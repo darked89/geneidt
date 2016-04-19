@@ -1,0 +1,12 @@
+#binary files
+
+bin/SSgff
+bin/ssgff
+bin/pictogram
+bin/evaluation
+bin/geneid
+
+#C programs sourcecode
+src/c/*/objects
+src/c/*/bin
+src/c/pictogram
