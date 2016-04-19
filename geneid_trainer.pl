@@ -164,76 +164,39 @@ print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
 
 # Cheking if the external programs are in the path.
 #C programs
-system("which bash > /dev/null;")
-    && &go_to_die("bash is not found or is not executable");
-system("which gawk > /dev/null;")
-    && &go_to_die("gawk is not found or is not executable");
-system("which egrep > /dev/null;")
-    && &go_to_die("egrep is not found or is not executable");
-system("which sed > /dev/null;")
-    && &go_to_die("sed is not found or is not executable");
-system("which geneid > /dev/null;")
-    && &go_to_die("geneid is not found or is not executable");
-system("which SSgff > /dev/null;")
-    && &go_to_die("SSgff is not found or is not executable");
-system("which shuf > /dev/null;")
-    && &go_to_die("shuf tool is not found or is not executable");
-system("which pictogram > /dev/null;")
-    && &go_to_die(
-    "The visualization program pictogram is not found or is not executable");
+
+run("which bash > /dev/null;");
+run("which gawk > /dev/null;");
+run("which egrep > /dev/null;");
+run("which sed > /dev/null;");
+run("which geneid > /dev/null;");
+run("which SSgff > /dev/null;");
+run("which shuf > /dev/null;");
+run("which pictogram > /dev/null;");
+run("which gff2gp.awk > /dev/null;");
+run("which cds2gff.awk > /dev/null;");
+run("which frequency.py > /dev/null;");
+run("which information.py > /dev/null;");
+run("which submatrix.awk > /dev/null;");
+run("which submatrix_order0.awk > /dev/null;");
+run("which Getkmatrix.awk > /dev/null;");
+run("which multiple_annot2one.awk > /dev/null;");
+run("which logratio_kmatrix.awk > /dev/null;");
+run("which logratio_zero_order.awk > /dev/null;");
+run("which preparedimatrixacceptor4parameter.awk > /dev/null;");
+run("which preparedimatrixdonor4parameter.awk > /dev/null;");
+run("which preparetrimatrixstart4parameter.awk > /dev/null;");
 
 #BASH AWK
 #system("which gff2ps > /dev/null;")
 #    && &go_to_die("The gff2ps package is not found or is not executable");
 
-system("which gff2gp.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script gff2gp.awk is not found or is not executable");
-system("which cds2gff.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script cds2gff.awk is not found or is not executable");
-system("which frequency.py > /dev/null;")
-    && &go_to_die(
-    "The gawk script frequency.awk is not found or is not executable");
-system("which information.py > /dev/null;")
-    && &go_to_die(
-    "The gawk script information.py is not found or is not executable");
-system("which submatrix.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script submatrix.awk is not found or is not executable");
-system("which submatrix_order0.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script submatrix_order0.awk is not found or is not executable");
-system("which Getkmatrix.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script Getkmatrix.awk is not found or is not executable");
-system("which multiple_annot2one.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script multiple_annot2one.awk is not found or is not executable"
-    );
-system("which logratio_kmatrix.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script logratio_kmatrix.awk is not found or is not executable");
-system("which logratio_zero_order.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script logratio_zero_order.awk is not found or is not executable"
-    );
-system("which preparedimatrixacceptor4parameter.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script preparedimatrixacceptor4parameter.awk is not found or is not executable"
-    );
-system("which preparedimatrixdonor4parameter.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script preparedimatrixdonor4parameter.awk is not found or is not executable"
-    );
-system("which preparetrimatrixstart4parameter.awk > /dev/null;")
-    && &go_to_die(
-    "The gawk script preparetrimatrixstart4parameter.awk is not found or is not executable"
-    );
-
 ## CREATE A VARIABLE SPECIES FOR A GIVEN SPECIES ONLY ONCE####
-my $varsmemory = $species . ".variables";
-open( my $fh_STORV, ">", "$varsmemory" ) or die;
+## XX BUG: it does not store the used variables + subsequent eval $_ is 
+## XX BUG: against the good PERL practice 
+
+# my $varsmemory = $species . ".variables";
+# open( my $fh_STORV, ">", "$varsmemory" ) or die;
 
 #######################################################
 ## CREATE FASTAS CDS; INTRON, SITES DIRs WITHIN PATH (ONLY FIRST TIME)
@@ -339,6 +302,9 @@ open( my $fh_STORV, ">", "$varsmemory" ) or die;
     $statsdir = "$work_dir/statistics_${species}/";
 ###########################################################
 ## store statistics directory variable
+    my $fh_STORV; 
+    open( $fh_STORV, ">", "geneid_trainer_global.log" ) or die;
+
     print $fh_STORV Data::Dumper->Dump( [$statsdir], ['$statsdir'] );
 
 
@@ -392,15 +358,18 @@ if ($reduced) {   ###reduced/short training starting with PWMs PLUS BACKGROUND
     $reducedtraining = 1;
     print STDERR
         "\n\nYou chose to continue the training of $species by assuming the cds, intronic sequences and splice sites have already been extracted... \n\n";
+## XX BUG: we did not store the used variables + subsequent 
+## XX BUG: eval $_ is  gainst the good PERL practice 
 
-    open( my $fh_species_VARS, "<", "${species}.variables" )
-        || die
-        "You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
-    while (<$fh_species_VARS>) {
-        eval $_;
-    }
-    die "can't restore variables from ${species}.variables: $@" if $@;
-    close $fh_species_VARS;
+    #open( my $fh_species_VARS, "<", "${species}.variables" )
+        #|| die
+        #"You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
+    #while (<$fh_species_VARS>) {
+        #eval $_;
+    #}
+    #die "can't restore variables from ${species}.variables: $@" if $@;
+    #close $fh_species_VARS;
+
 
 ## CREATE A STATS FILE
     my @timeData = localtime(time);
@@ -3291,6 +3260,7 @@ sub extractRealBranches {
 
 ## GETKMATRIX FUNCTION (Splice site an Start codon PWMs)
 sub getKmatrix {
+	#was my our?
     my ($true_seqs, $false_seqs, $order, $offset,
         $donor,     $accept,     $star,  $branch,
         $start,     $end,        $jacknife
@@ -3340,7 +3310,7 @@ sub getKmatrix {
         ` ./bin/information.py  $false_seq_name.freq $true_seq_name.freq | gawk 'NF==2 && \$1<=33 && \$1>=2' > $true_seq_name-$false_seq_name `;
         $tempinfolog = "$true_seq_name-$false_seq_name";
     }
-    ##?BUG dk: possible error below? star inteaad of starr
+    ##?BUG dk: possible error below? star inteaad of start?
     if ($star) {
         ` ./bin/information.py  $false_seq_name.freq $true_seq_name.freq | gawk 'NF==2 && \$1<=37 && \$1>=25' > $true_seq_name-$false_seq_name `;
         $tempinfolog = "$true_seq_name-$false_seq_name";
@@ -3362,7 +3332,35 @@ sub getKmatrix {
     }
 
     #need to check output and then go on
+## draw bit score bar graph function (nested, local)
+    local *BitScoreGraph = sub  {
 
+        my ( $infooutput, $info_thresh, $offset ) = @_;
+        my @info = ( $offset - 1, $offset + 1 );
+        open( my $fh_INFO, "<", "$infooutput" ) or die;
+        while (<$fh_INFO>) {
+            next if m/^#/;
+            last if m/^\s/;
+            last if m/^[^\d]/;
+            chomp;
+            my @fields = split;
+            printf STDERR "%2s %2.2f %s",
+                ( $fields[0], $fields[1], "=" x int( $fields[1] * 30 ) );
+            if ( $fields[1] > $info_thresh ) {
+                push( @info, $fields[0] );
+            }
+            print STDERR "\n";
+        }
+        close $fh_INFO;
+        my @sortedinfo = sort numerically @info;
+        my $start      = ( shift @sortedinfo );
+        $start = 1 if $start < 1;
+        my $end = pop @sortedinfo;
+
+        return ( $start, $end );
+    };    #end BitScoreGraph
+    
+    
     if ( !$jacknife ) {
         print STDERR "Information content profile\n";
     }
@@ -3401,35 +3399,7 @@ sub getKmatrix {
     }
 
 
-## draw bit score bar graph function
-    sub BitScoreGraph {
 
-        my ( $infooutput, $info_thresh, $offset ) = @_;
-        my @info = ( $offset - 1, $offset + 1 );
-        open( my $fh_INFO, "<", "$infooutput" ) or die;
-        while (<$fh_INFO>) {
-            next if m/^#/;
-            last if m/^\s/;
-            last if m/^[^\d]/;
-            chomp;
-            my @fields = split;
-            printf STDERR "%2s %2.2f %s",
-                ( $fields[0], $fields[1], "=" x int( $fields[1] * 30 ) );
-            if ( $fields[1] > $info_thresh ) {
-                push( @info, $fields[0] );
-            }
-            print STDERR "\n";
-        }
-        close $fh_INFO;
-        my @sortedinfo = sort numerically @info;
-        my $start      = ( shift @sortedinfo );
-        $start = 1 if $start < 1;
-        my $end = pop @sortedinfo;
-####
-
-        return ( $start, $end );
-
-    }    #end BitScoreGraph
 
     if ( !$jacknife && $interactive ) {
         my $resp  = "";
@@ -3453,6 +3423,7 @@ sub getKmatrix {
             $end = $1;
         }
     }    #if not jacknife
+    
     $offset = $offset - $order;
 
     #$start = $start - $order;
@@ -4077,98 +4048,113 @@ sub runJacknife {
 
         #	print SDTERR $outacceptortbl."\n";
 ## PRE EXTRACT SEQUENCES FROM TRAINING SET
-        my $grepAcceptor
-            = "egrep -vf $tempgroup4jckf2 $outacceptortbl  > $tmp_dir/tmp_Acceptorsminus";
+        my $my_command;
+        $my_command = "egrep -vf $tempgroup4jckf2 $outacceptortbl > $tmp_dir/tmp_Acceptorsminus";
+        run($my_command);
+        $my_command = "egrep -vf $tempgroup4jckf2 $outdonortbl    > $tmp_dir/tmp_Donorsminus";
+        run($my_command);
+        $my_command = "egrep -vf $tempgroup4jckf2 $outstarttbl    > $tmp_dir/tmp_Startsminus";
+        run($my_command); 
+        $my_command = "egrep -vf $tempgroup4jckf3 $outcds         > $tmp_dir/tmp_Codingminus";
+        run($my_command);
+        $my_command = "egrep -vf $tempgroup4jckf2 $outintron      > $tmp_dir/tmp_NonCodingminus";
+        run($my_command);
+        
+        $my_command = "gawk '{print \$2,\$1}' $gptraintbl | egrep -f $tempgroup4jckf1 - | gawk '{print \$2,\$1}' - > $tmp_dir/tmp_SeqsToEval";
+        run($my_command);
+        
+        #~ my $grepAcceptor
+            #~ = "egrep -vf $tempgroup4jckf2 $outacceptortbl  > $tmp_dir/tmp_Acceptorsminus"; #
 
-        my $grepDonor
-            = "egrep -vf $tempgroup4jckf2 $outdonortbl  > $tmp_dir/tmp_Donorsminus";
+        #~ my $grepDonor
+            #~ = "egrep -vf $tempgroup4jckf2 $outdonortbl  > $tmp_dir/tmp_Donorsminus"; #
 
-        my $grepStarts
-            = "egrep -vf $tempgroup4jckf2 $outstarttbl  > $tmp_dir/tmp_Startsminus";
+        #~ my $grepStarts
+            #~ = "egrep -vf $tempgroup4jckf2 $outstarttbl  > $tmp_dir/tmp_Startsminus"; #
 
-        my $grepMarkovCoding
-            = "egrep -vf $tempgroup4jckf3 $outcds  > $tmp_dir/tmp_Codingminus";
+        #~ my $grepMarkovCoding
+            #~ = "egrep -vf $tempgroup4jckf3 $outcds  > $tmp_dir/tmp_Codingminus"; #
 
-        my $grepMarkovNonCoding
-            = "egrep -vf $tempgroup4jckf2 $outintron  > $tmp_dir/tmp_NonCodingminus";
+        #~ my $grepMarkovNonCoding
+            #~ = "egrep -vf $tempgroup4jckf2 $outintron  > $tmp_dir/tmp_NonCodingminus";
 
-        #	print STDERR "$gptraintbl $tempgroup4jckf1";
+        #~ #	print STDERR "$gptraintbl $tempgroup4jckf1";
 
-        my $grepSeqsToEval
-            = "gawk '{print \$2,\$1}' $gptraintbl | egrep -f $tempgroup4jckf1 - | gawk '{print \$2,\$1}' - > $tmp_dir/tmp_SeqsToEval";
+        #~ my $grepSeqsToEval
+            #~ = "gawk '{print \$2,\$1}' $gptraintbl | egrep -f $tempgroup4jckf1 - | gawk '{print \$2,\$1}' - > $tmp_dir/tmp_SeqsToEval";
 
         if ($branchsw) {
             $grepBranches
                 = "egrep -vf $tempgroup4jckf2 $fullengthbranchtbl  > $tmp_dir/tmp_Branchesminus";
 
         }
-        $status = system $grepAcceptor;
+        #~ $status = system $grepAcceptor;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n  $grepAcceptor";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepAcceptor";
+        #~ }
 
-        #	print STDERR "$grepAcceptor\n";
+        #~ #	print STDERR "$grepAcceptor\n";
 
-        $status = system $grepDonor;
+        #~ $status = system $grepDonor;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n $grepDonor";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepDonor";
+        #~ }
 
-        #	print STDERR "$grepDonor\n";
+        #~ #	print STDERR "$grepDonor\n";
 
-        $status = system $grepStarts;
+        #~ $status = system $grepStarts;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n  $grepStarts";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepStarts";
+        #~ }
 
-        #	print STDERR "$grepStarts\n";
+        #~ #	print STDERR "$grepStarts\n";
 
-        if ($branchsw) {
-            $status = system $grepBranches;
+        #~ if ($branchsw) {
+            #~ $status = system $grepBranches;
 
-            if ( $status != 0 ) {
-                die
-                    && print STDERR
-                    "FATAL ERROR !!! Unsuccessful command :\n  $grepBranches";
-            }
+            #~ if ( $status != 0 ) {
+                #~ die
+                    #~ && print STDERR
+                    #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepBranches";
+            #~ }
 
-        }
-        $status = system $grepMarkovCoding;
+        #~ }
+        #~ $status = system $grepMarkovCoding;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n $grepMarkovCoding";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepMarkovCoding";
+        #~ }
 
-        #	print STDERR "$status $grepMarkovCoding\n";
+        #~ #	print STDERR "$status $grepMarkovCoding\n";
 
-        $status = system $grepMarkovNonCoding;
+        #~ $status = system $grepMarkovNonCoding;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n  $grepMarkovNonCoding";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepMarkovNonCoding";
+        #~ }
 
-        #	print STDERR "$grepMarkovNonCoding\n";
+        #~ #	print STDERR "$grepMarkovNonCoding\n";
 
-        $status = system $grepSeqsToEval;
+        #~ $status = system $grepSeqsToEval;
 
-        if ( $status != 0 ) {
-            die
-                && print STDERR
-                "FATAL ERROR !!! Unsuccessful command :\n $grepSeqsToEval";
-        }
+        #~ if ( $status != 0 ) {
+            #~ die
+                #~ && print STDERR
+                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepSeqsToEval";
+        #~ }
 
         #	print SDTERR "$status $grepSeqsToEval";
 
