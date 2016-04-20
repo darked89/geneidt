@@ -581,7 +581,15 @@ char *argv[];
         fprintf(psfp, "/Helvetica-Bold findfont 140 scalefont setfont\n");
 
         for (j = 0; j < len; ++j) {
-            tmpf = (struct bf *) malloc(4 * sizeof(struct bf));
+			
+        struct bf  *tmpf =  malloc(4 * sizeof(struct bf));
+            if (tmpf  == NULL) {
+				/* printError("Not enough memory: account"); */
+                exit(EXIT_FAILURE);
+           }
+           memset(tmpf, 0, sizeof(tmpf) );
+            
+            
             for (k = 0; k < 4; ++k) {
                 tmpf[k].b = k;
                 tmpf[k].f = (float) proff[j][k];
