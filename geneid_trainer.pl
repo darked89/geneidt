@@ -2473,38 +2473,32 @@ sub deriveCodingPotential {
 
     print STDERR "Intron model\n markov: ($markovm)";
 
-    my $intron_initial
-        = new geneidCEGMA::SequenceModel( 'intron', 'FREQ', $markovm,
-        \@introndois, 10, 0 );
+    my $intron_initial = geneidCEGMA::SequenceModel->new('intron', 'FREQ', $markovm, \@introndois, 10, 0 );
+    #my $intron_initial = new geneidCEGMA::SequenceModel('intron', 'FREQ', $markovm, \@introndois, 10, 0 );
 
     #print STDERR "($markovm) - intron initial: $intron_initial\n";
     # $intron_initial->write("$DIR/intron.initial.5.freq");
 
-    my $intron_transition
-        = new geneidCEGMA::SequenceModel( 'intron', 'MM', $markov,
-        \@introndois, 10, 0 );
+    my $intron_transition = geneidCEGMA::SequenceModel->new( 'intron', 'MM', $markov, \@introndois, 10, 0 );
+    #my $intron_transition = new geneidCEGMA::SequenceModel( 'intron', 'MM', $markov, \@introndois, 10, 0 );
 
     # $intron_transition->write("$DIR/intron.transition.5.freq");
 
     print STDERR "Coding model\n";
 
-    my $coding_initial
-        = new geneidCEGMA::SequenceModel( 'coding', 'FREQ', $markov - 1,
-        \@coding, 0.25, 2 );
+     my $coding_initial = geneidCEGMA::SequenceModel->new('coding', 'FREQ', $markov - 1, \@coding, 0.25, 2 );
+    #my $coding_initial = new geneidCEGMA::SequenceModel( 'coding', 'FREQ', $markov - 1, \@coding, 0.25, 2 );
 
     #$coding_initial->write("$path/coding.initial.5.freq");
-
-    my $coding_transition
-        = new geneidCEGMA::SequenceModel( 'coding', 'MM', $markov, \@coding,
-        0.25, 2 );
+    
+    my $coding_transition = geneidCEGMA::SequenceModel->new( 'coding', 'MM', $markov, \@coding, 0.25, 2 );
+    #my $coding_transition = new geneidCEGMA::SequenceModel( 'coding', 'MM', $markov, \@coding, 0.25, 2 );
 
     #$coding_transition->write("$path/coding.transition.5.freq");
 
-    my $initial_logs
-        = geneidCEGMA::log_ratio( $coding_initial, $intron_initial );
+    my $initial_logs = geneidCEGMA::log_ratio( $coding_initial, $intron_initial );
 
-    my $transition_logs
-        = geneidCEGMA::log_ratio( $coding_transition, $intron_transition );
+    my $transition_logs = geneidCEGMA::log_ratio( $coding_transition, $intron_transition );
 
     geneidCEGMA::write_log( $initial_logs, "$work_dir/coding.initial.5.logs" );
 
@@ -2741,7 +2735,7 @@ sub GetGenes {
     my $prevgene   = "x";
     my $prevchro   = "x";
     my $trail      = "";
-    my %genenames;
+    #my %genenames; unused var
     $outtblgp = "outputtbl.txt";
 
     chomp($path2gpath);
@@ -3973,7 +3967,7 @@ sub runJacknife {
         $fullengthbranchtbl, $startbranch,   $endbranch,
         $bestAcc,            $bestMin
     ) = @_;
-    my $grepBranches = "";
+    #my $grepBranches = "";
     my $branchexcept = "";
     my $count        = 1;
     my $geneidout    = "";
@@ -4107,8 +4101,10 @@ sub runJacknife {
             #~ = "gawk '{print \$2,\$1}' $gptraintbl | egrep -f $tempgroup4jckf1 - | gawk '{print \$2,\$1}' - > $tmp_dir/tmp_SeqsToEval";
 
         if ($branchsw) {
-            $grepBranches
-                = "egrep -vf $tempgroup4jckf2 $fullengthbranchtbl  > $tmp_dir/tmp_Branchesminus";
+			$my_command =  "egrep -vf $tempgroup4jckf2 $fullengthbranchtbl  > $tmp_dir/tmp_Branchesminus";
+            run($my_command);
+            #$grepBranches
+            #    = "egrep -vf $tempgroup4jckf2 $fullengthbranchtbl  > $tmp_dir/tmp_Branchesminus";
 
         }
         #~ $status = system $grepAcceptor;
@@ -4191,7 +4187,6 @@ sub runJacknife {
         my $seqstoevaltbl   = "$tmp_dir/tmp_SeqsToEval";
         if ($branchsw) {
             $branchexcept = "$tmp_dir/tmp_Branchesminus";
-
         }
 
 ## CONVERT TO FASTA (EVALUATE SET)
