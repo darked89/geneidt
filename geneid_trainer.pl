@@ -1021,9 +1021,10 @@ close $fh_FOUT;
 
 #print STDERR "$path/pictogram $donorsubprofile $statsdir/Donor -bits -land\n";
 ## BUG?
-#run("./bin/pictogram $donorsubprofile ./statistics_${species}/Donor -bits -land");
-
-unlink $donorsubprofile;
+my $my_command = "./bin/pictogram $donorsubprofile $plotsdir/donor_profile.pictogram -bits -land";
+print "\n$my_command\n"; 
+run($my_command);
+#unlink $donorsubprofile;
 
 # print STDERR "donormatrix: \n";
 # foreach my $i (@$donormatrix){
@@ -1090,9 +1091,11 @@ close $fh_FOUT;
 #print STDERR "$path/pictogram $acceptorsubprofile $statsdir/Acceptor -bits -land\n";
 
 ## BUG?
-# run("./bin/pictogram $acceptorsubprofile ./statistics_${species}/Acceptor -bits -land");
-
-unlink $acceptorsubprofile;
+$my_command = "./bin/pictogram $acceptorsubprofile $plotsdir/acceptor_profile.pictogram -bits -land";
+print "\n$my_command\n"; 
+run($my_command);
+# run("./bin/pictogram $acceptorsubprofile $plotsdir/Acceptor -bits -land");
+#unlink $acceptorsubprofile;
 
 #  print STDERR "acceptormatrix: \n";
 #   foreach my $i (@$acceptormatrix){
@@ -1158,8 +1161,10 @@ close $fh_FOUT;
 
 ## BUG?
 # run("./bin/pictogram $startsubprofile ./statistics_${species}/Start -bits -land");
-
-unlink $startsubprofile;
+$my_command = "./bin/pictogram $startsubprofile $plotsdir/start_profile.pictogram -bits -land";
+print "\n$my_command\n"; 
+run($my_command);
+#unlink $startsubprofile;
 
 ## OPTIONAL BRANCH STATS (FUNGI NORMALLY, AFTER RUNNING MEME)
 if ($usebranch) {
@@ -1219,8 +1224,10 @@ if ($usebranch) {
 #print STDERR "$path/pictogram $startsubprofile $statsdir/Start -bits -land\n";
 ## BUG?
 #    run("./bin/pictogram $branchsubprofile ./statistics_${species}/Branch -bits -land");
-
-    unlink $branchsubprofile;
+$my_command = "./bin/pictogram $branchsubprofile $plotsdir/branch_profile.pictogram -bits -land";
+print "\n$my_command\n"; 
+run($my_command);
+#unlink $branchsubprofile;
 
 }    # if usebranch
 
