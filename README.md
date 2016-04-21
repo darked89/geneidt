@@ -15,21 +15,30 @@ Latest commit works  (80% training, 20% for eveluation mode)
 
 * install required Perl modules
 easiest is to use cpanm to get modules located in:
-$HOME/perl5/lib/perl5/
+`$HOME/perl5/lib/perl5/`
  
-'
-cpanm Carp 
-cpanm Carp::Always; 
-cpanm Carp::Assert 
-cpanm Data::Dumper;
-cpanm Cwd;
-cpanm Getopt::Long;
-cpanm File::Path;
-cpanm File::Basename;
-cpanm File::Temp 
-cpanm IPC::System::Simple 
-cpanm Readonly
-'
+
+`cpanm Carp`
+
+`cpanm Carp::Always`
+
+`cpanm Carp::Assert` 
+
+`cpanm Data::Dumper`
+
+`cpanm Cwd`
+
+`cpanm Getopt::Long`
+
+`cpanm File::Path`
+
+`cpanm File::Basename`
+
+`cpanm File::Temp` 
+
+`cpanm IPC::System::Simple` 
+
+`cpanm Readonly`
 
 set the PERL5LIBS:
 i.e. in fish shell
@@ -42,7 +51,7 @@ i.e. in fish shell
 `clean_test_train_results.sh`
 
 * C programs 
-`
+```
 cd src/c/evaluation
 make
 cp -i ./bin/* ../../../bin/
@@ -57,13 +66,11 @@ cd src/c/pictogram
 make
 cp -i pictogram ../../../bin/
 cd ../../../
-`
+```
 compile geneid (not included in this distribution)
 
-### How do I ru the test ###
+### How do I run the test ###
 `./run_test_train.sh`
-
-to clean up:
 
 ### clean up all training results ###
 `clean_test_train_results.sh`
