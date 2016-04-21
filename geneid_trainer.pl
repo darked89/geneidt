@@ -556,7 +556,7 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     print STDERR "\nObtain locus_id (list of genomic sequences / genes)\n";
     
     
-    my $my_command = "gawk '{print \$1,\$9}' $gff | sort | uniq "; 
+    $my_command = "gawk '{print \$1,\$9}' $gff | sort | uniq "; 
     $locus_id = capture($my_command);
     
     #~ open $fh_LOCID, "gawk '{print \$1,\$9}' $gff | sort | uniq |";
@@ -596,11 +596,15 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 ## get a list of genes TOTAL
     print STDERR "\nObtain list of all genes\n\n";
     my $list_seqs = "";
-    open $fh_LOCID, "gawk '{print \$9}' $gff | sort | uniq |";
-    while (<$fh_LOCID>) {
-        $list_seqs .= $_;
-    }
-    close $fh_LOCID;
+    
+    $my_command = "gawk '{print \$9}' $gff | sort | uniq ";
+    $list_seqs  = capture($my_command);
+    
+    #~ open $fh_LOCID, "gawk '{print \$9}' $gff | sort | uniq |";
+    #~ while (<$fh_LOCID>) {
+        #~ $list_seqs .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $templist = $species . "_list_all_seqs";
     open( $fh_FOUT, ">", "$templist" ) or croak "Failed here";
@@ -650,22 +654,28 @@ if ( !$reducedtraining )
 
 #print $fh_SOUT "\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
 #random pick (UNSORT)
-        open(
-            my $fh_LOCID,
 
-       #"$path/unsort $templocus_id | head -$totalseqs4training | sort | uniq |"
-"shuf --head-count=$totalseqs4training $templocus_id | sort | uniq |"
-        );
-        while (<$fh_LOCID>) {
-            $new_locus_id .= $_;
-        }
-        close $fh_LOCID;
+        my $my_command   = "shuf --head-count=$totalseqs4training $templocus_id | sort | uniq";
+        $new_locus_id = capture($my_command);
+        
+        #~ open(
+            #~ my $fh_LOCID,
 
-        #	}
+       #~ #"$path/unsort $templocus_id | head -$totalseqs4training | sort | uniq |"
+
+
+#~ "shuf --head-count=$totalseqs4training $templocus_id | sort | uniq |"
+        #~ );
+        #~ while (<$fh_LOCID>) {
+            #~ $new_locus_id .= $_;
+        #~ }
+        #~ close $fh_LOCID;
+
+        #~ #	}
 
 ###
         $templocus_id_new = $species . "_locus_id_training_setaside80";
-
+          
         open( my $fh_FOUT, ">", "$templocus_id_new" ) or croak "Failed here";
         print $fh_FOUT "$new_locus_id";
         close $fh_FOUT;
@@ -686,13 +696,17 @@ if ( !$reducedtraining )
 
         print STDERR
 "\nThe new training gff file includes $seqsused gene models (80% of total seqs)\n";
-        open( $fh_LOCID,
-"gawk '{print \$2\"\$\"}' $templocus_id_new | sort | uniq | egrep -wf - $gff |"
-        );
-        while (<$fh_LOCID>) {
-            $gff4training .= $_;
-        }
-        close $fh_LOCID;
+        ## ??? BUG ???
+        $my_command   = "gawk '{print \$2\"\$\"}' $templocus_id_new | sort | uniq | egrep -wf - $gff";
+        $gff4training = capture($my_command);
+        
+        #~ open( $fh_LOCID,
+#~ "gawk '{print \$2\"\$\"}' $templocus_id_new | sort | uniq | egrep -wf - $gff |"
+        #~ );
+        #~ while (<$fh_LOCID>) {
+            #~ $gff4training .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         $tempgff4training = $species . ".gff_training_setaside80";
         open( $fh_FOUT, ">", "$tempgff4training" ) or croak "Failed here";
@@ -707,12 +721,15 @@ if ( !$reducedtraining )
         print STDERR "\nObtain list of training genes\n\n";
 
         my $list_seqs_train = "";
-
-        open $fh_LOCID, "gawk '{print \$9}' $tempgff4training | sort | uniq |";
-        while (<$fh_LOCID>) {
-            $list_seqs_train .= $_;
-        }
-        close $fh_LOCID;
+        
+        $my_command   = "gawk '{print \$9}' $tempgff4training | sort | uniq ";
+        $list_seqs_train = capture($my_command);
+        
+        #~ open $fh_LOCID, "gawk '{print \$9}' $tempgff4training | sort | uniq |";
+        #~ while (<$fh_LOCID>) {
+            #~ $list_seqs_train .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         $templist_train = $species . "_list_train_seqs_setaside80";
         open( $fh_FOUT, ">", "$templist_train" ) or croak "Failed here";
@@ -727,13 +744,18 @@ if ( !$reducedtraining )
 ## new locus_id for evaluation test set
 #########################
         my $locusideval = "";
-        open $fh_LOCID,
-"gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $templocus_id |";
-        while (<$fh_LOCID>) {
-            $locusideval .= $_;
-        }
-        close $fh_LOCID;
+        
+        $my_command   = "gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $templocus_id"; 
+        $locusideval  = capture($my_command);
         chomp $locusideval;
+        #~ open $fh_LOCID,
+#~ "gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $templocus_id |";
+        #~ while (<$fh_LOCID>) {
+            #~ $locusideval .= $_;
+        #~ }
+        #~ close $fh_LOCID;
+        #~ chomp $locusideval;
+        
         $templocusid_eval = $species . "_locus_id_evaluation_setaside20";
         open( $fh_FOUT, ">", "$templocusid_eval" ) or croak "Failed here";
         print $fh_FOUT "$locusideval";
@@ -745,21 +767,30 @@ if ( !$reducedtraining )
 #########################
 ## gff for evaluation test set
 #########################
-
-        $gffseqseval =
-` gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff | gawk '{ print \$9}' | sort | uniq | wc | gawk '{print \$1}' `;
-        chomp $gffseqseval;
-
-        my $gff4evaluation = "";
+        
+        
+        $my_command  =  "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff | gawk '{ print \$9}' | sort | uniq | wc -l";
+        ## ??? BUG this is a number...
+        $gffseqseval = capture($my_command ); 
+        chomp  $gffseqseval;
+        
+        #~ $gffseqseval = ` gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff | gawk '{ print \$9}' | sort | uniq | wc | gawk '{print \$1}' `;
+        #~ chomp $gffseqseval;
 
         print STDERR
-"The evaluation gff file includes $gffseqseval gene models (20% of total seqs)\n\n";
-        open $fh_LOCID,
-"gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff |";
-        while (<$fh_LOCID>) {
-            $gff4evaluation .= $_;
-        }
-        close $fh_LOCID;
+        "The evaluation gff file includes $gffseqseval gene models (20% of total seqs)\n\n";
+        
+        my $my_command  = "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff ";
+        my $gff4evaluation = capture($my_command);  
+        
+        
+        #~ $my_command  = 
+        #~ open $fh_LOCID,
+        #~ "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff |";
+        #~ while (<$fh_LOCID>) {
+            #~ $gff4evaluation .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         $tempgff4evaluation = $species . ".gff_evaluation_setaside20";
         open( $fh_FOUT, ">", "$tempgff4evaluation" ) or croak "Failed here";
@@ -1663,11 +1694,14 @@ if ($jacknifevalidate) {
     my $list4jkf = "";
 
 # print STDERR "These are the sequences used for Jacknife (cross-validation) accuracy estimation\n";
-    open( my $fh_LOCID, "grep '>' $gptrainfa| sed 's/>//g' | sort  |" );
-    while (<$fh_LOCID>) {
-        $list4jkf .= $_;
-    }
-    close $fh_LOCID;
+    $my_command = "grep '>' $gptrainfa | sed 's/>//g' | sort ";
+    $list4jkf   = capture($my_command);
+    
+    #~ open( my $fh_LOCID, "grep '>' $gptrainfa| sed 's/>//g' | sort  |" );
+    #~ while (<$fh_LOCID>) {
+        #~ $list4jkf .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $templist4jkf = $species . "_list_jacknife";
     open( my $fh_FOUT, ">", "$templist4jkf" ) or croak "Failed here";
