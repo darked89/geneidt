@@ -3,7 +3,9 @@
 ## if run under perlbrew, use i.e.:
 #!/$HOME/perl5/perlbrew/perls/perl-5.10.1/bin/perl
 
-## checks & dubugs modules
+## checks & debugs modules
+use Modern::Perl;
+
 use strict;
 use warnings;
 use autodie;
@@ -1832,8 +1834,24 @@ sub extractCDSINTRON {
         my ( $genomic_id, $gene_id ) = split;
         run(" egrep -w '$gene_id\$' $gff > $tmp_dir/$gene_id.gff");
         ## POTENTIAL BUG, split commands below
-` ./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
-` ./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
+        
+        my $fh_ssgff_A    = File::Temp->new();
+        my $fname_ssgff_A = $fh_ssgff_A->filename;
+        $my_command = "./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A"; 
+        run($my_command); 
+        $my_command = "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa ";
+        run($my_command);
+        
+#` ./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
+        
+        my $fh_ssgff_B    = File::Temp->new();
+        my $fname_ssgff_B = $fh_ssgff_B->filename;
+        $my_command = "./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B"; 
+        run($my_command); 
+        $my_command = "cat $fname_ssgff_B | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa";
+        run($my_command);
+        
+#` ./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
         $count++;
         print STDERR "$count ..";
     }
@@ -3305,13 +3323,16 @@ sub extractRealBranches {
     }
     close($fh_BRANCHES);
     close($fh_full_L_BRANCH);
-
-    open( my $fh_LOCID,
-        "gawk '{if (\$2 !~ /^N/)print \$1,\$2}' $fullengthbranch |" );
-    while (<$fh_LOCID>) {
-        $fullengthbranchmod .= $_;
-    }
-    close $fh_LOCID;
+    
+    #~ $my_command = "gawk '{if (\$2 !~ /^N/)print \$1,\$2}' $fullengthbranch";
+    #~ $fullengthbranchmod = capture($my_command);
+     
+    #~ open( my $fh_LOCID,
+        #~ "gawk '{if (\$2 !~ /^N/)print \$1,\$2}' $fullengthbranch |" );
+    #~ while (<$fh_LOCID>) {
+        #~ $fullengthbranchmod .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $fullengthbranches = $species . ".real.full_length_branches.tbl";
     open( my $fh_FOUT, ">", "$fullengthbranches" ) or croak "Failed here";
