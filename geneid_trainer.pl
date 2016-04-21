@@ -538,12 +538,17 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     print STDERR "\nEliminate undesirable (_ and .) characters from $gff\n";
 
     my $filtergff = "";
-    open $fh_LOCID,
-"gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff |";
-    while (<$fh_LOCID>) {
-        $filtergff .= $_;
-    }
-
+    
+    $my_command = "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff";
+    $filtergff  = capture($my_command);
+    
+    #~ open $fh_LOCID,
+#~ "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff |";
+    #~ while (<$fh_LOCID>) {
+        #~ $filtergff .= $_;
+    #~ }
+    
+    ## BUG!!! overwrites input gff!!!
     open( my $fh_FOUT, ">", "$gff" ) or croak "Failed here";
     print $fh_FOUT "$filtergff";
     close $fh_FOUT;
@@ -4768,7 +4773,7 @@ sub predictPlotgff2ps {
 
     my $geneidall   = "";
     my $gff2psplots = "$species.gff2ps.prediction.plots.ps";
-
+    ## TOFIX
     open( $fh_LOCID,
 "./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' | "
     );
