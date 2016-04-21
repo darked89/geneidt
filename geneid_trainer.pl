@@ -57,6 +57,43 @@ my $geneticcode = "./etc/genetic.code";
 ## no need to run anything if this fails
 check_external_progs();
 
+## Move parts necessary for getting comand line args here
+my $species     = "";
+my $gff         = "";
+my $fasta       = "";
+my $sout        = "-";
+my $pout        = "-";
+my $branchp     = 0;
+my $reduced     = 0;
+my $interactive = 0;
+my $tenfold     = 0;
+my $gff2ps      = 0;
+
+## Get arguments (command line)
+GetOptions(
+    'species:s'       => \$species,
+    'gff:s'           => \$gff,
+    'fastas:s'        => \$fasta,
+    'sout|statsout:s' => \$sout,
+    'branch'          => \$branchp,
+    'reduced|red'     => \$reduced,
+
+    #'path|binpath:s'  => \$path,
+    'interactive|i' => \$interactive,
+    'tenfold'       => \$tenfold,
+    'gff2ps'        => \$gff2ps
+);
+my $usage =
+"Usage: $0 -species H.sapiens -gff gffname -fastas fastasname -sout <statsfile_out> -branch -reduced -path <executables_path>\n";
+
+print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
+## EXAMPLE COMMAND LINE: ./geneidTRAINer1_2TA.pl -species S.cerevisiae -gff S_cerevisiae4training.gff -fastas yeast_genome.fa -sout stats.txt -branch -reduced
+## Get arguments (command line) END
+
+## end of getting ARGS, do stuff
+
+
+
 ## preparing directories
 my $work_dir = "$PROGRAM_HOME/00_gtrain_workdir/";
 run("mkdir -p $work_dir");
@@ -65,14 +102,15 @@ run("mkdir -p $tmp_dir;");
 
 #create_work_dirs();
 
+#
+
 my $TMPROOT  = "trainer_$$";
 my $CEGMATMP = "$/tmp_dir$TMPROOT";
 my $fh_SOUT;
 
 ## PROGRAM SPECIFIC VARIABLES
 my $count       = 0;
-my $gff         = "";
-my $fasta       = "";
+
 my $temptblcaps = "";
 my $label       = 0;
 
@@ -93,9 +131,9 @@ Readonly::Scalar my $backgrnd_kmer_num         => 100000;
 ## PROGRAM SPECIFIC VARIABLES (unordered...)
 
 my $pin                = "-";
-my $pout               = "-";
-my $sout               = "-";
-my $species            = "";
+
+
+
 my $answer             = "";
 my $validationanswer   = "";
 my $jacknifevalidate   = "0";
@@ -123,7 +161,7 @@ my $starttbl        = "";
 my $id;
 my $tblseq      = "";
 my $usebranch   = 0;
-my $branchp     = 0;
+
 my $memefile    = "";
 my $motifnumber = "";
 my $memeanswer  = "";
@@ -141,7 +179,7 @@ my $cdsdir             = "";
 my $geneidgffsorted    = "";
 my $total_genomic      = "";
 my $bckgrnd            = "";
-my $reduced            = 0;
+
 my $reducedtraining    = 0;
 my (
     $outdonortbl,    $totalnoncandon, $outacceptortbl,
@@ -169,29 +207,8 @@ my $tempgeneidgffsortedeval = "";
 my $ext_flg                 = 0;
 my $bp;
 my $optimize    = 0;
-my $interactive = 0;
-my $tenfold     = 0;
-my $gff2ps      = 0;
-## Get arguments (command line)
-GetOptions(
-    'species:s'       => \$species,
-    'gff:s'           => \$gff,
-    'fastas:s'        => \$fasta,
-    'sout|statsout:s' => \$sout,
-    'branch'          => \$branchp,
-    'reduced|red'     => \$reduced,
 
-    #'path|binpath:s'  => \$path,
-    'interactive|i' => \$interactive,
-    'tenfold'       => \$tenfold,
-    'gff2ps'        => \$gff2ps
-);
-my $usage =
-"Usage: $0 -species H.sapiens -gff gffname -fastas fastasname -sout <statsfile_out> -branch -reduced -path <executables_path>\n";
 
-print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
-## EXAMPLE COMMAND LINE: ./geneidTRAINer1_2TA.pl -species S.cerevisiae -gff S_cerevisiae4training.gff -fastas yeast_genome.fa -sout stats.txt -branch -reduced
-## Get arguments (command line) END
 
 #############################################################
 ## INITIAL CHECKS
@@ -576,12 +593,16 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     print $fh_STORV Data::Dumper->Dump( [$templocus_id], ['$templocus_id'] );
 
 ## number of gene models TOTAL
-    $total_seqs =
-` gawk '{print \$2}' $templocus_id | sort | uniq | wc | gawk '{print \$2}' `;
+    $my_command = " gawk '{print \$2}' $templocus_id | sort | uniq | wc -l";
+    $total_seqs = capture($my_command);
+    #~ $total_seqs =
+#~ ` gawk '{print \$2}' $templocus_id | sort | uniq | wc | gawk '{print \$2}' `;
     chomp $total_seqs;
 ## number of genomic sequences TOTAL
-    $total_genomic =
-` gawk '{print \$1}' $templocus_id | sort | uniq | wc | gawk '{print \$1}' `;
+    $my_command = "gawk '{print \$1}' $templocus_id | sort | uniq | wc -l";
+    $total_genomic = capture($my_command);
+    #~ $total_genomic = 
+#~ ` gawk '{print \$1}' $templocus_id | sort | uniq | wc | gawk '{print \$1}' `;
     chomp $total_genomic;
 
     print STDERR
@@ -686,7 +707,7 @@ if ( !$reducedtraining )
 ###ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
 
         $seqsused =
-` gawk '{print \$2}' $templocus_id_new | sort | uniq | wc | gawk '{ print \$1}' `;
+` gawk '{print \$2}' $templocus_id_new | sort | uniq | wc -l `;
         chomp $seqsused;
 
 ###################
@@ -2207,7 +2228,8 @@ sub extractCDSINTRON {
 sub extractprocessSITES {
 
     my ( $gff, $locus_id ) = @_;
-
+    my $fh_LOCID;
+    
 ## SPLICE SITES
     print STDERR "\nEXTRACT START AND SPLICE SITES\n\n";
 
@@ -2264,18 +2286,21 @@ sub extractprocessSITES {
     print STDERR "\n\nEliminate non-canonical donors/acceptors/starts:\n";
 
     #  	##EXTRACT NON CANONICAL DONORS
-    my $noncanonical     = "";
+    #my $noncanonical     = "";
     my $noncanonicalname = "";
     my $totnoncanonical  = "";
     my $totcanonical     = "";
     my $newdonortbl      = "";
-
-    open(my $fh_LOCID,
-      "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' |");
-    while (<$fh_LOCID>) {
-        $noncanonical .= $_;
-    }
-    close $fh_LOCID;
+    
+    $my_command = "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' ";
+    my $noncanonical   = capture($my_command);
+    
+    #~ open(my $fh_LOCID,
+      #~ "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' |");
+    #~ while (<$fh_LOCID>) {
+        #~ $noncanonical .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempdonornoncanonical = $species . "_non_canonical_donor";
     open( my $fh_FOUT, ">", "$tempdonornoncanonical" ) or croak "Failed here";
@@ -2283,7 +2308,7 @@ sub extractprocessSITES {
     close $fh_FOUT;
 
     $totnoncanonical = num_of_lines_in_file($tempdonornoncanonical);
-
+    
     #$totnoncanonical = ` wc -l $tempdonornoncanonical | gawk '{print \$1}'`;
     #chomp $totnoncanonical;
     #$totnoncanonical = int($totnoncanonical);
