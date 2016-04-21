@@ -72,14 +72,15 @@ my $fasta              = "";
 my $temptblcaps        = "";
 my $label              = 0;
 #my $cutoff             = -7;    
+
+## Constant values. modify if needed
 Readonly::Scalar my $pwm_cutoff => -7;
+Readonly::Scalar my $bases_offset => 30; #bases in fron/after? a feature
 Readonly::Scalar my $train_fraction => 0.8; #fraction of seq used for training 
 Readonly::Scalar my $train_loci_cutoff =>  500;
 Readonly::Scalar my $train_sites_cutoff =>  1400;
 Readonly::Scalar my $train_sites_cutoff_alt =>  1200; # changed in some part?
 Readonly::Scalar my $train_sites_markov_cutoff => 5500;
-
-#User can set the length and number of the background sequences
 Readonly::Scalar my $backgrnd_kmer_size => 62;
 Readonly::Scalar my $backgrnd_kmer_num => 100000;
 ## End Constant values
@@ -975,7 +976,7 @@ $numbersites = num_of_lines_in_file($outdonortbl);
 #my $numbersites =  `wc -l $outdonortbl | gawk '{print \$1}'`;
 #chomp $numbersites;
 #$numbersites = int($numbersites);
-my $donoffset = "30";    #position before intron (last of exon (31) -1 for offset)
+my $donoffset = $bases_offset;    #position before intron (last of exon (31) -1 for offset)
 
 if ( $numbersites > $train_sites_cutoff ) {
 
@@ -1044,7 +1045,7 @@ $numbersites = num_of_lines_in_file($outacceptortbl);
 #chomp $numbersites;
 #$numbersites = int($numbersites);
 print "numbersites in $outacceptortbl: $numbersites\n";
-my $accoffset = "30";    #position after intron (first of exon (31) -1 for offset)
+my $accoffset = $bases_offset;    #position after intron (first of exon (31) -1 for offset)
 
 if ( $numbersites > $train_sites_cutoff ) {
 
@@ -1114,7 +1115,7 @@ $numbersites = num_of_lines_in_file($outstarttbl);
 #print "#1136 numbersites: $numbersites";
 #chomp $numbersites;
 #$numbersites = int($numbersites);
-my $staoffset = "30";    #before first position of the exon (31)minus 1 for offset)
+my $staoffset = $bases_offset;    #before first position of the exon (31)minus 1 for offset)
 
 if ( $numbersites > $train_sites_markov_cutoff ) {
 
@@ -3944,6 +3945,7 @@ sub BuildOptimizedParameterFile {
 
     }    #if branch switch
     close $fh_SOUT;
+    
 
 }
 
@@ -4088,21 +4090,7 @@ sub runJacknife {
         $my_command = "gawk '{print \$2,\$1}' $gptraintbl | egrep -f $tempgroup4jckf1 - | gawk '{print \$2,\$1}' - > $tmp_dir/tmp_SeqsToEval";
         run($my_command);
         
-        #~ my $grepAcceptor
-            #~ = "egrep -vf $tempgroup4jckf2 $outacceptortbl  > $tmp_dir/tmp_Acceptorsminus"; #
-
-        #~ my $grepDonor
-            #~ = "egrep -vf $tempgroup4jckf2 $outdonortbl  > $tmp_dir/tmp_Donorsminus"; #
-
-        #~ my $grepStarts
-            #~ = "egrep -vf $tempgroup4jckf2 $outstarttbl  > $tmp_dir/tmp_Startsminus"; #
-
-        #~ my $grepMarkovCoding
-            #~ = "egrep -vf $tempgroup4jckf3 $outcds  > $tmp_dir/tmp_Codingminus"; #
-
-        #~ my $grepMarkovNonCoding
-            #~ = "egrep -vf $tempgroup4jckf2 $outintron  > $tmp_dir/tmp_NonCodingminus";
-
+       
         #~ #	print STDERR "$gptraintbl $tempgroup4jckf1";
 
         #~ my $grepSeqsToEval
@@ -4115,75 +4103,7 @@ sub runJacknife {
             #    = "egrep -vf $tempgroup4jckf2 $fullengthbranchtbl  > $tmp_dir/tmp_Branchesminus";
 
         }
-        #~ $status = system $grepAcceptor;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepAcceptor";
-        #~ }
-
-        #~ #	print STDERR "$grepAcceptor\n";
-
-        #~ $status = system $grepDonor;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepDonor";
-        #~ }
-
-        #~ #	print STDERR "$grepDonor\n";
-
-        #~ $status = system $grepStarts;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepStarts";
-        #~ }
-
-        #~ #	print STDERR "$grepStarts\n";
-
-        #~ if ($branchsw) {
-            #~ $status = system $grepBranches;
-
-            #~ if ( $status != 0 ) {
-                #~ die
-                    #~ && print STDERR
-                    #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepBranches";
-            #~ }
-
-        #~ }
-        #~ $status = system $grepMarkovCoding;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepMarkovCoding";
-        #~ }
-
-        #~ #	print STDERR "$status $grepMarkovCoding\n";
-
-        #~ $status = system $grepMarkovNonCoding;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n  $grepMarkovNonCoding";
-        #~ }
-
-        #~ #	print STDERR "$grepMarkovNonCoding\n";
-
-        #~ $status = system $grepSeqsToEval;
-
-        #~ if ( $status != 0 ) {
-            #~ die
-                #~ && print STDERR
-                #~ "FATAL ERROR !!! Unsuccessful command :\n $grepSeqsToEval";
-        #~ }
-
-        #	print SDTERR "$status $grepSeqsToEval";
+        
 
 ## store taken out sequences in the following variables:
 
@@ -4213,14 +4133,14 @@ sub runJacknife {
         #my $numbersites = ` wc -l $donorexcept | gawk '{print \$1}'`;
         #chomp $numbersites;
         #$numbersites = int($numbersites);
-        my $donoffset = "30";  #position before intron (last of exon (31) -1 for offset)
+        my $donoffset = $bases_offset;  #position before intron (last of exon (31) -1 for offset)
 
-        if ( $numbersites > 1200 ) {
+        if ( $numbersites > $train_sites_cutoff_alt ) {
 
             $order = "1";
 
         }
-        elsif ( $numbersites <= 1200 ) {
+        elsif ( $numbersites <= $train_sites_cutoff_alt ) {
 
             $order = "0";
         }
@@ -4251,14 +4171,14 @@ sub runJacknife {
         #$numbersites = ` wc -l $acceptorexcept | gawk '{print \$1}'`;
         #chomp $numbersites;
         #$numbersites = int($numbersites);
-        my $accoffset = "30";  #position after intron (first of exon (31) -1 for offset)
+        my $accoffset = $bases_offset;  #position after intron (first of exon (31) -1 for offset)
 
-        if ( $numbersites > 1200 ) {
+        if ( $numbersites > $train_sites_cutoff_alt ) {
 
             $order = "1";
 
         }
-        elsif ( $numbersites <= 1200 ) {
+        elsif ( $numbersites <= $train_sites_cutoff_alt ) {
 
             $order = "0";
         }
@@ -4287,7 +4207,7 @@ sub runJacknife {
         #$numbersites = ` wc -l $startexcept | gawk '{print \$1}'`;
         #chomp $numbersites;
         #$numbersites = int($numbersites);
-        my $staoffset = "30"; #before first position of the exon (31)minus 1 for offset)
+        my $staoffset = $bases_offset; #before first position of the exon (31)minus 1 for offset)
 
         if ( $numbersites > $train_sites_markov_cutoff ) {
 
@@ -4471,7 +4391,7 @@ sub runJacknife {
         return \@evaluation_jacknife;
 
     }
-
+    return 1;
     #unlink $temp_jkf_geneid;
 
 }    #SUB JACKNIFE
@@ -4772,7 +4692,7 @@ sub predictPlotgff2ps {
         }
     }
     close $fh_LOCI_gplen;
-
+    return 1;
 }
 
 sub TblToFasta {
@@ -4829,7 +4749,7 @@ sub TblToFastaFile {
     close $fh_IN_tbl;
 
     #close $fh_FOUT_fasta;
-
+    return 1;
 }
 
 sub FastaToTbl {
@@ -5097,7 +5017,7 @@ sub num_of_lines_in_file{
 sub check_external_progs() {
 ## Checking if the external programs are in the path.
 ## C, awk, python programs
-my $prog_name;
+#my $prog_name;
 my $my_command;
 my @progs_2_check = (qw(bash 
 					gawk 
@@ -5121,7 +5041,7 @@ my @progs_2_check = (qw(bash
 					preparedimatrixdonor4parameter.awk 
 					preparetrimatrixstart4parameter.awk));
 
-foreach $prog_name (@progs_2_check) {
+for my $prog_name (@progs_2_check) {
      $my_command = "which $prog_name > /dev/null";
      run($my_command);	
      }
