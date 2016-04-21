@@ -780,7 +780,8 @@ if ( !$reducedtraining )
         print STDERR
         "The evaluation gff file includes $gffseqseval gene models (20% of total seqs)\n\n";
         
-        my $my_command  = "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff ";
+     
+        $my_command  = "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff ";
         my $gff4evaluation = capture($my_command);  
         
         
@@ -1054,14 +1055,17 @@ my $donsub = "";
 
 #print STDERR "gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl\n";
 
-open(
-    my $fh_LOCID,
-"gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl |"
-);
-while (<$fh_LOCID>) {
-    $donsub .= $_;
-}
-close $fh_LOCID;
+my $my_command = "gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl ";
+$donsub     = capture($my_command);
+
+#~ open(
+    #~ my $fh_LOCID,
+#~ "gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl |"
+#~ );
+#~ while (<$fh_LOCID>) {
+    #~ $donsub .= $_;
+#~ }
+#~ close $fh_LOCID;
 
 $donorsubprofile = $species . ".don.sub.profile";
 open( my $fh_FOUT, ">", "$donorsubprofile" ) or croak "Failed here";
@@ -1070,7 +1074,7 @@ close $fh_FOUT;
 
 #print STDERR "$path/pictogram $donorsubprofile $statsdir/Donor -bits -land\n";
 ## BUG?
-my $my_command =
+$my_command =
 "./bin/pictogram $donorsubprofile $plotsdir/donor_profile.pictogram -bits -land";
 print "\n$my_command\n";
 run($my_command);
@@ -1130,12 +1134,15 @@ my $accsub = "";
 
 #print STDERR "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_don+6))}' $outacceptortbl\n";
 
-open $fh_LOCID,
-"gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl |";
-while (<$fh_LOCID>) {
-    $accsub .= $_;
-}
-close $fh_LOCID;
+$my_command = "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl ";
+$accsub     = capture($my_command);
+
+#~ open $fh_LOCID,
+#~ "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl |";
+#~ while (<$fh_LOCID>) {
+    #~ $accsub .= $_;
+#~ }
+#~ close $fh_LOCID;
 
 $acceptorsubprofile = $species . ".acc.sub.profile";
 open( $fh_FOUT, ">", "$acceptorsubprofile" ) or croak "Failed here";
@@ -1204,12 +1211,15 @@ my $stasub = "";
 
 #print STDERR "gawk '{print  substr(\$2,($startstart-3),($prof_len_don+6))}' $outstarttbl\n";
 
-open $fh_LOCID,
-"gawk '{print  substr(\$2,($startstart-3),($prof_len_sta+6))}' $outstarttbl |";
-while (<$fh_LOCID>) {
-    $stasub .= $_;
-}
-close $fh_LOCID;
+$my_command = "gawk '{print  substr(\$2,($startstart-3),($prof_len_sta+6))}' $outstarttbl ";
+$stasub     = capture($my_command);
+
+#~ open $fh_LOCID,
+#~ "gawk '{print  substr(\$2,($startstart-3),($prof_len_sta+6))}' $outstarttbl |";
+#~ while (<$fh_LOCID>) {
+    #~ $stasub .= $_;
+#~ }
+#~ close $fh_LOCID;
 
 $startsubprofile = $species . ".sta.sub.profile";
 open( $fh_FOUT, ">", "$startsubprofile" ) or croak "Failed here";
@@ -1267,13 +1277,15 @@ if ($usebranch) {
     my $brasub = "";
 
 #print STDERR "gawk '{print  substr(\$2,($startstart-3),($prof_len_don+6))}' $outstarttbl\n";
+$my_command = "gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl ";
+$brasub     = capture($my_command);
 
-    open $fh_LOCID,
-"gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl |";
-    while (<$fh_LOCID>) {
-        $brasub .= $_;
-    }
-    close $fh_LOCID;
+    #~ open $fh_LOCID,
+#~ "gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl |";
+    #~ while (<$fh_LOCID>) {
+        #~ $brasub .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     $branchsubprofile = $species . ".bra.sub.profile";
     open( my $fh_FOUT, ">", "$branchsubprofile" ) or croak "Failed here";
@@ -1918,13 +1930,16 @@ sub extractCDSINTRON {
 ## INTRONS LARGER THAN 0 ONLY
 
     my $introntblpositive = "";
-    open( my $fh_LOCID,
-        "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron |" );
-    while (<$fh_LOCID>) {
+    $my_command   = "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron " ;
+    $introntblpositive = capture($my_command);
+    
+    #~ open( my $fh_LOCID,
+        #~ "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron |" );
+    #~ while (<$fh_LOCID>) {
 
-        $introntblpositive .= $_;
-    }
-    close $fh_LOCID;
+        #~ $introntblpositive .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempallintron_positive =
       $species . "$type" . ".intron_positivelength.tbl";
@@ -1937,48 +1952,57 @@ sub extractCDSINTRON {
       "intron tabular file created with introns with more than 0 nucleotides\n";
 ## GET LIST OF SEQUENCES WITH LENGTH >0 and EXCLUDE FROM CDS/locus_id/gff FILES SEQUENCES WITH INTRONS WITH 0 LENGTH
     my $intronzero = "";
-    open( $fh_LOCID,
-"gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq |"
-    );
-    while (<$fh_LOCID>) {
+    $my_command = "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
+    $intronzero = capture($my_command);
+    
+    #~ open( $fh_LOCID,
+#~ "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq |"
+    #~ );
+    #~ while (<$fh_LOCID>) {
 
-        $intronzero .= $_;
-    }
-    close $fh_LOCID;
+        #~ $intronzero .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempall_intron_zero_list =
       $species . "$type" . ".intron_zerolength.list";
 
-    open( $fh_FOUT, ">", "$tempall_intron_zero_list" );
+    open($fh_FOUT, ">", "$tempall_intron_zero_list" );
     print $fh_FOUT "$intronzero";
     close $fh_FOUT;
 
     my $intronzero2 = "";
+    $my_command   = "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
+    $intronzero2  = capture($my_command); 
+    
+    #~ open( $fh_LOCID,
+#~ "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq |"
+    #~ );
+    #~ while (<$fh_LOCID>) {
 
-    open( $fh_LOCID,
-"gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq |"
-    );
-    while (<$fh_LOCID>) {
-
-        $intronzero2 .= $_;
-    }
-    close $fh_LOCID;
+        #~ $intronzero2 .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempall_intron_zero_list2 =
       $species . "$type" . ".intron_zerolength.list2";
 
-    open( $fh_FOUT, ">", "$tempall_intron_zero_list2" );
+    open($fh_FOUT, ">", "$tempall_intron_zero_list2" );
     print $fh_FOUT "$intronzero2";
     close $fh_FOUT;
 
 ## FILTER SEQUENCES WITH 0 SIZE INTRONS FROM CDS!
-    my $cdstblnozero = "";
-    open( $fh_LOCID, "egrep -vf $tempall_intron_zero_list $tempcds |" );
-    while (<$fh_LOCID>) {
 
-        $cdstblnozero .= $_;
-    }
-    close $fh_LOCID;
+    $my_command   =  "egrep -vf $tempall_intron_zero_list $tempcds " ;
+    my $cdstblnozero = capture($my_command); 
+    
+    #~ my $cdstblnozero = "";
+    #~ open( $fh_LOCID, "egrep -vf $tempall_intron_zero_list $tempcds |" );
+    #~ while (<$fh_LOCID>) {
+
+        #~ $cdstblnozero .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempallcds_nozero = $species . "$type" . ".cds_nozero.tbl";
 
@@ -1986,26 +2010,33 @@ sub extractCDSINTRON {
     print $fh_FOUT "$cdstblnozero";
     close $fh_FOUT;
 ## ENSURE LOCUSID DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
-    my $locusidnozero = "";
-    open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $locus_id |" );
-    while (<$fh_LOCID>) {
+    $my_command    = "egrep -vwf $tempall_intron_zero_list2 $locus_id ";
+    my $locusidnozero = capture($my_command); 
+    
+    
+    #~ open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $locus_id |" );
+    #~ while (<$fh_LOCID>) {
 
-        $locusidnozero .= $_;
-    }
-    close $fh_LOCID;
+        #~ $locusidnozero .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $templocus_id_nozero = $species . "$type" . "_locus_id_nozero";
-
     open( $fh_FOUT, ">", "$templocus_id_nozero" );
     print $fh_FOUT "$locusidnozero";
     close $fh_FOUT;
 ## ENSURE GFF DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
+
+
     my $gffnozero = "";
-    open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $gff |" );
-    while (<$fh_LOCID>) {
-        $gffnozero .= $_;
-    }
-    close $fh_LOCID;
+    $my_command = "egrep -vwf $tempall_intron_zero_list2 $gff " ;
+    $gffnozero  = capture($my_command);
+    
+    #~ open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $gff |" );
+    #~ while (<$fh_LOCID>) {
+        #~ $gffnozero .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempgffnozero = $species . "$type" . ".nozero.gff";
 
@@ -2027,10 +2058,14 @@ sub extractCDSINTRON {
     # $tempall_protein = Translate($geneticcode,$tempcds,$tempall_protein);
     $tempall_protein =
       Translate( $geneticcode, $tempallcds_nozero, $tempall_protein );
-
-    my $inframestops =
-`gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc | gawk '{print \$1}'`;
+    
+    $my_command = "gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc -l";
+    ## BUG reports just the number
+    my $inframestops = capture($my_command);
     chomp $inframestops;
+    
+    #~ #my $inframestops =`gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc | gawk '{print \$1}'`;
+    #~ chomp $inframestops;
 
     print STDERR
 "\n\nWe found $inframestops sequences with in-frame stop signals/not starting with a methionine or not ending with a canonical stop codon \n\n";
@@ -2041,16 +2076,21 @@ sub extractCDSINTRON {
     if ($inframestops) {
         my $inframe = "";
         my @inframe = ();
-        open( $fh_LOCID, "-|",
-"gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq "
-        );
-        while (<$fh_LOCID>) {
+        
+        ## XXX may not work XXX
+        $my_command = "gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq ";
+        @inframe    = capture($my_command);
+        
+        #~ open(my $fh_LOCID, "-|",
+#~ "gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq "
+        #~ );
+        #~ while (<$fh_LOCID>) {
 
-            push( @inframe, "$_" );
+            #~ push( @inframe, "$_" );
 
-        }
+        #~ }
 
-        close $fh_LOCID;
+        #~ close $fh_LOCID;
 
         foreach my $line (@inframe) {
             my (@frame) = split "_", $line;
@@ -2067,16 +2107,20 @@ sub extractCDSINTRON {
         print STDERR
 "\nremove sequences with in-frame stop signals from cds/intron files\n\n";
 
-        my $cdstbl2 = "";
+        
 
 #  open $fh_LOCID, "sed 's/\\(.*\\)\_.*/\\1/g' $inframe_protein | egrep -vf - $tempallcds_nozero |";
-        open( $fh_LOCID, "-|",
-"sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $tempallcds_nozero"
-        );
-        while (<$fh_LOCID>) {
-            $cdstbl2 .= $_;
-        }
-        close $fh_LOCID;
+         #my $cdstbl2 = 
+         $my_command = "sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $tempallcds_nozero";
+         my $cdstbl2 = capture($my_command);
+         
+        #~ open( $fh_LOCID, "-|",
+#~ "sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $tempallcds_nozero"
+        #~ );
+        #~ while (<$fh_LOCID>) {
+            #~ $cdstbl2 .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         my $tempall_cds2 = $species . "$type" . ".cds_filter1.tbl";
 
@@ -2085,14 +2129,18 @@ sub extractCDSINTRON {
         close $fh_FOUT;
 
         my $introntbl2 = "";
-        open( $fh_LOCID,
-"sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive |"
-        );
-        while (<$fh_LOCID>) {
+        
+        $my_command = "sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive ";
+        $introntbl2  = capture($my_command);
+        
+        #~ open( $fh_LOCID,
+#~ "sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive |"
+        #~ );
+        #~ while (<$fh_LOCID>) {
 
-            $introntbl2 .= $_;
-        }
-        close $fh_LOCID;
+            #~ $introntbl2 .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         my $tempall_intron2 = $species . "$type" . ".intron_filter1.tbl";
 
@@ -2100,16 +2148,18 @@ sub extractCDSINTRON {
         print $fh_FOUT "$introntbl2";
         close $fh_FOUT;
 
-        my $new_locus_id_filter1 = "";
-
+        #my $new_locus_id_filter1 = "";
+        $my_command = "sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero ";
+        my $new_locus_id_filter1  = capture($my_command);
+        
 #open $fh_LOCID, "sed 's/\\(.*\\)\_.*/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero |";
-        open( $fh_LOCID, "-|",
-"sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero "
-        );
-        while (<$fh_LOCID>) {
-            $new_locus_id_filter1 .= $_;
-        }
-        close $fh_LOCID;
+        #~ open( $fh_LOCID, "-|",
+#~ "sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero "
+        #~ );
+        #~ while (<$fh_LOCID>) {
+            #~ $new_locus_id_filter1 .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         my $templocus_id_new2 =
           $species . "$type" . "_locus_id_filter_noinframe";
@@ -2118,15 +2168,17 @@ sub extractCDSINTRON {
         print $fh_FOUT "$new_locus_id_filter1";
         close $fh_FOUT;
 
-        my $gffnew = "";
-
-        open( $fh_LOCID, "-|",
-"sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $tempgffnozero "
-        );
-        while (<$fh_LOCID>) {
-            $gffnew .= $_;
-        }
-        close $fh_LOCID;
+        #my $gffnew = "";
+        $my_command = "sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $tempgffnozero ";
+        my $gffnew  = capture($my_command);
+        
+        #~ open( $fh_LOCID, "-|",
+#~ "sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $tempgffnozero "
+        #~ );
+        #~ while (<$fh_LOCID>) {
+            #~ $gffnew .= $_;
+        #~ }
+        #~ close $fh_LOCID;
 
         my $tempnewgff = $species . "$type" . ".noinframe.gff";
 
@@ -2177,6 +2229,7 @@ sub extractprocessSITES {
 
 #	print STDERR "egrep -A 1 $site $tmp_dir/${gene_id}.all_sites $sitesdir/${site}_sites.fa\n";
 ## POTENTIAL BUG, split command below
+
             run(
 " egrep -A 1 $site $tmp_dir/${gene_id}.all_sites | sed -e '/--/d' -e '/^\$/d' >> $sitesdir/${site}_sites.fa"
             );
@@ -2217,8 +2270,8 @@ sub extractprocessSITES {
     my $totcanonical     = "";
     my $newdonortbl      = "";
 
-    open $fh_LOCID,
-      "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' |";
+    open(my $fh_LOCID,
+      "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' |");
     while (<$fh_LOCID>) {
         $noncanonical .= $_;
     }
@@ -4808,14 +4861,17 @@ sub predictPlotgff2ps {
     my $geneidall   = "";
     my $gff2psplots = "$species.gff2ps.prediction.plots.ps";
     ## TOFIX
-    open( $fh_LOCID,
-"./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' | "
-    );
+    my $my_command = "./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' ";
+    $geneidall     = capture($my_command);
+    
+    #~ open(my $fh_LOCID,
+#~ "./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' | "
+    #~ );
 
-    while (<$fh_LOCID>) {
-        $geneidall .= $_;
-    }
-    close $fh_LOCID;
+    #~ while (<$fh_LOCID>) {
+        #~ $geneidall .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
     my $tempgeneidgffpreds = $species . ".geneid.predictions.gff";
     open( my $fh_FOUT, ">", "$tempgeneidgffpreds" ) or croak "Failed here";
@@ -5085,7 +5141,7 @@ sub generalGFFtoGFFgeneid {
     }
 
     my $geneidgffsorted = "";
-    open $fh_LOCID, "sort -s -k8,9 -k4,5n $geneidgff |";
+    open(my $fh_LOCID, "sort -s -k8,9 -k4,5n $geneidgff |");
     while (<$fh_LOCID>) {
         $geneidgffsorted .= $_;
     }
