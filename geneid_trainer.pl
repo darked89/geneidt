@@ -94,15 +94,38 @@ print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
 
 
 
-## preparing directories
-my $work_dir = "$PROGRAM_HOME/00_gtrain_workdir/";
-run("mkdir -p $work_dir");
-my $tmp_dir = "$work_dir/temp_00/";
-run("mkdir -p $tmp_dir;");
+#~ ## preparing directories
+#~ my $work_dir = "$PROGRAM_HOME/00_gtrain_workdir/";
+#~ run("mkdir -p $work_dir");
+#~ my $tmp_dir = "$work_dir/temp_00/";
+#~ run("mkdir -p $tmp_dir;");
 
 #create_work_dirs();
+my $work_dir      = "$PROGRAM_HOME/workdir_00_gtrain/";
+my $tmp_dir  = "$work_dir/temp_00/";
+#my $TMP         = "$work_dir/tmp/";
+#my $stats_dir   = "$work_dir/stats/";
+my $stats_dir = "$work_dir/statistics_${species}/";
+my $sites_dir   = "$work_dir/sites/";
+my $plots_dir   = "$work_dir/plots/";
+my $introns_dir  = "$work_dir/introns/";
+my $fastas_dir  = "$work_dir/fastas/";
+my $backgrd_dir = "$work_dir/backgrd/";
+my $cds_dir     = "$work_dir/cds/";
+my $geneid_dir  = "$work_dir/geneid/";
+my $bigbag_dir  = "$work_dir/bigbag/";
 
+my @data_dirs = ($work_dir, $tmp_dir, $fastas_dir, $stats_dir, 
+                 $sites_dir, $plots_dir, $introns_dir,
+                 $backgrd_dir, $cds_dir,
+                 $geneid_dir, $bigbag_dir );
+
+create_data_dirs(@data_dirs);
 #
+#~ my @data_dirs = ($work_dir, $tmp_dir, $stats_dir, 
+                 #~ $sites_dir, $plots_dir, $introns_dir,
+                 #~ $fastas_dir, $backgrd_dir, $cds_dir,
+                 #~ $geneid_dir, $bigbag_dir );
 
 my $TMPROOT  = "trainer_$$";
 my $CEGMATMP = "$/tmp_dir$TMPROOT";
@@ -171,11 +194,7 @@ my @evaluation   = ();
 my @jacknifeeval = ();
 my ( $bestIeWF, $bestIoWF, $bestAcc, $bestMin ) = ( "", "", "", "" );
 my $fullengthbranchtbl = "";
-my $fastasdir          = "";
-my $statsdir           = "";
-my $sitesdir           = "";
-my $introndir          = "";
-my $cdsdir             = "";
+
 my $geneidgffsorted    = "";
 my $total_genomic      = "";
 my $bckgrnd            = "";
@@ -200,7 +219,7 @@ my $acceptorsubprofile      = "";
 my $startsubprofile         = "";
 my $branchsubprofile        = "";
 my $temp_jkf_geneid         = "";
-my $plotsdir                = "";
+
 my $contigopt               = 0;
 my $tempgeneidgffsorted     = "";
 my $tempgeneidgffsortedeval = "";
@@ -229,117 +248,21 @@ my $optimize    = 0;
 ## sanity check
 #######################################################
 ## CREATE FASTAS CDS; INTRON, SITES DIRs WITHIN PATH (ONLY FIRST TIME)
-print STDERR
-  "\ncreate FASTAS, CDS, INTRON and SITES DIRECTORIES within PATH\n\n";
 
-#~ #tmp
-#~ if ( !$optimize && -d "$tmp_dir" ) {
-#~ print STDERR
-#~ "There is a directory named $tmp_dir..\nRemove directory and its contents\n";
-#~ rmtree( ["$tmp_dir"] );
-#~ `mkdir -p $tmp_dir;`;
-#~ #$cdsdir = "$tmp_dir";
 
-#~ }
-#~ else {
-#~ `mkdir -p $tmp_dir;`;
-#~ #$cdsdir = "$work_dir/cds/";
-#~ }
-
-#CDS
-if ( !$optimize && -d "$work_dir/cds/" ) {
-    print STDERR
-"There is a directory named $work_dir/cds/..\nRemove directory and its contents\n";
-    rmtree( ["$work_dir/cds/"] );
-    run("mkdir -p $work_dir/cds/");
-    $cdsdir = "$work_dir/cds/";
-
-}
-else {
-    run("mkdir -p $work_dir/cds/");
-    $cdsdir = "$work_dir/cds/";
-}
-
-#INTRON
-if ( !$optimize && -d "$work_dir/intron/" ) {
-    print
-"There is a directory named $work_dir/intron/!\nRemove directory and its contents\n";
-    rmtree( ["$work_dir/intron/"] );
-    run("mkdir -p $work_dir/intron/");
-    $introndir = "$work_dir/intron/";
-
-}
-else {
-    run("mkdir -p $work_dir/intron/");
-    $introndir = "$work_dir/intron/";
-}
-
-#SITES
-if ( !$optimize && -d "$work_dir/sites/" ) {
-    print
-"There is a directory named $work_dir/sites/!\nRemove directory and its contents\n";
-    rmtree( ["$work_dir/sites/"] );
-    run("mkdir -p $work_dir/sites/");
-    $sitesdir = "$work_dir/sites/";
-}
-else {
-    run("mkdir -p $work_dir/sites/");
-    $sitesdir = "$work_dir/sites/";
-}
-
-#FASTAS
-if ( !$optimize && -d "$work_dir/fastas_${species}" ) {
-
-    print STDERR
-"There is already a directory named $work_dir/fastas_${species}!\nRemove its contents and re-create it\n";
-
-    rmtree( ["$work_dir/fastas_$species/"] );
-    run("mkdir -p $work_dir/fastas_$species/");
-    $fastasdir = "$work_dir/fastas_$species/";
-    print STDERR "\n";
-}
-else {
-    print STDERR
-      "Create a new one\nNo directory $work_dir/fastas_${species} exists\n";
-    run("mkdir -p $work_dir/fastas_$species/");
-    $fastasdir = "$work_dir/fastas_$species/";
-}
-
-#PLOTS JUST ONCE KEEP DATA IF IT HAD ALREADY BEEN CREATED
-if ( !$optimize && -d "$work_dir/plots" )
-{    ###$work_dir = "$work_dir/statistics_${species}/";
-
-    print STDERR "There is already a directory named $work_dir"
-      . "plots, however will keep contents, they may be overwritten";
-    run("mkdir -p $work_dir/plots");
-    $plotsdir = "$work_dir/plots";
-    print STDERR "\n";
-}
-else {
-    print STDERR "Create a new one\nNo directory $work_dir" . "plots exists\n";
-    run("mkdir -p $work_dir/plots");
-    $plotsdir = "$work_dir/plots";
-}
-
-## MAKE A STATISTICS DIRECTORY
-
-print STDERR "Create a statistics directory for this species\n";
-run("mkdir -p $work_dir/statistics_${species}/");
-$statsdir = "$work_dir/statistics_${species}/";
-###########################################################
-
+#
 #######################################################
 ## store statistics directory variable
 my $fh_STORV;
 open( $fh_STORV, ">", "geneid_trainer_global.log" ) or croak "Failed here";
 
-print $fh_STORV Data::Dumper->Dump( [$statsdir], ['$statsdir'] );
+print $fh_STORV Data::Dumper->Dump( [$stats_dir], ['$stats_dir'] );
 
 ##CREATE A STATS/PARAMETER FILE
 my @timeData = localtime(time);
 
 #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
-my $statsout = "$statsdir" . join( '_', @timeData ) . "_$sout";
+my $statsout = "$stats_dir" . join( '_', @timeData ) . "_$sout";
 ###OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
 open( $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
 print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
@@ -409,7 +332,7 @@ sub start_reduced {
     my @timeData = localtime(time);
 
     #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
-    my $statsout = $statsdir . join( '_', @timeData ) . "_$sout";
+    my $statsout = $stats_dir . join( '_', @timeData ) . "_$sout";
 ## OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
     open( my $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
 
@@ -498,28 +421,28 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 ## store CAPPED tabular  file directory
     print $fh_STORV Data::Dumper->Dump( [$temptblcaps], ['$temptblcaps'] );
 ## store fastas dir and plots dir
-    print $fh_STORV Data::Dumper->Dump( [$fastasdir], ['$fastasdir'] );
-    print $fh_STORV Data::Dumper->Dump( [$plotsdir],  ['$plotsdir'] );
+    print $fh_STORV Data::Dumper->Dump( [$fastas_dir], ['$fastas_dir'] );
+    print $fh_STORV Data::Dumper->Dump( [$plots_dir],  ['$plots_dir'] );
 
 ## place genomic sequences in "fastas_$species" directory
-    print STDERR "move genomic sequences into \"fastas_$species\" directory\n";
+    print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
     print STDERR "(also transfer genomic fasta length info)\n\n";
 ## do not create fastas in diretory if they are already created and their number corresponds to the number of sequences in thr array
 ## CONVERT GENOMICS FASTA TO MULTI FASTA AND PLACE THEM IN APPROPRIATE DIRECTORY
 
     print STDERR
-"Convert $temptblcaps to multiple genomic fastas and place them in $fastasdir:\n";
+"Convert $temptblcaps to multiple genomic fastas and place them in $fastas_dir:\n";
 
-    TblToFastaFile( $fastasdir, $temptblcaps );
+    TblToFastaFile( $fastas_dir, $temptblcaps );
     print STDERR
 "\n\nConversion of $temptblcaps to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
 
-    opendir( my $dh_fasta_dir, $fastasdir )
+    opendir( my $dh_fasta_dir, $fastas_dir )
       || croak "Can't open directory: $!";
 
     my @files = grep {
         /^[\w+|\d+]/               # Begins with a character or number
-          && -f "$fastasdir/$_"    # and is a file
+          && -f "$fastas_dir/$_"    # and is a file
     } readdir($dh_fasta_dir);
 
     foreach my $file (@files) {
@@ -528,7 +451,7 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 
         my $fnametable = ${file} . ".tbl";
         $fnametable =
-          FastaToTbl( ${fastasdir} . $file, ${fastasdir} . $fnametable );
+          FastaToTbl( ${fastas_dir} . $file, ${fastas_dir} . $fnametable );
 
         open( my $fh_FLEN, "<", "$fnametable" ) or croak "Failed here";
         while ( my $line = <$fh_FLEN> ) {
@@ -536,7 +459,7 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 
             # print STDERR "\$name: $name\n";
             my $lengfasta = length($seq);
-            open( my $fh_FLEN2, ">", "$fastasdir/${name}_len" )
+            open( my $fh_FLEN2, ">", "$fastas_dir/${name}_len" )
               or croak "Failed here";
             print $fh_FLEN2 "$name $lengfasta\n";
             close $fh_FLEN2;
@@ -673,28 +596,10 @@ if ( !$reducedtraining )
         print STDERR
 "\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
 
-#print $fh_SOUT "\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
-#random pick (UNSORT)
 
         my $my_command   = "shuf --head-count=$totalseqs4training $templocus_id | sort | uniq";
         $new_locus_id = capture($my_command);
         
-        #~ open(
-            #~ my $fh_LOCID,
-
-       #~ #"$path/unsort $templocus_id | head -$totalseqs4training | sort | uniq |"
-
-
-#~ "shuf --head-count=$totalseqs4training $templocus_id | sort | uniq |"
-        #~ );
-        #~ while (<$fh_LOCID>) {
-            #~ $new_locus_id .= $_;
-        #~ }
-        #~ close $fh_LOCID;
-
-        #~ #	}
-
-###
         $templocus_id_new = $species . "_locus_id_training_setaside80";
           
         open( my $fh_FOUT, ">", "$templocus_id_new" ) or croak "Failed here";
@@ -721,13 +626,6 @@ if ( !$reducedtraining )
         $my_command   = "gawk '{print \$2\"\$\"}' $templocus_id_new | sort | uniq | egrep -wf - $gff";
         $gff4training = capture($my_command);
         
-        #~ open( $fh_LOCID,
-#~ "gawk '{print \$2\"\$\"}' $templocus_id_new | sort | uniq | egrep -wf - $gff |"
-        #~ );
-        #~ while (<$fh_LOCID>) {
-            #~ $gff4training .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         $tempgff4training = $species . ".gff_training_setaside80";
         open( $fh_FOUT, ">", "$tempgff4training" ) or croak "Failed here";
@@ -746,11 +644,6 @@ if ( !$reducedtraining )
         $my_command   = "gawk '{print \$9}' $tempgff4training | sort | uniq ";
         $list_seqs_train = capture($my_command);
         
-        #~ open $fh_LOCID, "gawk '{print \$9}' $tempgff4training | sort | uniq |";
-        #~ while (<$fh_LOCID>) {
-            #~ $list_seqs_train .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         $templist_train = $species . "_list_train_seqs_setaside80";
         open( $fh_FOUT, ">", "$templist_train" ) or croak "Failed here";
@@ -769,13 +662,6 @@ if ( !$reducedtraining )
         $my_command   = "gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $templocus_id"; 
         $locusideval  = capture($my_command);
         chomp $locusideval;
-        #~ open $fh_LOCID,
-#~ "gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $templocus_id |";
-        #~ while (<$fh_LOCID>) {
-            #~ $locusideval .= $_;
-        #~ }
-        #~ close $fh_LOCID;
-        #~ chomp $locusideval;
         
         $templocusid_eval = $species . "_locus_id_evaluation_setaside20";
         open( $fh_FOUT, ">", "$templocusid_eval" ) or croak "Failed here";
@@ -804,15 +690,6 @@ if ( !$reducedtraining )
      
         $my_command  = "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff ";
         my $gff4evaluation = capture($my_command);  
-        
-        
-        #~ $my_command  = 
-        #~ open $fh_LOCID,
-        #~ "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff |";
-        #~ while (<$fh_LOCID>) {
-            #~ $gff4evaluation .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         $tempgff4evaluation = $species . ".gff_evaluation_setaside20";
         open( $fh_FOUT, ">", "$tempgff4evaluation" ) or croak "Failed here";
@@ -995,16 +872,16 @@ if ( !$reducedtraining )
 
 ## DELETE DIRECTORIES NO LONGER NEEDED
     print STDERR
-"the CDS-containing directory in $work_dir/cds/ is no longer needed..\nRemove directory and its contents\n";
-    rmtree( ["$work_dir/cds/"] );
+"the CDS-containing directory in $cds_dir is no longer needed..\nRemove directory and its contents\n";
+    #rmtree( ["$work_dir/cds/"] );
     print STDERR
-"the intron-containing directory in $work_dir/intron/ is no longer needed..\nRemove directory and its contents\n";
-    rmtree( ["$work_dir/intron/"] );
+"the intron-containing directory in $introns_dir is no longer needed..\nRemove directory and its contents\n";
+    #rmtree( ["$work_dir/intron/"] );
 
 #print STDERR "the splice-site-containing directory in $path/sites/ is no longer needed..\nRemove directory and its contents\n";
 #	rmtree([ "$path/sites/" ]);
 #print STDERR "the fastas-containing directory in $path/fastas_$species/ is no longer needed..\nRemove directory and its contents\n";
-#	rmtree([ "$path/fastas_$species/" ]);
+#	rmtree([ "$fastas_dir" ]);
 ###
     close $fh_STORV;
 
@@ -1014,12 +891,6 @@ if ( !$reducedtraining )
 ### EVERYTHING BELOW ALWAYS EXECUTED EVEN ON SHORT VERSION OF THE PIPELINE (REDUCED)
 
 ## GET BACKGROUND SEQUENCES
-#User can set the length and number of the background sequences
-#~ my $kmer    = 62;
-#~ my $numseqs = 100000;
-#User can set the length and number of the background sequences
-#Readonly::Scalar my $backgrnd_kmer_size => 62;
-#Readonly::Scalar my $backgrnd_kmer_num => 100000;
 
 print
 "Obtaining $backgrnd_kmer_num background sequences of $backgrnd_kmer_size nucleotides each for estimating background frequencies of nucleotides\n";
@@ -1079,14 +950,6 @@ my $donsub = "";
 my $my_command = "gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl ";
 $donsub     = capture($my_command);
 
-#~ open(
-    #~ my $fh_LOCID,
-#~ "gawk '{print  substr(\$2,($startdonor-3),($prof_len_don+6))}' $outdonortbl |"
-#~ );
-#~ while (<$fh_LOCID>) {
-    #~ $donsub .= $_;
-#~ }
-#~ close $fh_LOCID;
 
 $donorsubprofile = $species . ".don.sub.profile";
 open( my $fh_FOUT, ">", "$donorsubprofile" ) or croak "Failed here";
@@ -1096,7 +959,7 @@ close $fh_FOUT;
 #print STDERR "$path/pictogram $donorsubprofile $statsdir/Donor -bits -land\n";
 ## BUG?
 $my_command =
-"./bin/pictogram $donorsubprofile $plotsdir/donor_profile.pictogram -bits -land";
+"./bin/pictogram $donorsubprofile $plots_dir/donor_profile.pictogram -bits -land";
 print "\n$my_command\n";
 run($my_command);
 
@@ -1158,12 +1021,6 @@ my $accsub = "";
 $my_command = "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl ";
 $accsub     = capture($my_command);
 
-#~ open $fh_LOCID,
-#~ "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl |";
-#~ while (<$fh_LOCID>) {
-    #~ $accsub .= $_;
-#~ }
-#~ close $fh_LOCID;
 
 $acceptorsubprofile = $species . ".acc.sub.profile";
 open( $fh_FOUT, ">", "$acceptorsubprofile" ) or croak "Failed here";
@@ -1174,11 +1031,11 @@ close $fh_FOUT;
 
 ## BUG?
 $my_command =
-"./bin/pictogram $acceptorsubprofile $plotsdir/acceptor_profile.pictogram -bits -land";
+"./bin/pictogram $acceptorsubprofile $plots_dir/acceptor_profile.pictogram -bits -land";
 print "\n$my_command\n";
 run($my_command);
 
-# run("./bin/pictogram $acceptorsubprofile $plotsdir/Acceptor -bits -land");
+# run("./bin/pictogram $acceptorsubprofile $plots_dir/Acceptor -bits -land");
 #unlink $acceptorsubprofile;
 
 #  print STDERR "acceptormatrix: \n";
@@ -1230,35 +1087,27 @@ if (
 
 my $stasub = "";
 
-#print STDERR "gawk '{print  substr(\$2,($startstart-3),($prof_len_don+6))}' $outstarttbl\n";
 
 $my_command = "gawk '{print  substr(\$2,($startstart-3),($prof_len_sta+6))}' $outstarttbl ";
 $stasub     = capture($my_command);
 
-#~ open $fh_LOCID,
-#~ "gawk '{print  substr(\$2,($startstart-3),($prof_len_sta+6))}' $outstarttbl |";
-#~ while (<$fh_LOCID>) {
-    #~ $stasub .= $_;
-#~ }
-#~ close $fh_LOCID;
 
 $startsubprofile = $species . ".sta.sub.profile";
 open( $fh_FOUT, ">", "$startsubprofile" ) or croak "Failed here";
 print $fh_FOUT "$stasub";
 close $fh_FOUT;
 
-## BUG?
-# run("./bin/pictogram $startsubprofile ./statistics_${species}/Start -bits -land");
-$my_command =
-"./bin/pictogram $startsubprofile $plotsdir/start_profile.pictogram -bits -land";
-print "\n$my_command\n";
+
+$my_command = "./bin/pictogram $startsubprofile $plots_dir/start_profile.pictogram -bits -land";
+#print "\n$my_command\n";
 run($my_command);
 
 #unlink $startsubprofile;
 
 ## OPTIONAL BRANCH STATS (FUNGI NORMALLY, AFTER RUNNING MEME)
 if ($usebranch) {
-
+}
+sub dk_branch_sub {
     #print STDERR "\nCHECK: begin to process branch\n";
     $fullengthbranchtbl = processBranch( $memefile, $motifnumber, $outintron );
 
@@ -1317,13 +1166,18 @@ $brasub     = capture($my_command);
 ## BUG?
 #    run("./bin/pictogram $branchsubprofile ./statistics_${species}/Branch -bits -land");
     $my_command =
-"./bin/pictogram $branchsubprofile $plotsdir/branch_profile.pictogram -bits -land";
+"./bin/pictogram $branchsubprofile $plots_dir/branch_profile.pictogram -bits -land";
     print "\n$my_command\n";
     run($my_command);
 
     #unlink $branchsubprofile;
+    return 1;
 
-}    # if usebranch
+}    
+# dk use branch
+
+
+## NO BRANCH AGAIN
 
 ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -1897,7 +1751,7 @@ sub extractCDSINTRON {
     #	unlink "$work_dir/intron/${species}.${type}.intron.fa";
 
     # #####extract CDS and INTRON SEQUENCES
-
+    #my 
     print STDERR "\nEXTRACT CDS and INTRON SEQUENCES from $type set..\n\n";
     open( my $fh_LOCUS, "<", "$locus_id" ) or croak "Failed here";
     print STDERR "$locus_id and $gff\n";
@@ -1907,20 +1761,26 @@ sub extractCDSINTRON {
         run(" egrep -w '$gene_id\$' $gff > $tmp_dir/$gene_id.gff");
         ## POTENTIAL BUG, split commands below
         
-        my $fh_ssgff_A    = File::Temp->new();
-        my $fname_ssgff_A = $fh_ssgff_A->filename;
-        $my_command = "./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A"; 
+        #~ my $fh_ssgff_A    = File::Temp->new();
+        #~ my $fname_ssgff_A = $fh_ssgff_A->filename;
+        ## CDS
+        my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
+        $my_command = "./bin/SSgff -cE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A"; 
         run($my_command); 
-        $my_command = "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa ";
+        $my_command = "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $cds_dir/${species}${type}.cds.fa ";
         run($my_command);
         
 #` ./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
         
-        my $fh_ssgff_B    = File::Temp->new();
-        my $fname_ssgff_B = $fh_ssgff_B->filename;
-        $my_command = "./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B"; 
+        ## INTRONS
+        #~ my $fh_ssgff_B    = File::Temp->new();
+        #~ my $fname_ssgff_B = $fh_ssgff_B->filename;
+        my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
+        $my_command = "./bin/SSgff -iE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B"; 
+        #say "\n$my_command\n";
         run($my_command); 
-        $my_command = "cat $fname_ssgff_B | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa";
+        $my_command = "cat $fname_ssgff_B | sed -e 's/:/_/' -e 's/ Intron.*//' >> $introns_dir/${species}${type}.intron.fa";
+        #say "\n$my_command\n";
         run($my_command);
         
 #` ./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
@@ -1937,14 +1797,14 @@ sub extractCDSINTRON {
 "\nCreate tabular format of CDS and INTRON sequences for $type sequences\n";
 
 ## CDS
-    my $tempcdsfa = $cdsdir . ${species} . "$type" . ".cds.fa";
+    my $tempcdsfa = $cds_dir . ${species} . "$type" . ".cds.fa";
     print STDERR "$tempcdsfa\n\n";
     my $tempcds = ${species} . "$type" . ".cds.tbl";
     $tempcds = FastaToTbl( $tempcdsfa, $tempcds );
     print STDERR "cds tabular file created for $type sequences \n";
 
     # ##INTRON
-    my $tempintronfa = $introndir . ${species} . "$type" . ".intron.fa";
+    my $tempintronfa = $introns_dir . ${species} . "$type" . ".intron.fa";
     my $tempintron   = ${species} . "$type" . ".intron.tbl";
     $tempintron = FastaToTbl( $tempintronfa, $tempintron );
 
@@ -1976,14 +1836,6 @@ sub extractCDSINTRON {
     $my_command = "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
     $intronzero = capture($my_command);
     
-    #~ open( $fh_LOCID,
-#~ "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq |"
-    #~ );
-    #~ while (<$fh_LOCID>) {
-
-        #~ $intronzero .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $tempall_intron_zero_list =
       $species . "$type" . ".intron_zerolength.list";
@@ -1995,15 +1847,7 @@ sub extractCDSINTRON {
     my $intronzero2 = "";
     $my_command   = "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
     $intronzero2  = capture($my_command); 
-    
-    #~ open( $fh_LOCID,
-#~ "gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq |"
-    #~ );
-    #~ while (<$fh_LOCID>) {
-
-        #~ $intronzero2 .= $_;
-    #~ }
-    #~ close $fh_LOCID;
+   
 
     my $tempall_intron_zero_list2 =
       $species . "$type" . ".intron_zerolength.list2";
@@ -2017,13 +1861,7 @@ sub extractCDSINTRON {
     $my_command   =  "egrep -vf $tempall_intron_zero_list $tempcds " ;
     my $cdstblnozero = capture($my_command); 
     
-    #~ my $cdstblnozero = "";
-    #~ open( $fh_LOCID, "egrep -vf $tempall_intron_zero_list $tempcds |" );
-    #~ while (<$fh_LOCID>) {
 
-        #~ $cdstblnozero .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $tempallcds_nozero = $species . "$type" . ".cds_nozero.tbl";
 
@@ -2034,13 +1872,7 @@ sub extractCDSINTRON {
     $my_command    = "egrep -vwf $tempall_intron_zero_list2 $locus_id ";
     my $locusidnozero = capture($my_command); 
     
-    
-    #~ open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $locus_id |" );
-    #~ while (<$fh_LOCID>) {
 
-        #~ $locusidnozero .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $templocus_id_nozero = $species . "$type" . "_locus_id_nozero";
     open( $fh_FOUT, ">", "$templocus_id_nozero" );
@@ -2053,11 +1885,6 @@ sub extractCDSINTRON {
     $my_command = "egrep -vwf $tempall_intron_zero_list2 $gff " ;
     $gffnozero  = capture($my_command);
     
-    #~ open( $fh_LOCID, "egrep -vwf $tempall_intron_zero_list2 $gff |" );
-    #~ while (<$fh_LOCID>) {
-        #~ $gffnozero .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $tempgffnozero = $species . "$type" . ".nozero.gff";
 
@@ -2102,16 +1929,6 @@ sub extractCDSINTRON {
         $my_command = "gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq ";
         @inframe    = capture($my_command);
         
-        #~ open(my $fh_LOCID, "-|",
-#~ "gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq "
-        #~ );
-        #~ while (<$fh_LOCID>) {
-
-            #~ push( @inframe, "$_" );
-
-        #~ }
-
-        #~ close $fh_LOCID;
 
         foreach my $line (@inframe) {
             my (@frame) = split "_", $line;
@@ -2128,20 +1945,11 @@ sub extractCDSINTRON {
         print STDERR
 "\nremove sequences with in-frame stop signals from cds/intron files\n\n";
 
-        
-
-#  open $fh_LOCID, "sed 's/\\(.*\\)\_.*/\\1/g' $inframe_protein | egrep -vf - $tempallcds_nozero |";
-         #my $cdstbl2 = 
+    
          $my_command = "sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $tempallcds_nozero";
          my $cdstbl2 = capture($my_command);
          
-        #~ open( $fh_LOCID, "-|",
-#~ "sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $tempallcds_nozero"
-        #~ );
-        #~ while (<$fh_LOCID>) {
-            #~ $cdstbl2 .= $_;
-        #~ }
-        #~ close $fh_LOCID;
+
 
         my $tempall_cds2 = $species . "$type" . ".cds_filter1.tbl";
 
@@ -2154,14 +1962,7 @@ sub extractCDSINTRON {
         $my_command = "sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive ";
         $introntbl2  = capture($my_command);
         
-        #~ open( $fh_LOCID,
-#~ "sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive |"
-        #~ );
-        #~ while (<$fh_LOCID>) {
 
-            #~ $introntbl2 .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         my $tempall_intron2 = $species . "$type" . ".intron_filter1.tbl";
 
@@ -2169,18 +1970,9 @@ sub extractCDSINTRON {
         print $fh_FOUT "$introntbl2";
         close $fh_FOUT;
 
-        #my $new_locus_id_filter1 = "";
         $my_command = "sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero ";
         my $new_locus_id_filter1  = capture($my_command);
         
-#open $fh_LOCID, "sed 's/\\(.*\\)\_.*/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero |";
-        #~ open( $fh_LOCID, "-|",
-#~ "sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero "
-        #~ );
-        #~ while (<$fh_LOCID>) {
-            #~ $new_locus_id_filter1 .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         my $templocus_id_new2 =
           $species . "$type" . "_locus_id_filter_noinframe";
@@ -2193,13 +1985,6 @@ sub extractCDSINTRON {
         $my_command = "sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $tempgffnozero ";
         my $gffnew  = capture($my_command);
         
-        #~ open( $fh_LOCID, "-|",
-#~ "sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $tempgffnozero "
-        #~ );
-        #~ while (<$fh_LOCID>) {
-            #~ $gffnew .= $_;
-        #~ }
-        #~ close $fh_LOCID;
 
         my $tempnewgff = $species . "$type" . ".noinframe.gff";
 
@@ -2246,14 +2031,14 @@ sub extractprocessSITES {
 
         #  print STDERR "$gene_id $gff $tmp_dir/$gene_id.gff \n\n";
         ## POTENTIAL BUG SPLIT
-` ./bin/SSgff -dabeE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
+` ./bin/SSgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
         foreach my $site (qw(Acceptor Donor Stop Start)) {
 
 #	print STDERR "egrep -A 1 $site $tmp_dir/${gene_id}.all_sites $sitesdir/${site}_sites.fa\n";
 ## POTENTIAL BUG, split command below
 
             run(
-" egrep -A 1 $site $tmp_dir/${gene_id}.all_sites | sed -e '/--/d' -e '/^\$/d' >> $sitesdir/${site}_sites.fa"
+" egrep -A 1 $site $tmp_dir/${gene_id}.all_sites | sed -e '/--/d' -e '/^\$/d' >> $sites_dir/${site}_sites.fa"
             );
         }
         $count++;
@@ -2261,12 +2046,12 @@ sub extractprocessSITES {
     }    #while $fh_LOC_sites
     close $fh_LOC_sites;
 
-    my $accsites = "$sitesdir/Acceptor_sites.fa";
+    my $accsites = "$sites_dir/Acceptor_sites.fa";
 
     #print STDERR "$accsites\n..";
-    my $donsites   = "$sitesdir/Donor_sites.fa";
-    my $startsites = "$sitesdir/Start_sites.fa";
-    my $stopsites  = "$sitesdir/Stop_sites.fa";
+    my $donsites   = "$sites_dir/Donor_sites.fa";
+    my $startsites = "$sites_dir/Start_sites.fa";
+    my $stopsites  = "$sites_dir/Stop_sites.fa";
 
     my $prestarttbl = "Start_sites.tbl";
     $prestarttbl = FastaToTbl( $startsites, $prestarttbl );
@@ -2279,8 +2064,8 @@ sub extractprocessSITES {
 
 ##ADD N TO START SITES############
     ## POTENTIAL BUG
-`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sitesdir/Start_sites_complete.tbl`;
-    my $starttbl = "$sitesdir" . "Start_sites_complete.tbl";
+`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl`;
+    my $starttbl = "$sites_dir" . "Start_sites_complete.tbl";
 #################################
 
     print STDERR "\n\nEliminate non-canonical donors/acceptors/starts:\n";
@@ -2295,12 +2080,6 @@ sub extractprocessSITES {
     $my_command = "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' ";
     my $noncanonical   = capture($my_command);
     
-    #~ open(my $fh_LOCID,
-      #~ "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' |");
-    #~ while (<$fh_LOCID>) {
-        #~ $noncanonical .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $tempdonornoncanonical = $species . "_non_canonical_donor";
     open( my $fh_FOUT, ">", "$tempdonornoncanonical" ) or croak "Failed here";
@@ -2309,9 +2088,6 @@ sub extractprocessSITES {
 
     $totnoncanonical = num_of_lines_in_file($tempdonornoncanonical);
     
-    #$totnoncanonical = ` wc -l $tempdonornoncanonical | gawk '{print \$1}'`;
-    #chomp $totnoncanonical;
-    #$totnoncanonical = int($totnoncanonical);
     print STDERR
 "\nThere are $totnoncanonical non-canonical donors within the training set:\n";
 
@@ -2360,9 +2136,6 @@ sub extractprocessSITES {
 
         $totcanonical = num_of_lines_in_file($tempcanonicaldonor);
 
-        #my $totcanonical = ` wc -l $tempcanonicaldonor | gawk '{print \$1}'`;
-        #chomp $totcanonical;
-        #$totcanonical = int($totcanonical);
         print STDERR
 "\nThere are $totcanonical canonical donors within the training set:\n";
 
@@ -2371,10 +2144,6 @@ sub extractprocessSITES {
     }
     else {    #if there are no non-canonical
         my $totcanonical = num_of_lines_in_file($donortbl);
-
-        #my $totcanonical = ` wc -l $donortbl | gawk '{print \$1}'`;
-        #chomp $totcanonical;
-        #$totcanonical = int($totcanonical);
 
         print STDERR
           "There are $totcanonical canonical donors within the training set:\n";
@@ -2391,7 +2160,13 @@ sub extractprocessSITES {
     $noncanonicalname = "";
     $totcanonical     = "";
     my $newacceptortbl = "";
+    my $foobar_tmp ="";
 
+
+    $my_command      = "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCGn]{28}AG'";
+    # BUG this blows if there are no such sites...
+    #$foobar_tmp = capture($my_command);
+    
     open $fh_LOCID,
       "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCGn]{28}AG' |";
     while (<$fh_LOCID>) {
@@ -2408,9 +2183,6 @@ sub extractprocessSITES {
 
     $totnoncanonical = num_of_lines_in_file($tempacceptornoncanonical);
 
-    #$totnoncanonical = `wc -l $tempacceptornoncanonical | gawk '{print \$1}'`;
-    #chomp $totnoncanonical;
-    #$totnoncanonical = int($totnoncanonical);
     print STDERR
 "\nThere are $totnoncanonical non-canonical acceptors within the training set:\n";
 ###########################
@@ -2458,9 +2230,6 @@ sub extractprocessSITES {
 
         my $totcanonical = num_of_lines_in_file($tempcanonicalacceptor);
 
-       #my $totcanonical = ` wc -l $tempcanonicalacceptor | gawk '{print \$1}'`;
-       #chomp $totcanonical;
-       #$totcanonical = int($totcanonical);
         print STDERR
 "\nThere are $totcanonical canonical acceptors within the training set:\n";
 
@@ -2471,10 +2240,6 @@ sub extractprocessSITES {
     else {    #if there are only canonical use initial file list
         my $totcanonical = num_of_lines_in_file($acceptortbl);
 
-        #my $totcanonical = ` wc -l $acceptortbl | gawk '{print \$1}'`;
-        #my  $totnoncanonical = "";
-        #chomp $totcanonical;
-        #$totcanonical = int($totcanonical);
         print STDERR
 "There are $totcanonical canonical acceptors within the training set:\n";
         push( @newsites, "$acceptortbl" );
@@ -2509,9 +2274,6 @@ sub extractprocessSITES {
 
     $totnoncanonical = num_of_lines_in_file($tempstartnoncanonical);
 
-    #$totnoncanonical = ` wc -l $tempstartnoncanonical | gawk '{print \$1}'`;
-    #chomp $totnoncanonical;
-    #$totnoncanonical = int($totnoncanonical);
     print STDERR
 "\nThere are $totnoncanonical non-canonical starts within the training set:\n";
 ###########################
@@ -2556,9 +2318,7 @@ sub extractprocessSITES {
         #unlink $tempnoncanonicalname;
         my $totcanonical = num_of_lines_in_file($tempcanonicalstart);
 
-        #my $totcanonical = ` wc -l $tempcanonicalstart | gawk '{print \$1}'`;
-        #chomp $totcanonical;
-        #$totcanonical = int($totcanonical);
+
         print STDERR
 "\nThere are $totcanonical canonical starts within the training set:\n";
 
@@ -2569,9 +2329,7 @@ sub extractprocessSITES {
     else {
         my $totcanonical = num_of_lines_in_file($starttbl);
 
-        #my $totcanonical = ` wc -l $starttbl  | gawk '{print \$1}'`;
-        #chomp $totcanonical;
-        #$totcanonical = int($totcanonical);
+
         print STDERR
 "\nThere are $totcanonical canonical starts within the training set:\n";
         push( @newsites, "$starttbl" );
@@ -2746,8 +2504,8 @@ sub processSequences4Optimization {
     print $fh_FOUT "$gff2gp";
     close $fh_FOUT;
     print STDERR
-      "BEFORE GETGENES: $fastasdir,$tempgff2gp,$work_dir/,$outtblname\n";
-    my $pretblgp = GetGenes( $fastasdir, $tempgff2gp, $work_dir, $outtblname );
+      "BEFORE GETGENES: $fastas_dir,$tempgff2gp,$work_dir/,$outtblname\n";
+    my $pretblgp = GetGenes( $fastas_dir, $tempgff2gp, $work_dir, $outtblname );
     print STDERR "PRETBL AFTER GETGENES: $pretblgp \n";
 
     print STDERR
@@ -3441,15 +3199,6 @@ sub extractRealBranches {
     close($fh_BRANCHES);
     close($fh_full_L_BRANCH);
     
-    #~ $my_command = "gawk '{if (\$2 !~ /^N/)print \$1,\$2}' $fullengthbranch";
-    #~ $fullengthbranchmod = capture($my_command);
-     
-    #~ open( my $fh_LOCID,
-        #~ "gawk '{if (\$2 !~ /^N/)print \$1,\$2}' $fullengthbranch |" );
-    #~ while (<$fh_LOCID>) {
-        #~ $fullengthbranchmod .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $fullengthbranches = $species . ".real.full_length_branches.tbl";
     open( my $fh_FOUT, ">", "$fullengthbranches" ) or croak "Failed here";
@@ -4889,15 +4638,6 @@ sub predictPlotgff2ps {
     my $my_command = "./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' ";
     $geneidall     = capture($my_command);
     
-    #~ open(my $fh_LOCID,
-#~ "./bin/geneid -GP $paramopt $gpfa | gawk 'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' | "
-    #~ );
-
-    #~ while (<$fh_LOCID>) {
-        #~ $geneidall .= $_;
-    #~ }
-    #~ close $fh_LOCID;
-
     my $tempgeneidgffpreds = $species . ".geneid.predictions.gff";
     open( my $fh_FOUT, ">", "$tempgeneidgffpreds" ) or croak "Failed here";
     print $fh_FOUT "$geneidall";
@@ -4919,14 +4659,14 @@ sub predictPlotgff2ps {
         }
         if ( !$contigopt ) {
             run(
-" ./bin/gff2ps -v -p -- $tmp_dir$gene_id.gff > $plotsdir/$species.${gene_id}.ps"
+" ./bin/gff2ps -v -p -- $tmp_dir$gene_id.gff > $plots_dir/$species.${gene_id}.ps"
             );
             print STDERR "#";
         }
         elsif ($contigopt) {
             my $nucleotidesperline = 10000;
             run(
-" ./bin/gff2ps -v -p -N $nucleotidesperline -C $work_dir.gff2psrcNEW -- $tmp_dir$gene_id.gff > $plotsdir/$species.gv"
+" ./bin/gff2ps -v -p -N $nucleotidesperline -C $work_dir.gff2psrcNEW -- $tmp_dir$gene_id.gff > $plots_dir/$species.gv"
             );
             print STDERR "#";
         }
@@ -5037,7 +4777,7 @@ sub Translate {
 
     my %gencodeh = ();
     open( my $fh_gencode, "<", "$geneticcode_fn" )
-      // croak "Can't open  $geneticcode_fn";
+     or croak "Can't open  $geneticcode_fn";
     while (<$fh_gencode>) {
 
         my $line = $_;
@@ -5293,3 +5033,20 @@ sub check_external_progs() {
     return 1;
 }
 
+sub create_data_dirs {
+	my $dir_name = shift(@_);
+	say "\ninside create_data_dirs function\n";
+	foreach $dir_name (@_) {
+	    say  "Creating $dir_name directory\n";
+	    if (-d $dir_name) {
+		    say "$dir_name exists. Purge and recreate\n";
+		    rmtree( ["dir_name"] );
+		    } 
+		else {
+            #say "$dir_name does not exist!\n";
+            my $my_command = "mkdir -p $dir_name";
+            run($my_command);
+         }   
+	}
+	return 1;
+	};
