@@ -145,6 +145,19 @@ Readonly::Scalar my $train_sites_markov_cutoff => 5500;
 Readonly::Scalar my $backgrnd_kmer_size        => 62;
 Readonly::Scalar my $backgrnd_kmer_num         => 100000;
 ## End Constant values
+## need to explain or just incorporate Readonly::Scalar
+           #~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
+        #~ || ( $totalcodingbases > 375000 && $totalnoncodingbases > 150000 )
+        #~ || (   $totalnoncodingbases > 35000
+            #~ && $totalcodingbases > ( 25 * $totalnoncodingbases ) )
+
+
+## another numbers from middle of the code.
+    #~ if (
+        #~ !defined @{ $param->isocores }[0]->set_profile(
+            #~ 'Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50,
+            #~ $order, 0, 1, 40, 10, 0, 0, $branchmatrix
+        #~ )
 
 ## PROGRAM SPECIFIC VARIABLES (unordered...)
 
@@ -3680,8 +3693,15 @@ sub OptimizeParameter {
                 }
 
                 $param->writeParam("$species.geneid.param.temp");
-
-` ./bin/geneid -GP ${newparam}.temp $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
+                ###
+                        my $fh_geneid    = File::Temp->new();
+                        my $fname_geneid = $fh_geneid->filename;
+                        print "\ntemp geneid file: $fname_geneid \n";
+                        $my_command = "./bin/geneid -GP ${newparam}.temp $gpfa > $fname_geneid";
+                        run($my_command); 
+                        $my_command = "cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff";     
+                run($my_command);
+#` ./bin/geneid -GP ${newparam}.temp $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
 
                 my @evaluation_output = split " ",
 ` ./bin/evaluation -sta $tmp_dir/Predictions.${newparam}.gff $gpgff | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
