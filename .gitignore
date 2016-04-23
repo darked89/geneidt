@@ -12,4 +12,4 @@ src/c/*/bin
 src/c/pictogram
 
 #dir to temp store debug/fixes/etc.
-./my_scratch
+./my_scratch/*

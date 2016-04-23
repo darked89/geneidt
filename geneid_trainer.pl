@@ -425,40 +425,8 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     TblToFastaFile( $fastas_dir, $temptblcaps );
     print STDERR
 "\n\nConversion of $temptblcaps to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
+write_sizes_from_tbl_fn($temptblcaps);
 
-    opendir( my $dh_fasta_dir, $fastas_dir )
-      || croak "Can't open directory: $!";
-
-    my @files = grep {
-        /^[\w+|\d+]/                # Begins with a character or number
-          && -f "$fastas_dir/$_"    # and is a file
-    } readdir($dh_fasta_dir);
-
-    foreach my $file (@files) {
-
-        #	print STDERR "\nNAME FASTA FILE: $file\n";
-
-        my $fnametable = ${file} . ".tbl";
-        $fnametable =
-          FastaToTbl( ${fastas_dir} . $file, ${fastas_dir} . $fnametable );
-
-        open( my $fh_FLEN, "<", "$fnametable" ) or croak "Failed here";
-        while ( my $line = <$fh_FLEN> ) {
-            my ( $name, $seq ) = split( /\s+/, $line );
-
-            # print STDERR "\$name: $name\n";
-            my $lengfasta = length($seq);
-            open( my $fh_FLEN2, ">", "$fastas_dir/${name}_len" )
-              or croak "Failed here";
-            print $fh_FLEN2 "$name $lengfasta\n";
-            close $fh_FLEN2;
-        }
-        close $fh_FLEN;
-
-        print STDERR "#";
-        unlink $fnametable;
-    }
-    closedir($dh_fasta_dir);
 
     print STDERR "\n";
 #################################################
@@ -468,7 +436,7 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 
     my $filtergff = "";
 
-    $my_command =
+    my $my_command =
 "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff";
     $filtergff = capture($my_command);
 
@@ -4808,6 +4776,53 @@ sub FastaToTbl {
 
 }
 
+
+#~ sub FastaToTbl {
+
+    #~ my ( $in_fa_fn, $out_tbl_fn, $flag ) = @_;
+    #~ say "\n$in_fa_fn, $out_tbl_fn, $flag\n";
+    #~ #fix CAPS & Ns while converting
+    #~ #
+     
+    #~ open( my $fh_IN,   "<", "$in_fa_fn" ) ;
+    #~ open( my $fh_TOUT, ">", "$out_tbl_fn" );
+
+    #~ #print STDERR "$fa INSIDE LOOP\n\n";
+    #~ my $count    = 0;
+    #~ my $sequence = "";
+    #~ while (<$fh_IN>) {
+        #~ chomp;
+        #~ $_ =~ s/\|//;
+        #~ if ( $_ =~ /\>(\S+)/ ) {
+            #~ print $fh_TOUT "\n" if $count > 0;
+            #~ print $fh_TOUT $1 . "\t";
+            #~ $count++;
+        #~ }
+        #~ else {
+			#~ if ($flag eq "genome"){
+				#~ say "here\n";
+				#~ $sequence = uc $_;
+				#~ #$sequence = ~ s/-/N/gi;
+				#~ print $fh_TOUT $_;
+			#~ }
+            #~ else {
+				#~ print $fh_TOUT $_;
+			#~ }
+        #~ }
+    #~ }
+    #~ print $fh_TOUT "\n";
+
+    #~ close $fh_IN;
+    #~ close $fh_TOUT;
+    #~ if ($flag eq "foobar"){
+		#~ my $my_command = "sort --output=$out_tbl_fn $out_tbl_fn";
+		#~ run($my_command);
+	#~ }
+    #~ #return $tblout;
+    #~ return 1;
+
+#~ }
+
 sub Translate {
 
     my ( $geneticcode_fn, $cds_fn, $outprot ) = @_;
@@ -5099,3 +5114,36 @@ sub create_data_dirs {
     }
     return 1;
 }
+
+sub write_sizes_from_tbl_fn {
+
+    my $input_tbl_fn = $_[0];
+    print "calc size for  $input_tbl_fn \n";
+
+    open( my $fh_input, '<', $input_tbl_fn )
+      or croak "Could not open file $input_tbl_fn' $!";
+
+    while ( my $line = <$fh_input> ) {
+        chomp $line;
+
+        #print $line
+        my @f = split / /, $line;
+        my $name = $f[0];
+
+        #print "$name\t"
+        my $seq       = $f[1];
+        my $lengfasta = length($seq);
+
+        #print "$name = $lengfasta\t"
+        my $tmp_out_fn = "$fastas_dir/$name" . "_len";
+
+        #print  " $tmp_out_fn \t" 
+        open( my $fh_out, '>', $tmp_out_fn )
+          or die "Could not open file '$tmp_out_fn' $!";
+        print $fh_out "$name $lengfasta\n";
+        close $fh_out;
+
+    }
+    close $fh_input;
+    return 1;
+}    #end write_sizes_from_tbl_fn
