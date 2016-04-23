@@ -69,19 +69,22 @@ my $interactive = 0;
 my $tenfold     = 0;
 my $gff2ps      = 0;
 
+my $standard_run = 1;    # get rid of !$reduced
+
 ## Get arguments (command line)
 GetOptions(
     'species:s'       => \$species,
     'gff:s'           => \$gff,
     'fastas:s'        => \$fasta,
     'sout|statsout:s' => \$sout,
-    'branch'          => \$branchp,
-    'reduced|red'     => \$reduced,
+
+    #'branch'          => \$branchp,
+    #'reduced|red'     => \$reduced,
 
     #'path|binpath:s'  => \$path,
-    'interactive|i' => \$interactive,
-    'tenfold'       => \$tenfold,
-    'gff2ps'        => \$gff2ps
+    #'interactive|i' => \$interactive,
+    #'tenfold'       => \$tenfold,
+    #'gff2ps'        => \$gff2ps
 );
 my $usage =
 "Usage: $0 -species H.sapiens -gff gffname -fastas fastasname -sout <statsfile_out> -branch -reduced -path <executables_path>\n";
@@ -146,18 +149,17 @@ Readonly::Scalar my $backgrnd_kmer_size        => 62;
 Readonly::Scalar my $backgrnd_kmer_num         => 100000;
 ## End Constant values
 ## need to explain or just incorporate Readonly::Scalar
-           #~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
-        #~ || ( $totalcodingbases > 375000 && $totalnoncodingbases > 150000 )
-        #~ || (   $totalnoncodingbases > 35000
-            #~ && $totalcodingbases > ( 25 * $totalnoncodingbases ) )
-
+#~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
+#~ || ( $totalcodingbases > 375000 && $totalnoncodingbases > 150000 )
+#~ || (   $totalnoncodingbases > 35000
+#~ && $totalcodingbases > ( 25 * $totalnoncodingbases ) )
 
 ## another numbers from middle of the code.
-    #~ if (
-        #~ !defined @{ $param->isocores }[0]->set_profile(
-            #~ 'Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50,
-            #~ $order, 0, 1, 40, 10, 0, 0, $branchmatrix
-        #~ )
+#~ if (
+#~ !defined @{ $param->isocores }[0]->set_profile(
+#~ 'Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50,
+#~ $order, 0, 1, 40, 10, 0, 0, $branchmatrix
+#~ )
 
 ## PROGRAM SPECIFIC VARIABLES (unordered...)
 
@@ -271,6 +273,18 @@ my $statsout = "$stats_dir" . join( '_', @timeData ) . "_$sout";
 open( $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
 print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
 
+###########################################################
+## CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR SHORT VERSION
+########################################
+## CREATE BLANK PARAMETER FILE############
+my $param = Geneid::Param->new($species);
+
+#set isochores to 1
+$param->numIsocores(1);
+$param->isocores( [ Geneid::Isocore->new() ] );
+
+## END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
+
 ########################################
 ## IF THERE IS A MEME BRANCH PROFILE####
 ########################################
@@ -278,32 +292,6 @@ print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
 if ($branchp) {
     branch_start();
 }
-
-sub branch_start {
-    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE
-    $usebranch = 1;
-    do {
-        print STDERR
-"\n\nYou chose to use meme branch profile information in training $species. Please, indicate the name of the meme output file (make sure the file is in the right path) followed by the number of the motif the branch profile and the position(not index) of the branchpoint A (i.e. enter 'meme.txt 2 7' if the meme output file is called meme.txt and the second motif is the one corresponding to the branch profile and the A is at the seventh position)\n";
-        $memeanswer = <ARGV>;
-        chomp $memeanswer;
-    } while ( $memeanswer !~ /^(.+)\s+(\d+)\s+(\d+)$/i );
-
-    $memefile    = $1;
-    $motifnumber = $2;
-    $bp          = $3;
-
-    if ( -e "$memefile" ) {
-        print "File exists and is named: ($memefile) \n\n";
-    }
-    else {
-        print "File does not exist";
-
-        print STDERR $usage and exit;
-
-    }
-    return 1;
-}    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE END
 
 #############################################################
 ## REDUCED/SHORT TRAINING
@@ -313,76 +301,27 @@ if ($reduced) {
     start_reduced();
 }
 
-sub start_reduced {
-    ###reduced/short training starting with PWMs PLUS BACKGROUND
-    $reducedtraining = 1;
-    print STDERR
-"\n\nYou chose to continue the training of $species by assuming the cds, intronic sequences and splice sites have already been extracted... \n\n";
-## XX BUG: we did not store the used variables + subsequent
-## XX BUG: eval $_ is  against the good PERL practice
-
-#open( my $fh_species_VARS, "<", "${species}.variables" )
-#|| die
-#"You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
-#while (<$fh_species_VARS>) {
-#eval $_;
-#}
-#die "can't restore variables from ${species}.variables: $@" if $@;
-#close $fh_species_VARS;
-
-## CREATE A STATS FILE
-    my @timeData = localtime(time);
-
-    #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
-    my $statsout = $stats_dir . join( '_', @timeData ) . "_$sout";
-## OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
-    open( my $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
-
-    if ( !$useallseqs ) {
-        print STDERR
-"\nThe reduced training process will use 80% of the gene-model sequences ($totalseqs4training)/20% will used for posterior evaluation of the newly developed parameter file ($gffseqseval)\n";
-    }
-    else {
-        print STDERR
-"The reduced training process will use ALL of the gene-model sequences ($total_seqs)\n";
-    }
-    if ($jacknifevalidate) {
-        print STDERR
-"\nThe reduced training process will include a 10x cross validation of the accuracy of the new $species parameter file\n";
-    }
-
-    print STDERR
-"\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
-    print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
-    return 1;
-}    #end reduced
-
-#############################################################
-## reduced/short version training starting with PWMs PLUS BACKGROUND#
-#############################################################
-
 ##########################################
 ## FULL TRAINING -MANDATORY FOR THE FIRST TIME GENEID IS TRAINED FOR A GIVEN SPECIES
-if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
+if ( !$reducedtraining ) {
+    normal_run();
+}
 
+sub normal_run {
+
+    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
 ## Convert fasta to tabular format
+
+## Fasta process
+
     print STDERR
       "\nConverting genomics fasta file ($fasta) to tabular format\n";
 
     my $temptbl = $work_dir . $species . ".genomic.tbl";
-
     $temptbl = FastaToTbl( $fasta, $temptbl );
-
-    #my @tabular = split(/\n/, $temptbl);
-
     run("sort -o $temptbl $temptbl");
 
-    # $value = scalar(@tabular) ;
-
-    #chomp $value;
-
     print STDERR "actg to ACTG conversion of input fasta \n";
-
     my $tblcaps = "";
 
     open(
@@ -409,22 +348,23 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     #    $value = scalar(@tabular) ;
     my $my_command = "gawk '{print \$1}' $temptblcaps | sort | uniq | wc -l";
 
-#$value = `gawk '{print \$1}' $temptblcaps | sort | uniq | wc | gawk '{print \$1}'`;
-    $value = capture($my_command);
-    chomp $value;
-    $value = int($value);
+    my $tot_uniq_fasta_seq = capture($my_command);
 
-    print STDERR "\nThe user has provided $value genomic sequences\n";
+    #chomp $value;
+    #$value = int($value);
 
-## store file with number of genomic sequences used in training
-    print $fh_STORV Data::Dumper->Dump( [$value], ['$value'] );
-## store tabular file directory
-    print $fh_STORV Data::Dumper->Dump( [$temptbl], ['$temptbl'] );
-## store CAPPED tabular  file directory
-    print $fh_STORV Data::Dumper->Dump( [$temptblcaps], ['$temptblcaps'] );
-## store fastas dir and plots dir
-    print $fh_STORV Data::Dumper->Dump( [$fastas_dir], ['$fastas_dir'] );
-    print $fh_STORV Data::Dumper->Dump( [$plots_dir],  ['$plots_dir'] );
+    print STDERR
+      "\nThe user has provided $tot_uniq_fasta_seq$ genomic sequences\n";
+
+    #~ ## store file with number of genomic sequences used in training
+    #~ print $fh_STORV Data::Dumper->Dump( [$value], ['$value'] );
+    #~ ## store tabular file directory
+    #~ print $fh_STORV Data::Dumper->Dump( [$temptbl], ['$temptbl'] );
+    #~ ## store CAPPED tabular  file directory
+    #~ print $fh_STORV Data::Dumper->Dump( [$temptblcaps], ['$temptblcaps'] );
+    #~ ## store fastas dir and plots dir
+    #~ print $fh_STORV Data::Dumper->Dump( [$fastas_dir], ['$fastas_dir'] );
+    #~ print $fh_STORV Data::Dumper->Dump( [$plots_dir],  ['$plots_dir'] );
 
 ## place genomic sequences in "fastas_$species" directory
     print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
@@ -438,10 +378,8 @@ if ( !$reducedtraining ) {    #DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE
     TblToFastaFile( $fastas_dir, $temptblcaps );
     print STDERR
 "\n\nConversion of $temptblcaps to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
-write_sizes_from_tbl_fn($temptblcaps);
+    write_sizes_from_tbl_fn($temptblcaps);
 
-
-    print STDERR "\n";
 #################################################
 
 ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
@@ -522,18 +460,7 @@ write_sizes_from_tbl_fn($temptblcaps);
 
 ## DO ONLY FIRST TIME YOU RUN FULL TRAINING PIPELINE IF (!REDUCED TRAINING)
 ## NOT EXECUTED WHEN REDUCED METHOD IS CHOSEN
-
-###########################################################
-## CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR SHORT VERSION
-########################################
-## CREATE BLANK PARAMETER FILE############
-my $param = Geneid::Param->new($species);
-
-#set isochores to 1
-$param->numIsocores(1);
-$param->isocores( [ Geneid::Isocore->new() ] );
-
-## END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
+## XXX
 
 ##############################################
 ## Select subset for training/evaluation###
@@ -758,35 +685,35 @@ if ( !$reducedtraining )
       @{ processSequences4Optimization( $outgff, ".train", 0 ) };
     print STDERR "$gptraingff";
 
-## STORE VARIABLE INFO IN DATA DUMPER###
-    print $fh_STORV Data::Dumper->Dump(
-        [
-            $outcds,              $outintron,       $outlocus_id,
-            $outgff,              $outcdseval,      $outintroneval,
-            $outlocus_id_eval,    $outgffeval,      $inframeeval,
-            $tempgeneidgffsorted, $inframe,         $outdonortbl,
-            $totalnoncandon,      $outacceptortbl,  $totalnoncanacc,
-            $outstarttbl,         $totalnoncansta,  $gptraingff,
-            $gptrainfa,           $gptraintbl,      $gptrainlen,
-            $gptraincontiggff,    $gptraincontigfa, $gptraincontigtbl,
-            $gptraincontiglen
-        ],
-        [
-            '$outcds',           '$outintron',
-            '$outlocus_id',      '$outgff',
-            '$outcdseval',       '$outintroneval',
-            '$outlocus_id_eval', '$outgffeval',
-            '$inframeeval',      '$tempgeneidgffsorted',
-            '$inframe',          '$outdonortbl',
-            '$totalnoncandon',   '$outacceptortbl',
-            '$totalnoncanacc',   '$outstarttbl',
-            '$totalnoncansta',   '$gptraingff',
-            '$gptrainfa',        '$gptraintbl',
-            '$gptrainlen',       '$gptraincontiggff',
-            '$gptraincontigfa',  '$gptraincontigtbl',
-            '$gptraincontiglen'
-        ]
-    );
+    #~ ## STORE VARIABLE INFO IN DATA DUMPER###
+    #~ print $fh_STORV Data::Dumper->Dump(
+    #~ [
+    #~ $outcds,              $outintron,       $outlocus_id,
+    #~ $outgff,              $outcdseval,      $outintroneval,
+    #~ $outlocus_id_eval,    $outgffeval,      $inframeeval,
+    #~ $tempgeneidgffsorted, $inframe,         $outdonortbl,
+    #~ $totalnoncandon,      $outacceptortbl,  $totalnoncanacc,
+    #~ $outstarttbl,         $totalnoncansta,  $gptraingff,
+    #~ $gptrainfa,           $gptraintbl,      $gptrainlen,
+    #~ $gptraincontiggff,    $gptraincontigfa, $gptraincontigtbl,
+    #~ $gptraincontiglen
+    #~ ],
+    #~ [
+    #~ '$outcds',           '$outintron',
+    #~ '$outlocus_id',      '$outgff',
+    #~ '$outcdseval',       '$outintroneval',
+    #~ '$outlocus_id_eval', '$outgffeval',
+    #~ '$inframeeval',      '$tempgeneidgffsorted',
+    #~ '$inframe',          '$outdonortbl',
+    #~ '$totalnoncandon',   '$outacceptortbl',
+    #~ '$totalnoncanacc',   '$outstarttbl',
+    #~ '$totalnoncansta',   '$gptraingff',
+    #~ '$gptrainfa',        '$gptraintbl',
+    #~ '$gptrainlen',       '$gptraincontiggff',
+    #~ '$gptraincontigfa',  '$gptraincontigtbl',
+    #~ '$gptraincontiglen'
+    #~ ]
+    #~ );
 ########################################
 
     #NOT USING ALL SEQS FOR TRAINING/EVALUATION ALSO PROCESS EVAL SEQS
@@ -3694,13 +3621,16 @@ sub OptimizeParameter {
 
                 $param->writeParam("$species.geneid.param.temp");
                 ###
-                        my $fh_geneid    = File::Temp->new();
-                        my $fname_geneid = $fh_geneid->filename;
-                        print "\ntemp geneid file: $fname_geneid \n";
-                        $my_command = "./bin/geneid -GP ${newparam}.temp $gpfa > $fname_geneid";
-                        run($my_command); 
-                        $my_command = "cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff";     
+                my $fh_geneid    = File::Temp->new();
+                my $fname_geneid = $fh_geneid->filename;
+                print "\ntemp geneid file: $fname_geneid \n";
+                $my_command =
+                  "./bin/geneid -GP ${newparam}.temp $gpfa > $fname_geneid";
                 run($my_command);
+                $my_command =
+"cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff";
+                run($my_command);
+
 #` ./bin/geneid -GP ${newparam}.temp $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
 
                 my @evaluation_output = split " ",
@@ -4796,50 +4726,49 @@ sub FastaToTbl {
 
 }
 
-
 #~ sub FastaToTbl {
 
-    #~ my ( $in_fa_fn, $out_tbl_fn, $flag ) = @_;
-    #~ say "\n$in_fa_fn, $out_tbl_fn, $flag\n";
-    #~ #fix CAPS & Ns while converting
-    #~ #
-     
-    #~ open( my $fh_IN,   "<", "$in_fa_fn" ) ;
-    #~ open( my $fh_TOUT, ">", "$out_tbl_fn" );
+#~ my ( $in_fa_fn, $out_tbl_fn, $flag ) = @_;
+#~ say "\n$in_fa_fn, $out_tbl_fn, $flag\n";
+#~ #fix CAPS & Ns while converting
+#~ #
 
-    #~ #print STDERR "$fa INSIDE LOOP\n\n";
-    #~ my $count    = 0;
-    #~ my $sequence = "";
-    #~ while (<$fh_IN>) {
-        #~ chomp;
-        #~ $_ =~ s/\|//;
-        #~ if ( $_ =~ /\>(\S+)/ ) {
-            #~ print $fh_TOUT "\n" if $count > 0;
-            #~ print $fh_TOUT $1 . "\t";
-            #~ $count++;
-        #~ }
-        #~ else {
-			#~ if ($flag eq "genome"){
-				#~ say "here\n";
-				#~ $sequence = uc $_;
-				#~ #$sequence = ~ s/-/N/gi;
-				#~ print $fh_TOUT $_;
-			#~ }
-            #~ else {
-				#~ print $fh_TOUT $_;
-			#~ }
-        #~ }
-    #~ }
-    #~ print $fh_TOUT "\n";
+#~ open( my $fh_IN,   "<", "$in_fa_fn" ) ;
+#~ open( my $fh_TOUT, ">", "$out_tbl_fn" );
 
-    #~ close $fh_IN;
-    #~ close $fh_TOUT;
-    #~ if ($flag eq "foobar"){
-		#~ my $my_command = "sort --output=$out_tbl_fn $out_tbl_fn";
-		#~ run($my_command);
-	#~ }
-    #~ #return $tblout;
-    #~ return 1;
+#~ #print STDERR "$fa INSIDE LOOP\n\n";
+#~ my $count    = 0;
+#~ my $sequence = "";
+#~ while (<$fh_IN>) {
+#~ chomp;
+#~ $_ =~ s/\|//;
+#~ if ( $_ =~ /\>(\S+)/ ) {
+#~ print $fh_TOUT "\n" if $count > 0;
+#~ print $fh_TOUT $1 . "\t";
+#~ $count++;
+#~ }
+#~ else {
+#~ if ($flag eq "genome"){
+#~ say "here\n";
+#~ $sequence = uc $_;
+#~ #$sequence = ~ s/-/N/gi;
+#~ print $fh_TOUT $_;
+#~ }
+#~ else {
+#~ print $fh_TOUT $_;
+#~ }
+#~ }
+#~ }
+#~ print $fh_TOUT "\n";
+
+#~ close $fh_IN;
+#~ close $fh_TOUT;
+#~ if ($flag eq "foobar"){
+#~ my $my_command = "sort --output=$out_tbl_fn $out_tbl_fn";
+#~ run($my_command);
+#~ }
+#~ #return $tblout;
+#~ return 1;
 
 #~ }
 
@@ -5157,7 +5086,7 @@ sub write_sizes_from_tbl_fn {
         #print "$name = $lengfasta\t"
         my $tmp_out_fn = "$fastas_dir/$name" . "_len";
 
-        #print  " $tmp_out_fn \t" 
+        #print  " $tmp_out_fn \t"
         open( my $fh_out, '>', $tmp_out_fn )
           or die "Could not open file '$tmp_out_fn' $!";
         print $fh_out "$name $lengfasta\n";
@@ -5167,3 +5096,78 @@ sub write_sizes_from_tbl_fn {
     close $fh_input;
     return 1;
 }    #end write_sizes_from_tbl_fn
+
+## extracted from main flow
+sub branch_start {
+    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE
+    $usebranch = 1;
+    do {
+        print STDERR
+"\n\nYou chose to use meme branch profile information in training $species. Please, indicate the name of the meme output file (make sure the file is in the right path) followed by the number of the motif the branch profile and the position(not index) of the branchpoint A (i.e. enter 'meme.txt 2 7' if the meme output file is called meme.txt and the second motif is the one corresponding to the branch profile and the A is at the seventh position)\n";
+        $memeanswer = <ARGV>;
+        chomp $memeanswer;
+    } while ( $memeanswer !~ /^(.+)\s+(\d+)\s+(\d+)$/i );
+
+    $memefile    = $1;
+    $motifnumber = $2;
+    $bp          = $3;
+
+    if ( -e "$memefile" ) {
+        print "File exists and is named: ($memefile) \n\n";
+    }
+    else {
+        print "File does not exist";
+
+        print STDERR $usage and exit;
+
+    }
+    return 1;
+}    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE END
+
+sub start_reduced {
+#############################################################
+## reduced/short version training starting with PWMs PLUS BACKGROUND#
+#############################################################
+    ###reduced/short training starting with PWMs PLUS BACKGROUND
+    $reducedtraining = 1;
+    print STDERR
+"\n\nYou chose to continue the training of $species by assuming the cds, intronic sequences and splice sites have already been extracted... \n\n";
+## XX BUG: we did not store the used variables + subsequent
+## XX BUG: eval $_ is  against the good PERL practice
+
+#open( my $fh_species_VARS, "<", "${species}.variables" )
+#|| die
+#"You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
+#while (<$fh_species_VARS>) {
+#eval $_;
+#}
+#die "can't restore variables from ${species}.variables: $@" if $@;
+#close $fh_species_VARS;
+
+## CREATE A STATS FILE
+    my @timeData = localtime(time);
+
+    #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
+    my $statsout = $stats_dir . join( '_', @timeData ) . "_$sout";
+## OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
+    open( my $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
+
+    if ( !$useallseqs ) {
+        print STDERR
+"\nThe reduced training process will use 80% of the gene-model sequences ($totalseqs4training)/20% will used for posterior evaluation of the newly developed parameter file ($gffseqseval)\n";
+    }
+    else {
+        print STDERR
+"The reduced training process will use ALL of the gene-model sequences ($total_seqs)\n";
+    }
+    if ($jacknifevalidate) {
+        print STDERR
+"\nThe reduced training process will include a 10x cross validation of the accuracy of the new $species parameter file\n";
+    }
+
+    print STDERR
+"\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
+    print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
+    return 1;
+}    #end reduced
+
