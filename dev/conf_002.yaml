@@ -1,0 +1,51 @@
+---
+#input files
+genome_fasta : Hsap_BTK.fa
+
+gff:
+    genes_fn    : Hsap_BTK.gff
+    col3_vals    : [First, Internal, Single, Terminal]
+    col9_transc_id    : True
+    int_values : [start, end]
+
+foo : 1
+GTF_HEADER  : [seqname, source, feature, start, end, score, strand, frame, transcript_id]
+
+#genetic_code
+
+
+
+#values from gi_trainer
+#pre_ATG       : 30
+#post_ATG      : 27 # error?
+
+
+
+
+#donor/acceptor/start values
+#it means: 30bp before an end of exon + 30bp after the end
+donor_offset  : 30
+#it means: 30bp before start of exon + 30bp after the start
+accptr_offset : 30
+#it means: 30bp before start of ATG + 30bp including A of ATG (error?)
+start_offset  : 30
+
+MIN_NO_DONOR_SITES : 1400
+MIN_NO_ACCPT_SITES : 1400
+
+
+#some bad number? MIN_START_SITES_LIMIT = 5500;
+
+
+#values from CEGMA
+MIN_CDS      : 100
+MAX_CDS      : 10000
+MIN_INTRON   : 35
+MAX_INTRON   : 100000
+MIN_EXON     : 16
+MAX_EXON     : 10000
+SPLICE_DONOR : GT
+SPLICE_ACCPT : AG
+start_codon  : ATG
+stop_codons  : [TAG,TAA,TGA]
+...
