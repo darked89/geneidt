@@ -9,6 +9,12 @@ from math import log
 bckg_freq_fn = sys.argv[1]
 true_freq_fn = sys.argv[2]
 
+
+#print "## from information.py: "
+#print "## input args1: bckg_freq_fn", bckg_freq_fn
+#print "## input arg12: true_freq_fn", true_freq_fn 
+
+
 trueseq_dict = {}
 bckgseq_dict = {}
 

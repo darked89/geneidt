@@ -752,3 +752,115 @@ sub runJacknife {
 
 }    #SUB JACKNIFE
 
+
+sub start_reduced {
+#############################################################
+## reduced/short version training starting with PWMs PLUS BACKGROUND#
+#############################################################
+    ###reduced/short training starting with PWMs PLUS BACKGROUND
+    $reducedtraining = 1;
+    print STDERR
+"\n\nYou chose to continue the training of $species by assuming the cds, intronic sequences and splice sites have already been extracted... \n\n";
+## XX BUG: we did not store the used variables + subsequent
+## XX BUG: eval $_ is  against the good PERL practice
+
+#open( my $fh_species_VARS, "<", "${species}.variables" )
+#|| die
+#"You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
+#while (<$fh_species_VARS>) {
+#eval $_;
+#}
+#die "can't restore variables from ${species}.variables: $@" if $@;
+#close $fh_species_VARS;
+
+## CREATE A STATS FILE
+    my @timeData = localtime(time);
+
+    #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
+    my $statsout = $stats_dir . join( '_', @timeData ) . "_$sout";
+## OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
+    open( my $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
+
+    if ( !$useallseqs ) {
+        print STDERR
+"\nThe reduced training process will use 80% of the gene-model sequences ($totalseqs4training)/20% will used for posterior evaluation of the newly developed parameter file ($gffseqseval)\n";
+    }
+    else {
+        print STDERR
+"The reduced training process will use ALL of the gene-model sequences ($total_seqs)\n";
+    }
+    if ($jacknifevalidate) {
+        print STDERR
+"\nThe reduced training process will include a 10x cross validation of the accuracy of the new $species parameter file\n";
+    }
+
+    print STDERR
+"\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
+    print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
+    return 1;
+}    #end reduced
+
+
+sub refactor_branch_sub {
+
+        #print STDERR "\nCHECK: begin to process branch\n";
+        $fullengthbranchtbl =
+          processBranch( $memefile, $motifnumber, $outintron );
+
+#########
+## get branch site statistics
+#########
+
+        $order = "0";
+
+        $numbersites = num_of_lines_in_file($fullengthbranchtbl);
+
+        my $braoffset = "32"
+          ; #before the A (branch) (33)minus 1 for offset) ####CHANGE TO 26 for it to work with meme.txt of V. dahliae introns...
+
+        print STDERR
+"\nThere are $numbersites branch sites, enough for a matrix of order $order, offset: $braoffset \n";
+
+        (
+            $branchmatrix, $prof_len_bra, $fxdbraoffset,
+            $startbranch,  $endbranch
+          )
+          = getKmatrix( $fullengthbranchtbl, $bckgrnd, $order, $braoffset, 0,
+            0, 0, 1, 0, 0, 0 );
+
+## write to parameter file
+        if (
+            !defined @{ $param->isocores }[0]->set_profile(
+                'Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50,
+                $order, 0, 1, 40, 10, 0, 0, $branchmatrix
+            )
+          )
+        {
+            croak "error in setting profile\n";
+        }
+
+        my $brasub = "";
+
+#print STDERR "gawk '{print  substr(\$2,($startstart-3),($prof_len_don+6))}' $outstarttbl\n";
+        $my_command =
+"gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl ";
+        $brasub = capture($my_command);
+
+
+        $branchsubprofile = $work_dir . $species . ".bra.sub.profile";
+        open( my $fh_FOUT, ">", "$branchsubprofile" ) or croak "Failed here";
+        print $fh_FOUT "$brasub";
+        close $fh_FOUT;
+
+ #print STDERR "$path/pictogram $startsubprofile $statsdir/Start -bits -land\n";
+## BUG?
+#    run("./bin/pictogram $branchsubprofile ./statistics_${species}/Branch -bits -land");
+        $my_command =
+"./bin/pictogram $branchsubprofile $plots_dir/branch_profile.pictogram -bits -land";
+        print "\n$my_command\n";
+        run($my_command);
+
+        #unlink $branchsubprofile;
+        return 1;
+
+    } #  refactor use branch

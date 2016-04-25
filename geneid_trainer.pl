@@ -102,8 +102,12 @@ print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
 #~ run("mkdir -p $tmp_dir;");
 
 #create_work_dirs();
-my $work_dir = "$PROGRAM_HOME/workdir_00_gtrain/";
-my $tmp_dir  = "$work_dir/temp_00/";
+
+#my $work_dir = "$PROGRAM_HOME/workdir_00_gtrain/";
+## NEW changing to relative directory address
+my $work_dir = "./workdir_00_gtrain/";
+
+my $tmp_dir = "$work_dir/temp_00/";
 
 #my $TMP         = "$work_dir/tmp/";
 #my $stats_dir   = "$work_dir/stats/";
@@ -145,8 +149,10 @@ Readonly::Scalar my $train_loci_cutoff         => 500;
 Readonly::Scalar my $train_sites_cutoff        => 1400;
 Readonly::Scalar my $train_sites_cutoff_alt    => 1200;  # changed in some part?
 Readonly::Scalar my $train_sites_markov_cutoff => 5500;
-Readonly::Scalar my $backgrnd_kmer_size        => 62;
-Readonly::Scalar my $backgrnd_kmer_num         => 100000;
+## BUG : extracted donor/acceptor/start all are 60bp in size at this point
+#Readonly::Scalar my $backgrnd_kmer_size        => 62;
+Readonly::Scalar my $backgrnd_kmer_size => 60;
+Readonly::Scalar my $backgrnd_kmer_num  => 100000;
 ## End Constant values
 ## need to explain or just incorporate Readonly::Scalar
 #~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
@@ -582,16 +588,19 @@ sub normal_run {
 
 ####LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
 
-    else {    # seqs < 500
-        $jacknifevalidate = 1;
-##ALWAYS USE ALL SEQS IF USER PROVIDES FEWER THAN 500 SEQS
-        $useallseqs = 1;
+    else {    # seqs < $train_loci_cutoff
+        ## BUG we do not do jacknife anyway here
+        croak "we do not have >= $train_loci_cutoff sequences, quitting now";
 
-###STORE INFORMATION AS TO WHETHER WE WOULD LIKE TO RUN JACKNIFE AND THAT SEQS WERE NOT set aside for eval $useallseqs=1 <500 seqs
-        print $fh_STORV Data::Dumper->Dump(
-            [ $jacknifevalidate,   $useallseqs ],
-            [ '$jacknifevalidate', '$useallseqs' ]
-        );
+        #~ $jacknifevalidate = 1;
+        #~ ##ALWAYS USE ALL SEQS IF USER PROVIDES FEWER THAN 500 SEQS
+        #~ $useallseqs = 1;
+
+#~ ###STORE INFORMATION AS TO WHETHER WE WOULD LIKE TO RUN JACKNIFE AND THAT SEQS WERE NOT set aside for eval $useallseqs=1 <500 seqs
+#~ print $fh_STORV Data::Dumper->Dump(
+#~ [ $jacknifevalidate,   $useallseqs ],
+#~ [ '$jacknifevalidate', '$useallseqs' ]
+#~ );
 
     }    # seqs < 500
 
@@ -977,87 +986,12 @@ sub normal_run {
 
     #unlink $startsubprofile;
 
-## OPTIONAL BRANCH STATS (FUNGI NORMALLY, AFTER RUNNING MEME)
-    if ($usebranch) {
-    }
+#~ ## OPTIONAL BRANCH STATS (FUNGI NORMALLY, AFTER RUNNING MEME)
+    #~ if ($usebranch) {
+		#~ refactor_branch_sub();
+    #~ }
 
-    sub dk_branch_sub {
-
-        #print STDERR "\nCHECK: begin to process branch\n";
-        $fullengthbranchtbl =
-          processBranch( $memefile, $motifnumber, $outintron );
-
-#########
-## get branch site statistics
-#########
-
-        $order = "0";
-
-        $numbersites = num_of_lines_in_file($fullengthbranchtbl);
-
-        #$numbersites = `wc -l $fullengthbranchtbl | gawk '{print \$1}'`;
-        #chomp $numbersites;
-        #$numbersites = int($numbersites);
-        my $braoffset = "32"
-          ; #before the A (branch) (33)minus 1 for offset) ####CHANGE TO 26 for it to work with meme.txt of V. dahliae introns...
-
-        print STDERR
-"\nThere are $numbersites branch sites, enough for a matrix of order $order, offset: $braoffset \n";
-
-        (
-            $branchmatrix, $prof_len_bra, $fxdbraoffset,
-            $startbranch,  $endbranch
-          )
-          = getKmatrix( $fullengthbranchtbl, $bckgrnd, $order, $braoffset, 0,
-            0, 0, 1, 0, 0, 0 );
-
-## write to parameter file
-        if (
-            !defined @{ $param->isocores }[0]->set_profile(
-                'Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50,
-                $order, 0, 1, 40, 10, 0, 0, $branchmatrix
-            )
-          )
-        {
-            croak "error in setting profile\n";
-        }
-#############################
-
-        my $brasub = "";
-
-#print STDERR "gawk '{print  substr(\$2,($startstart-3),($prof_len_don+6))}' $outstarttbl\n";
-        $my_command =
-"gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl ";
-        $brasub = capture($my_command);
-
-#~ open $fh_LOCID,
-#~ "gawk '{print  substr(\$2,($startbranch-3),($prof_len_bra+6))}' $fullengthbranchtbl |";
-#~ while (<$fh_LOCID>) {
-#~ $brasub .= $_;
-#~ }
-#~ close $fh_LOCID;
-
-        $branchsubprofile = $work_dir . $species . ".bra.sub.profile";
-        open( my $fh_FOUT, ">", "$branchsubprofile" ) or croak "Failed here";
-        print $fh_FOUT "$brasub";
-        close $fh_FOUT;
-
- #print STDERR "$path/pictogram $startsubprofile $statsdir/Start -bits -land\n";
-## BUG?
-#    run("./bin/pictogram $branchsubprofile ./statistics_${species}/Branch -bits -land");
-        $my_command =
-"./bin/pictogram $branchsubprofile $plots_dir/branch_profile.pictogram -bits -land";
-        print "\n$my_command\n";
-        run($my_command);
-
-        #unlink $branchsubprofile;
-        return 1;
-
-    }
-
-    # dk use branch
-
-## NO BRANCH AGAIN
+#~ ## NO BRANCH AGAIN
 
 ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -1130,8 +1064,8 @@ my $newparam = "$species.geneid.param";
 ##############################################
 #if ( !$reducedtraining )
 
-print STDERR
-  "\nCHECK: use all sequences ?: $useallseqs\njacknife ?: $jacknifevalidate\n";
+#~ print STDERR
+#~ "\nCHECK: use all sequences ?: $useallseqs\njacknife ?: $jacknifevalidate\n";
 
 ##############################################
 ## CALL SUBS:
@@ -1146,6 +1080,8 @@ print STDERR
 ################################
 
 print STDERR "\nOptimizing new parameter file\n\n";
+
+## BUG we run non interactive here
 
 my $opttype = "";
 if ($interactive) {
@@ -1756,7 +1692,7 @@ sub extractprocessSITES {
     my $fh_LOCID;
 
 ## SPLICE SITES
-    print STDERR "\nEXTRACT START AND SPLICE SITES\n\n";
+    print STDERR "\nEXTRACT START AND SPLICE SITES from transcripts\n\n";
 
     #print STDERR "$locus_id and $gff\n";
     my @newsites = ();
@@ -1771,7 +1707,11 @@ sub extractprocessSITES {
 
         #  print STDERR "$gene_id $gff $tmp_dir/$gene_id.gff \n\n";
         ## POTENTIAL BUG SPLIT
-` ./bin/ssgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
+        my $my_command =
+"./bin/ssgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites";
+        run($my_command);
+
+#   ` ./bin/ssgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
         foreach my $site (qw(Acceptor Donor Stop Start)) {
 
 #	print STDERR "egrep -A 1 $site $tmp_dir/${gene_id}.all_sites $sitesdir/${site}_sites.fa\n";
@@ -1782,7 +1722,7 @@ sub extractprocessSITES {
             );
         }
         $count++;
-        print STDERR "site $count..";
+        print STDERR "transc $count..";
     }    #while $fh_LOC_sites
     close $fh_LOC_sites;
 
@@ -1804,7 +1744,11 @@ sub extractprocessSITES {
 
 ##ADD N TO START SITES############
     ## POTENTIAL BUG
-`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl`;
+    my $my_command =
+"gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl";
+    run($my_command);
+
+#`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl`;
     my $starttbl = "$sites_dir" . "Start_sites_complete.tbl";
 #################################
 
@@ -1817,8 +1761,7 @@ sub extractprocessSITES {
     my $totcanonical     = "";
     my $newdonortbl      = "";
 
-    my $my_command =
-      "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' ";
+    $my_command = "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' ";
     my $noncanonical = capture($my_command);
 
     my $tempdonornoncanonical = $work_dir . $species . "_non_canonical_donor";
@@ -2092,12 +2035,16 @@ sub deriveCodingPotential {
     my $markov  = "";
     my $markovm = "";
 
-    my $totalcodingbases =
-      ` gawk '{ l=length(\$2); L+=l;} END{ print L;}' $cds `;
+    my $my_command = "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $cds";
+    my $totalcodingbases = capture($my_command);
+    
+      #~ ` gawk '{ l=length(\$2); L+=l;} END{ print L;}' $cds `;
     chomp $totalcodingbases;
-
-    my $totalnoncodingbases =
-      ` gawk '{ l=length(\$2); L+=l;} END{ print L;}' $intron `;
+    
+    $my_command = "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $intron ";
+    my $totalnoncodingbases = capture($my_command);
+    
+      #~ ` gawk '{ l=length(\$2); L+=l;} END{ print L;}' $intron `;
     chomp $totalnoncodingbases;
 
     print STDERR
@@ -2233,7 +2180,9 @@ sub processSequences4Optimization {
     my $gff2gp     = "";
     my $fastagp    = "";
     my $gffgp      = "";
-
+    my $my_command = "";
+    #my $work_dir;
+    
     open( my $fh_LOCID, "./bin/gff2gp.awk $gff | sort -k 1 |" );
     while (<$fh_LOCID>) {
 
@@ -2253,10 +2202,15 @@ sub processSequences4Optimization {
 
     print STDERR
 "\nGet sequences of 400-nt flanked sequences in tabular and gff formats\n";
+    #~ my $seq4Optimization_temp_1_fn =  "$work_dir/processSequences4Optimization_temp1.txt";
+    #~ $my_command =  "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $pretblgp > $seq4Optimization_temp_1_fn";
+    #~ run($my_command);
+    #~ $my_command =  "sort seq4Optimization_temp_1_fn | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |";
+    #open( $fh_LOCID, $my_command );     
+    open( $fh_LOCID, 
+ "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $pretblgp | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |"
+   );
 
-    open( $fh_LOCID,
-"gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $pretblgp | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |"
-    );
     while (<$fh_LOCID>) {
         $tblgp .= $_;
     }
@@ -2292,7 +2246,7 @@ sub processSequences4Optimization {
     unlink $pretblgp;
 
     print STDERR "\nSet up files for optimization\n\n";
-
+ 
     my $seqslenggp =
       ` gawk '{print \$1,length(\$2)}' $tempgp_tbl | sort -k1,1 `;    ##XX
 
@@ -2755,13 +2709,29 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 
 ## GETKMATRIX FUNCTION (Splice site an Start codon PWMs)
 sub getKmatrix {
-
+    ## BUG do not relay on  jacknife/branch etc. use some: type ??
     #was my our?
     my (
         $true_seqs, $false_seqs, $order, $offset,
-        $donor,     $accept,     $star,  $branch,
+        $donor,     $accept,     $ATG,   $branch,
         $start,     $end,        $jacknife
     ) = @_;
+
+    my $matrix_type = "";
+    if ($donor) {
+        $matrix_type = 'donor';
+    }
+    if ($accept) {
+        $matrix_type = 'acceptor';
+    }
+
+    if ($ATG) {
+        $matrix_type = 'ATG';
+    }
+
+    if ($branch) {
+        $matrix_type = 'branch';
+    }
     my $original_offset = $offset;
     my @prof            = ();
     my $tempinfolog;
@@ -2816,24 +2786,35 @@ sub getKmatrix {
 
     my $my_freq_field_limit_1 = 0;
     my $my_freq_field_limit_2 = 0;
-    if ($donor) {
-        $my_freq_field_limit_1 = 38;
-        $my_freq_field_limit_2 = 25;
-    }
-    if ($accept) {
-        $my_freq_field_limit_1 = 33;
-        $my_freq_field_limit_2 = 2;    ### BUG !!! ???
-    }
 
-    if ($star) {
-        $my_freq_field_limit_1 = 37;
-        $my_freq_field_limit_2 = 25;
-    }
+    my %frequency_thresholds = (
+        donor    => [ 38, 25 ],
+        acceptor => [ 33, 2 ],
+        ATG      => [ 37, 25 ],
+        branch   => [ 41, 28 ],
+    );
 
-    if ($branch) {
-        $my_freq_field_limit_1 = 41;
-        $my_freq_field_limit_2 = 28;
-    }
+    $my_freq_field_limit_1 = $frequency_thresholds{$matrix_type}[0];
+    $my_freq_field_limit_2 = $frequency_thresholds{$matrix_type}[1];
+
+    #~ if ($donor) {
+    #~ $my_freq_field_limit_1 = 38;
+    #~ $my_freq_field_limit_2 = 25;
+    #~ }
+    #~ if ($accept) {
+    #~ $my_freq_field_limit_1 = 33;
+    #~ $my_freq_field_limit_2 = 2;    ### BUG !!! ???
+    #~ }
+
+    #~ if ($star) {
+    #~ $my_freq_field_limit_1 = 37;
+    #~ $my_freq_field_limit_2 = 25;
+    #~ }
+
+    #~ if ($branch) {
+    #~ $my_freq_field_limit_1 = 41;
+    #~ $my_freq_field_limit_2 = 28;
+    #~ }
     my $my_command_A =
       "./bin/information.py  $true_seq_freq_fn $false_seq_freq_fn  | ";
     my $my_command_B =
@@ -2913,38 +2894,52 @@ sub getKmatrix {
         return ( $start, $end );
     };    #end BitScoreGraph
 
-    if ( !$jacknife ) {
-        print STDERR "Information content profile\n";
-    }
+    ## TODO simplify
 
-    if ( $donor && !$jacknife ) {
+    $jacknife = 0;
 
-        $info_thresh = "0.15";
+    #~ if ( !$jacknife ) {
+    #~ print STDERR "Information content profile\n";
+    #~ }
 
-        ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
+    my %info_thresholds = (
+        'donor'    => 0.15,
+        'acceptor' => 0.04,
+        'ATG'      => 0.15,
+        'branch'   => 0.30,
+    );
+    $info_thresh = $info_thresholds{$matrix_type};
+    say "\n matrix sub: $matrix_type, $info_thresh \n";
+    ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
 
-    }
-    elsif ( $accept && !$jacknife ) {
+    #~ if ( $donor && !$jacknife ) {
 
-        $info_thresh = "0.04";
+    #~ $info_thresh = "0.15";
 
-        ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
+    #~ ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
 
-    }
-    elsif ( $star && !$jacknife ) {
+    #~ }
+    #~ elsif ( $accept && !$jacknife ) {
 
-        $info_thresh = "0.15";
+    #~ $info_thresh = "0.04";
 
-        ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
+    #~ ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
 
-    }
-    elsif ( $branch && !$jacknife ) {
+    #~ }
+    #~ elsif ( $star && !$jacknife ) {
 
-        $info_thresh = "0.3";
+    #~ $info_thresh = "0.15";
 
-        ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
+    #~ ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
 
-    }
+    #~ }
+    #~ elsif ( $branch && !$jacknife ) {
+
+    #~ $info_thresh = "0.3";
+
+    #~ ( $start, $end ) = BitScoreGraph( $tempinfolog, $info_thresh, $offset );
+
+    #~ }
 
     if ( !$jacknife && $interactive ) {
         my $resp  = "";
@@ -3027,7 +3022,7 @@ sub getKmatrix {
 #	  print STDERR "submatrix.awk $start $end $true_seq_name-log.$ordname-matrix/$my_True_dimatrixdonor_4param_fn";
 
     }
-    elsif ( $order >= 2 && $star ) {
+    elsif ( $order >= 2 && $ATG ) {
 
         my $preoffset = $offset - 2;
         my $newoffset = $offset - 1;
@@ -3662,7 +3657,7 @@ sub WriteStatsFile {
     #print STDERR "intron: $meangci $stgci\n";
     #BUG?
     #my $totexons = ` gawk '{print \$9}' $outgff | wc -l | gawk '{print \$1}' `;
-    
+
     my $totexons = ` gawk '{print \$9}' $outgff | wc -l `;
 
     chomp $totexons;
@@ -4243,6 +4238,7 @@ sub check_external_progs() {
 }
 
 sub create_data_dirs {
+
     #my $dir_name = shift(@_);
     say "\ninside create_data_dirs function\n";
     ## check if not a bug XXX
@@ -4325,46 +4321,7 @@ sub start_reduced {
 #############################################################
 ## reduced/short version training starting with PWMs PLUS BACKGROUND#
 #############################################################
-    ###reduced/short training starting with PWMs PLUS BACKGROUND
-    $reducedtraining = 1;
-    print STDERR
-"\n\nYou chose to continue the training of $species by assuming the cds, intronic sequences and splice sites have already been extracted... \n\n";
-## XX BUG: we did not store the used variables + subsequent
-## XX BUG: eval $_ is  against the good PERL practice
-
-#open( my $fh_species_VARS, "<", "${species}.variables" )
-#|| die
-#"You need to have run the training program once previously to execute the reduced version of the geneid training program \n";
-#while (<$fh_species_VARS>) {
-#eval $_;
-#}
-#die "can't restore variables from ${species}.variables: $@" if $@;
-#close $fh_species_VARS;
-
-## CREATE A STATS FILE
-    my @timeData = localtime(time);
-
-    #STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
-    my $statsout = $stats_dir . join( '_', @timeData ) . "_$sout";
-## OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
-    open( my $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
-
-    if ( !$useallseqs ) {
-        print STDERR
-"\nThe reduced training process will use 80% of the gene-model sequences ($totalseqs4training)/20% will used for posterior evaluation of the newly developed parameter file ($gffseqseval)\n";
-    }
-    else {
-        print STDERR
-"The reduced training process will use ALL of the gene-model sequences ($total_seqs)\n";
-    }
-    if ($jacknifevalidate) {
-        print STDERR
-"\nThe reduced training process will include a 10x cross validation of the accuracy of the new $species parameter file\n";
-    }
-
-    print STDERR
-"\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
-    print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
+    croak "no reduced training option in the simplified script";
     return 1;
 }    #end reduced
 
@@ -4375,7 +4332,8 @@ sub getBackground {
     #my $fasta = $f;
     #my $tbl = "";
     my $countlines = 0;
-    my $totalseqs = num_of_lines_in_file($fasta);
+    my $totalseqs  = num_of_lines_in_file($fasta);
+
     #my $totalseqs  = `egrep -c \"^>\" $fasta`;
     #chomp $totalseqs;
 
@@ -4433,3 +4391,5 @@ sub getBackground {
     #return $background;
 
 }    # END getbackground function
+
+
