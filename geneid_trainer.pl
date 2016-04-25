@@ -4193,7 +4193,7 @@ sub sortevalbranch {
 sub num_of_lines_in_file {
     my $input_fn = $_[0];
     my $my_num_lines;
-    $my_num_lines = capture(cat $input_fn | wc -l);
+    $my_num_lines = capture("cat $input_fn | wc -l");
 
     #assert No such file or directory #
     chomp $my_num_lines;
@@ -4375,7 +4375,7 @@ sub getBackground {
     #my $fasta = $f;
     #my $tbl = "";
     my $countlines = 0;
-    $totalseqs = num_of_lines_in_file($fasta);
+    my $totalseqs = num_of_lines_in_file($fasta);
     #my $totalseqs  = `egrep -c \"^>\" $fasta`;
     #chomp $totalseqs;
 
