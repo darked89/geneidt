@@ -7,9 +7,11 @@ bin/evaluation
 bin/geneid
 
 #C programs sourcecode
-src/c/*/objects
-src/c/*/bin
-src/c/pictogram
+src/c/*/objects/*
+src/c/*/bin/*
+src/c/pictogram/pictogram
 
 #dir to temp store debug/fixes/etc.
 ./my_scratch/*
+
+*.o

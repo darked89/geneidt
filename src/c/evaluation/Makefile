@@ -7,12 +7,12 @@ HEADERS = $(INCLUDE)/evaluation.h
 PROGRAM= evaluation
 PRODUCT= bin/$(PROGRAM)
 CC= gcc 
-#OPTS=-I$(INCLUDE) -Wall 
+OPTS=-I$(INCLUDE) -Wall 
 
 #scan-build make 
 #CC= clang
 #OPTS=-I$(INCLUDE) -Wall -Wextra -gdwarf-2 -g3 -ggdb
-OPTS=-I$(INCLUDE) -std=c11 -gdwarf-2 -g2 -Wpedantic -Wall -Wextra  -Wshadow -Wstrict-overflow -fno-strict-aliasing  
+#OPTS=-I$(INCLUDE) -std=c11 -gdwarf-2 -g2 -Wpedantic -Wall -Wextra  -Wshadow -Wstrict-overflow -fno-strict-aliasing  
 #-Wduplicated-cond 
 
 

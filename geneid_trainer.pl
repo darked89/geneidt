@@ -1506,20 +1506,20 @@ sub extractCDSINTRON {
         ## CDS
         my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
         my $my_command =
-"./bin/SSgff -cE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A";
+"./bin/ssgff -cE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A";
         run($my_command);
         $my_command =
 "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $cds_dir/${species}${type}.cds.fa ";
         run($my_command);
 
-#` ./bin/SSgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
+#` ./bin/ssgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
 
         ## INTRONS
         #~ my $fh_ssgff_B    = File::Temp->new();
         #~ my $fname_ssgff_B = $fh_ssgff_B->filename;
         my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
         $my_command =
-"./bin/SSgff -iE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B";
+"./bin/ssgff -iE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B";
 
         #say "\n$my_command\n";
         run($my_command);
@@ -1529,7 +1529,7 @@ sub extractCDSINTRON {
         #say "\n$my_command\n";
         run($my_command);
 
-#` ./bin/SSgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
+#` ./bin/ssgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
         $count++;
         print STDERR "$count ..";
     }
@@ -1771,7 +1771,7 @@ sub extractprocessSITES {
 
         #  print STDERR "$gene_id $gff $tmp_dir/$gene_id.gff \n\n";
         ## POTENTIAL BUG SPLIT
-` ./bin/SSgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
+` ./bin/ssgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites`;
         foreach my $site (qw(Acceptor Donor Stop Start)) {
 
 #	print STDERR "egrep -A 1 $site $tmp_dir/${gene_id}.all_sites $sitesdir/${site}_sites.fa\n";
@@ -3662,6 +3662,7 @@ sub WriteStatsFile {
     #print STDERR "intron: $meangci $stgci\n";
     #BUG?
     #my $totexons = ` gawk '{print \$9}' $outgff | wc -l | gawk '{print \$1}' `;
+    
     my $totexons = ` gawk '{print \$9}' $outgff | wc -l `;
 
     chomp $totexons;
@@ -3677,7 +3678,7 @@ sub WriteStatsFile {
 
     my ( $avgle, $stle ) = average( \@exonlength );
 
-    my $singlegenes = ` egrep -c '(Single)' $outgff `;
+    my $singlegenes = `egrep -c '(Single)' $outgff `;
     chomp $singlegenes;
 
     #print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
@@ -4192,7 +4193,7 @@ sub sortevalbranch {
 sub num_of_lines_in_file {
     my $input_fn = $_[0];
     my $my_num_lines;
-    $my_num_lines = `cat $input_fn | wc -l`;
+    $my_num_lines = capture(cat $input_fn | wc -l);
 
     #assert No such file or directory #
     chomp $my_num_lines;
@@ -4211,7 +4212,7 @@ sub check_external_progs() {
           egrep
           sed
           geneid
-          SSgff
+          ssgff
           shuf
           pictogram
           gff2gp.awk
@@ -4242,9 +4243,10 @@ sub check_external_progs() {
 }
 
 sub create_data_dirs {
-    my $dir_name = shift(@_);
+    #my $dir_name = shift(@_);
     say "\ninside create_data_dirs function\n";
-    foreach $dir_name (@_) {
+    ## check if not a bug XXX
+    foreach my $dir_name (@_) {
         say "Creating $dir_name directory\n";
         if ( -d $dir_name ) {
             say "$dir_name exists. Purge and recreate\n";
@@ -4283,7 +4285,7 @@ sub write_sizes_from_tbl_fn {
 
         #print  " $tmp_out_fn \t"
         open( my $fh_out, '>', $tmp_out_fn )
-          or die "Could not open file '$tmp_out_fn' $!";
+          or croak "Could not open file '$tmp_out_fn' $!";
         print $fh_out "$name $lengfasta\n";
         close $fh_out;
 
@@ -4373,8 +4375,9 @@ sub getBackground {
     #my $fasta = $f;
     #my $tbl = "";
     my $countlines = 0;
-    my $totalseqs  = `egrep -c \"^>\" $fasta`;
-    chomp $totalseqs;
+    $totalseqs = num_of_lines_in_file($fasta);
+    #my $totalseqs  = `egrep -c \"^>\" $fasta`;
+    #chomp $totalseqs;
 
     open( my $fh_IN, "<", "$tbl" ) or croak "Failed here";
     my @tabular = ();
