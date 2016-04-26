@@ -33,7 +33,10 @@ for line in open(true_freq_fn).readlines():
 		kmer_size = len(sl[0])
 	counter += 1
 
-print counter
+#debug line, not needed in the output
+#print counter
+#print trueseq_dict
+
 
 new_counter = 0
 for line in open(bckg_freq_fn).readlines():
@@ -49,21 +52,30 @@ for line in open(bckg_freq_fn).readlines():
 		#bckgseq_dict[my_key] = float(sl[3])
 		new_counter += 1
 
-print new_counter, len(bckgseq_dict), len(trueseq_dict), kmer_size
+#print bckgseq_dict
+#debug line, not needed in the output
+#print new_counter, len(bckgseq_dict), len(trueseq_dict), kmer_size
 
+#make sure that somehow we are not iterating beyond the background kmer length
+assert len(trueseq_dict.keys()) <=  len(bckgseq_dict.keys())
 
 for position in trueseq_dict.keys():
 	c_variable = 0.0;
 	for kmer in trueseq_dict[position].keys():
-		bckg_freq = bckgseq_dict[position][kmer]
+		#print "XXX", kmer
 		true_freq = trueseq_dict[position][kmer]
+		bckg_freq = bckgseq_dict[position][kmer]
+		#if bckg_freq <= 0:
+		#	print position, kmer, bckg_freq[position][kmer]
 		try:
 			temp_info_val = true_freq*log(true_freq/bckg_freq)/log(2)
+			#Sprint "Y", position, kmer, temp_info_val
 		except: 
 			temp_info_val = 0 #not sure
 		c_variable += temp_info_val
 		#print kmer, position,  bckg_freq, true_freq, temp_info_val
-		print kmer, position, temp_info_val
+		#debug line, not needed in the output
+		#print kmer, position, temp_info_val
 	print position, c_variable
 	c_variable = 0.0
 '''	

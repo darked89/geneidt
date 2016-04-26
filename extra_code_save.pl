@@ -864,3 +864,164 @@ sub refactor_branch_sub {
         return 1;
 
     } #  refactor use branch
+
+
+sub predictPlotgff2ps {
+    my ( $paramopt, $gpfa, $gpgff, $gplen, $tempjkf_geneid ) = @_;
+
+    print STDERR " \nRunning geneid on fastas \n \n ";
+
+    my $geneidall   = "";
+    my $gff2psplots = "$species . gff2ps . prediction . plots . ps ";
+    ## TOFIX
+    my $my_command =
+" . /bin/geneid -GP $paramopt $gpfa | gawk
+'NR>5 {OFS=\"\\t\";if (\$3==\"Gene\") print \"\#\$\"; \$2=\"geneid_$species\"; if (substr(\$1,1,1)!=\"\#\") print }'
+                              | egrep -wv 'exon' ";
+    $geneidall = capture($my_command);
+
+    my $tempgeneidgffpreds = $work_dir . $species . "
+                              . geneid
+                              . predictions
+                              . gff ";
+    open( my $fh_FOUT, " > ", "$tempgeneidgffpreds " ) or croak " Failed here ";
+    print $fh_FOUT "$geneidall ";
+    close $fh_FOUT;
+
+    unlink $gff2psplots;
+
+    #print STDERR " Plotting of predictions using gff2ps \n ";
+
+    open( my $fh_LOCI_gplen, " < ", "$gplen " ) or croak " Failed here ";
+    print STDERR " \nCreating gff2ps plots for $species \n \n ";
+    while (<$fh_LOCI_gplen>) {
+        my ( $gene_id, $genelength ) = split;
+        print STDERR " \n $gplen $gpgff $tempjkf_geneid $gene_id $genelength \n
+                              ";
+        run(" egrep -w '$gene_id' $gpgff > $tmp_dir$gene_id . gff ");
+        run(" egrep -w '$gene_id' $tempgeneidgffpreds >> $tmp_dir$gene_id
+                              . gff ");
+        if ($jacknifevalidate) {
+            run(" egrep -w '$gene_id' $tempjkf_geneid >> $tmp_dir$gene_id
+                              . gff ");
+        }
+        if ( !$contigopt ) {
+            run(
+"
+                              . /bin/gff2ps -v -p --$tmp_dir$gene_id
+                              . gff > $plots_dir / $species
+                              . ${gene_id}
+                              . ps "
+            );
+            print STDERR "    #";
+                          } elsif ($contigopt) {
+                            my $nucleotidesperline = 10000;
+                            run(
+" ./bin/gff2ps -v -p -N $nucleotidesperline -C $work_dir.gff2psrcNEW -- $tmp_dir$gene_id.gff > $plots_dir/$species.gv"
+                            );
+                            print STDERR "#";
+                        }
+                    }
+                    close $fh_LOCI_gplen;
+                    return 1;
+}
+
+
+## BUG unused. we do not use interactive or branch in simplified script 
+#~ elsif ($usebranch) {    #use separate branch profile
+    #~ if ($interactive) {
+        #~ my $respo = "";
+        #~ do {
+            #~ print STDERR
+#~ "Use automatically selected range values for the optimization of geneid eWF (exon weight)/oWF (exon/oligo factor)/Minimum Branch Distance from Acceptor and Context length in which Branch sites should be scored (AccCtx) internal parameters?\n\n(eWF: $IeWF to $FeWF; step $deWF\noWF: $IoWF to $FoWF; step $doWF\nMinBranchDistance: $iMin to $fMin; step $dMin\nAcceptorBranchCtx: $iAccCtx to $fAccCtx; step $dAccCtx)\n\nDo you prefer to change these values? (we do not recommed you change the Min Branch Distance and AccBranch context)";
+            #~ $respo = readline(STDIN);
+        #~ } while ( $respo !~ /^(yes|y)|(n|no)$/i );
+
+        #~ if ( $respo =~ /^(yes|y)/i ) {
+
+            #~ my $sline = "";
+            #~ my $eline = "";
+            #~ my $dline = "";
+            #~ do {
+                #~ print STDERR "\nType new initial eWF (IeWF): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $IeWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType new final eWF (FeWF): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $FeWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType step (delta) eWF (deWF)): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $deWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType new initial oWF (IoWF): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $IoWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType new final oWF (FoWF): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $FoWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType step (delta) oWF (doWF): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $doWF = $1;
+
+            #~ do {
+                #~ print STDERR "\nType new initial Min Branch Distance (iMin): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $iMin = $1;
+
+            #~ do {
+                #~ print STDERR "\nType new final Min Branch Distance (fMin): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $fMin = $1;
+
+            #~ do {
+                #~ print STDERR
+                  #~ "\nType step (delta) Min Branch Distance (dMin)): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $dMin = $1;
+
+            #~ do {
+                #~ print STDERR
+                  #~ "\nType new initial Acceptor/Branch Context (iAccCtx): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $iAccCtx = $1;
+
+            #~ do {
+                #~ print STDERR
+                  #~ "\nType new final Acceptor/Branch Context (fAccCtx): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $fAccCtx = $1;
+
+            #~ do {
+                #~ print STDERR
+                  #~ "\nType step (delta) Acceptor/Branch Context (dAccCtx): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $dAccCtx = $1;
+
+        #~ }
+    #~ }
+#~ ## OPTIMIZATION FUNCTIONS
