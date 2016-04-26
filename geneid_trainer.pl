@@ -1133,60 +1133,60 @@ my $dAccCtx = "10";
 my $fAccCtx = "70";
 
 if ( !$branchp ) {    # no clear separate branch profile
-    if ($interactive) {
-        my $respo = "";
-        do {
-            print STDERR
-"Use default range values for the optimization of geneid eWF (exon weight) and oWF (exon/oligo factor) internal parameters?\n\n(eWF: $IeWF to $FeWF; step $deWF\noWF: $IoWF to $FoWF; step $doWF)\n\nDo you prefer to change these values? ";
-            $respo = readline(STDIN);
-        } while ( $respo !~ /^(yes|y)|(n|no)$/i );
+    #~ if ($interactive) {
+        #~ my $respo = "";
+        #~ do {
+            #~ print STDERR
+#~ "Use default range values for the optimization of geneid eWF (exon weight) and oWF (exon/oligo factor) internal parameters?\n\n(eWF: $IeWF to $FeWF; step $deWF\noWF: $IoWF to $FoWF; step $doWF)\n\nDo you prefer to change these values? ";
+            #~ $respo = readline(STDIN);
+        #~ } while ( $respo !~ /^(yes|y)|(n|no)$/i );
 
-        if ( $respo =~ /^(yes|y)/i ) {
+        #~ if ( $respo =~ /^(yes|y)/i ) {
 
-            my $sline = "";
-            my $eline = "";
-            my $dline = "";
-            do {
-                print STDERR "\nType new initial eWF (IeWF): ";
-                $sline = readline(STDIN);
-            } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            $IeWF = $1;
+            #~ my $sline = "";
+            #~ my $eline = "";
+            #~ my $dline = "";
+            #~ do {
+                #~ print STDERR "\nType new initial eWF (IeWF): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $IeWF = $1;
 
-            do {
-                print STDERR "\nType new final eWF (FeWF): ";
-                $eline = readline(STDIN);
-              } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                || $eline <= $sline );
-            $FeWF = $1;
+            #~ do {
+                #~ print STDERR "\nType new final eWF (FeWF): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $FeWF = $1;
 
-            do {
-                print STDERR "\nType step (delta) eWF (deWF)): ";
-                $dline = readline(STDIN);
-            } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            $deWF = $1;
+            #~ do {
+                #~ print STDERR "\nType step (delta) eWF (deWF)): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $deWF = $1;
 
-            do {
-                print STDERR "\nType new initial oWF (IoWF): ";
-                $sline = readline(STDIN);
-            } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            $IoWF = $1;
+            #~ do {
+                #~ print STDERR "\nType new initial oWF (IoWF): ";
+                #~ $sline = readline(STDIN);
+            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $IoWF = $1;
 
-            do {
-                print STDERR "\nType new final oWF (FoWF): ";
-                $eline = readline(STDIN);
-              } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                || $eline <= $sline );
-            $FoWF = $1;
+            #~ do {
+                #~ print STDERR "\nType new final oWF (FoWF): ";
+                #~ $eline = readline(STDIN);
+              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
+                #~ || $eline <= $sline );
+            #~ $FoWF = $1;
 
-            do {
-                print STDERR "\nType step (delta) oWF (doWF): ";
-                $dline = readline(STDIN);
-            } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            $doWF = $1;
+            #~ do {
+                #~ print STDERR "\nType step (delta) oWF (doWF): ";
+                #~ $dline = readline(STDIN);
+            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
+            #~ $doWF = $1;
 
-        }
-    }
-## OPTIMIZATION FUNCTIONS
+        #~ }
+    #~ }
+#~ ## OPTIMIZATION FUNCTIONS
 
     if ( !$contigopt ) {
         @evaluation = @{
@@ -3652,7 +3652,7 @@ sub WriteStatsFile {
     $param->geneModel->intergenicRange( $minintergenic, $maxintergenic );
 ###############################
     
-    $my_command = "gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)} $outcds";
+    $my_command = "gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)}' $outcds";
     my @CDSGCcontent = capture($my_command);
         
 #    my @CDSGCcontent =
@@ -3662,7 +3662,7 @@ sub WriteStatsFile {
     my ( $meangc, $stgc ) = average( \@CDSGCcontent );
 
     #print STDERR "CDS: $meangc $stgc $outintron\n";
-    $my_command = "gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)} $outintron ";
+    $my_command = "gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)}' $outintron ";
     my @intronGCcontent = capture($my_command);
     
     #my @intronGCcontent =
@@ -3675,22 +3675,30 @@ sub WriteStatsFile {
     #BUG?
     #my $totexons = ` gawk '{print \$9}' $outgff | wc -l | gawk '{print \$1}' `;
     $my_command = "gawk '{print \$9}' $outgff | wc -l ";
-    my $totexons = ` gawk '{print \$9}' $outgff | wc -l `;
+    my $totexons = capture($my_command);
+    #my $totexons = ` gawk '{print \$9}' $outgff | wc -l `;
 
     chomp $totexons;
     $totexons = int($totexons);
     my @exonspergene;
-    @exonspergene =
-      ` gawk '{print \$9}' $outgff | sort | uniq -c | gawk '{print \$1}' `;
+    $my_command = "gawk '{print \$9}' $outgff | sort | uniq -c | gawk '{print \$1}'";
+    @exonspergene = capture($my_command);
+    #@exonspergene =  
+    #  ` gawk '{print \$9}' $outgff | sort | uniq -c | gawk '{print \$1}' `;
 
     my ( $avgex, $stex ) = average( \@exonspergene );
-
-    my @exonlength =
-      ` egrep -v 'Single' $outgff | gawk '{len=\$5-\$4;print len}' - | sort `;
+    
+    $my_command = "egrep -v 'Single' $outgff | gawk '{len=\$5-\$4;print len}' - | sort ";
+    my @exonlength = capture($my_command);
+    
+#    my @exonlength =
+#      ` egrep -v 'Single' $outgff | gawk '{len=\$5-\$4;print len}' - | sort `;
 
     my ( $avgle, $stle ) = average( \@exonlength );
-
-    my $singlegenes = `egrep -c '(Single)' $outgff `;
+    
+    $my_command = "egrep -c '(Single)' $outgff";
+    my $singlegenes = capture($my_command);
+    #my $singlegenes = `egrep -c '(Single)' $outgff `;
     chomp $singlegenes;
 
     #print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
