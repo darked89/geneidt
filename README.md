@@ -78,3 +78,6 @@ compile geneid (not included in this distribution)
 
 ### clean up all training results ###
 `clean_test_train_results.sh`
+
+# Bitbucket code access etc. #
+For an easy "git clone" etc. one needs to create a personal ssh key on a workstation/server of interest and make it known to Bitbucket. 
