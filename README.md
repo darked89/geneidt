@@ -55,6 +55,8 @@ i.e. in fish shell
 * C programs 
 ```
 cd src/c/evaluation
+mkdir ./bin
+mkdir ./objects
 make
 cp -i ./bin/* ../../../bin/
 cd ../../../
