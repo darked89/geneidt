@@ -15,8 +15,10 @@ Latest commit works  (80% training, 20% for eveluation mode)
 
 * install required Perl modules
 easiest is to use cpanm to get modules located in:
+
 `$HOME/perl5/lib/perl5/`
- 
+
+`cpanm Modern::Perl`
 
 `cpanm Carp`
 
