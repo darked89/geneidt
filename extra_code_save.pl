@@ -1025,3 +1025,184 @@ sub predictPlotgff2ps {
         #~ }
     #~ }
 #~ ## OPTIMIZATION FUNCTIONS
+
+
+sub branch_start {
+    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE
+    $usebranch = 1;
+    do {
+        print STDERR
+"\n\nYou chose to use meme branch profile information in training $species. Please, indicate the name of the meme output file (make sure the file is in the right path) followed by the number of the motif the branch profile and the position(not index) of the branchpoint A (i.e. enter 'meme.txt 2 7' if the meme output file is called meme.txt and the second motif is the one corresponding to the branch profile and the A is at the seventh position)\n";
+        $memeanswer = <ARGV>;
+        chomp $memeanswer;
+    } while ( $memeanswer !~ /^(.+)\s+(\d+)\s+(\d+)$/i );
+
+    $memefile    = $1;
+    $motifnumber = $2;
+    $bp          = $3;
+
+    if ( -e "$memefile" ) {
+        print "File exists and is named: ($memefile) \n\n";
+    }
+    else {
+        print "File does not exist";
+
+        print STDERR $usage and exit;
+
+    }
+    return 1;
+}
+
+
+
+## not complete function for branch opty
+sub OptimizeParameter {
+
+    my (
+        $gpfa,         $gpgff,        $newparam,     $branchswitch,
+        $prof_len_bra, $fxdbraoffset, $branchmatrix, $IeWF,
+        $deWF,         $FeWF,         $IoWF,         $doWF,
+        $FoWF,         $iMin,         $dMin,         $fMin,
+        $iAccCtx,      $dAccCtx,      $fAccCtx
+    ) = @_;
+    my @evaluation_total = ();
+    my $IeWFini          = $IeWF;
+    my $IoWFini          = $IoWF;
+    my $iMinini          = $iMin;
+    my $iAccCtxini       = $iAccCtx;
+
+    my $fh_SOUT;
+
+    open( $fh_SOUT, ">", "$work_dir/$species.OptimizeParameter.log" )
+      or croak "Failed here";
+
+    #~ if ( !$branchswitch ) {
+        
+        print STDERR
+          "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
+        print $fh_SOUT
+          "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
+    #~ }
+    #~ else {
+        #~ print STDERR
+#~ "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\nMinBranch range : $iMin to $fMin\nAccCtx range : $iAccCtx to $fAccCtx\n\n";
+        #~ print $fh_SOUT
+#~ "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\nMinBranch range : $iMin to $fMin\nAccCtx range : $iAccCtx to $fAccCtx\n\n";
+
+    #~ }
+
+    for ( $IeWF = $IeWFini ; $IeWF <= $FeWF ; $IeWF += $deWF ) {
+        print STDERR "eWF: $IeWF\noWF: ";
+
+        for ( $IoWF = $IoWFini ; $IoWF <= $FoWF ; $IoWF += $doWF ) {
+			print STDERR "$IoWF  ";
+			
+            #~ if ( !$branchswitch ) {
+                #~ print STDERR "$IoWF  ";
+            #~ }
+            #~ if ($branchswitch) {
+                #~ print STDERR "$IoWF\nMinDist:  ";
+                #~ for ( $iMin = $iMinini ; $iMin <= $fMin ; $iMin += $dMin ) {
+                    #~ print STDERR "$iMin\nAccCtx:  ";
+
+                    #~ for (
+                        #~ $iAccCtx = $iAccCtxini ;
+                        #~ $iAccCtx <= $fAccCtx ;
+                        #~ $iAccCtx += $dAccCtx
+                      #~ )
+                    #~ {
+                        #~ print STDERR "$iAccCtx  ";
+                        #~ my $param = Geneid::Param->new();
+                        #~ $param->readParam("$newparam");
+
+                        #~ for ( my $i = 0 ; $i < $param->numIsocores ; $i++ ) {
+                            #~ if (
+                                #~ !defined @{ $param->isocores }[$i]
+                                #~ ->Exon_weights(
+                                    #~ [ $IeWF, $IeWF, $IeWF, $IeWF ]
+                                #~ )
+                              #~ )
+                            #~ {
+                                #~ croak "error in setting exon weights\n";
+                            #~ }
+                            #~ if ( !defined @{ $param->isocores }[$i]
+                                #~ ->Exon_factor( [ $IoWF, $IoWF, $IoWF, $IoWF ] )
+                              #~ )
+                            #~ {
+#~ # if (!defined @{$param->isocores}[$i]->Exon_factor([0.33,$bestIoWF,$bestIoWF,0.33])) {
+                                #~ croak "error in setting exon weights\n";
+                            #~ }
+                            #~ if (
+                                #~ !defined @{ $param->isocores }[$i]
+                                #~ ->Site_factor(
+                                    #~ [
+                                        #~ 1 - $IoWF, 1 - $IoWF,
+                                        #~ 1 - $IoWF, 1 - $IoWF
+                                    #~ ]
+                                #~ )
+                              #~ )
+                            #~ {
+#~ # if (!defined @{$param->isocores}[$i]->Site_factor([0.45,1-$bestIoWF,1-$bestIoWF,0.45])) {
+                                #~ croak "error in setting exon weights\n";
+                            #~ }
+                            #~ if (
+                                #~ !defined @{ $param->isocores }[$i]
+                                #~ ->set_profile(
+                                    #~ 'Branch_point_profile', $prof_len_bra,
+                                    #~ $fxdbraoffset,          -50,
+                                    #~ 0,                      0,
+                                    #~ 1,                      $iAccCtx,
+                                    #~ $iMin,                  0,
+                                    #~ 0,                      $branchmatrix
+                                #~ )
+                              #~ )
+                            #~ {
+                                #~ croak "error in setting profile\n";
+                            #~ }
+                        #~ }
+                        #~ my $temp_geneid_param = "$work_dir/$species.geneid.param.tmp";
+                        
+                        #~ $param->writeParam($temp_geneid_param);
+                        #~ my $my_command;
+
+                        #~ #my $fh_geneid;
+                        #~ #my $fname_geneid;
+                        #~ print "\nbefore running my_command(s) geneid \n";
+                        #~ my $fh_geneid    = File::Temp->new();
+                        #~ my $fname_geneid = $fh_geneid->filename;
+                        #~ print "\ntemp geneid file: $fname_geneid \n";
+                        #~ $my_command =
+#~ "./bin/geneid -GP $temp_geneid_param $gpfa > $fname_geneid";
+                        #~ run($my_command);
+                        #~ my $fh_gawk_out    = File::Temp->new();
+                        #~ my $fname_gawk_out = $fh_gawk_out->filename;
+                        #~ $my_command =
+#~ "cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' > $fname_gawk_out";
+                        #~ run($my_command);
+                        #~ $my_command =
+#~ "egrep -wv 'exon'  $fname_gawk_out > $tmp_dir/Predictions.${newparam}.gff";
+                        #~ run($my_command);
+
+#~ #` ./bin/geneid -GP ${newparam}.temp $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
+                        #~ print "\nafter running my_command(s) geneid \n";
+
+                        #~ my @evaluation_output = split " ",
+#~ ` ./bin/evaluation -sta $tmp_dir/Predictions.${newparam}.gff $gpgff | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, $iAccCtx, $iMin, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}'`;
+
+                        #~ push( @evaluation_total, \@evaluation_output );
+
+                    #~ }    #$iAccCtx for loop
+                    #~ unless ( $iMin == $fMin ) {
+                        #~ print STDERR "\nMinDist:  ";
+                    #~ }
+                    #~ $iAccCtx = $iAccCtxini;
+
+                #~ }    #$iMin for loop
+                #~ unless ( $IoWF == $FoWF ) {
+                    #~ print STDERR "\noWF:  ";
+                #~ }
+                #~ $iAccCtx = $iAccCtxini;
+                #~ $iMin    = $iMinini;
+
+            #~ }    #if $branchswitch
+            #~ elsif ( !$branchswitch ) 
