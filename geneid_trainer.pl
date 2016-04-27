@@ -32,6 +32,7 @@ use IPC::System::Simple qw(run system capture EXIT_ANY);
 use Readonly;
 
 use feature 'say';
+use Benchmark qw(:all) ;
 
 ## geneid_trained modules
 use Geneid::Param;
@@ -99,22 +100,22 @@ print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout &&  $f
 ## set CONSTANTS
 ## Constant values. modify if needed
 Readonly::Scalar my $pwm_cutoff     => -7;
-Readonly::Scalar my $bases_offset   => 30;    #bases in fron/after? a feature
+Readonly::Scalar my $bases_offset   => 30;    #bases in front/after? a feature
 Readonly::Scalar my $train_fraction => 0.8;   #fraction of seq used for training
 Readonly::Scalar my $train_loci_cutoff         => 500;
 Readonly::Scalar my $train_sites_cutoff        => 1400;
 Readonly::Scalar my $train_sites_cutoff_alt    => 1200;  # changed in some part?
 Readonly::Scalar my $train_sites_markov_cutoff => 5500;
 Readonly::Scalar my $backgrnd_kmer_size => 60;
-Readonly::Scalar my $backgrnd_kmer_num  => 100000;
+Readonly::Scalar my $backgrnd_kmer_num  => 100_000;
 
 #~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
-Readonly::Scalar my $coding_bp_limit_A  => 400000;
-Readonly::Scalar my $coding_bp_limit_B  => 375000;
+Readonly::Scalar my $coding_bp_limit_A  => 400_000;
+Readonly::Scalar my $coding_bp_limit_B  => 375_000;
 
 #~ || ( $totalcodingbases > 375000 && $totalnoncodingbases > 150000 )
-Readonly::Scalar my $non_coding_bp_limit_A  => 100000;
-Readonly::Scalar my $non_coding_bp_limit_B  => 150000;
+Readonly::Scalar my $non_coding_bp_limit_A  => 100_000;
+Readonly::Scalar my $non_coding_bp_limit_B  => 150_000;
 
 ## need to explain or just incorporate Readonly::Scalar
 ## BUG ??? is it ever used?
@@ -151,7 +152,7 @@ my @data_dirs = (
 create_data_dirs(@data_dirs);
 
 my $fh_SOUT;
-
+my $last_bench_time;
 
 my $temptblcaps = "";
 
@@ -190,7 +191,7 @@ my $new_locus_id    = "";
 my $seqs4training   = "";
 my $seqs4evaluation = "";
 my $starttbl        = "";
-my $id;
+#~ my $id;
 my $tblseq    = "";
 
 my $usebranch = 0;
@@ -208,7 +209,7 @@ my ( $bestIeWF, $bestIoWF, $bestAcc, $bestMin ) = ( "", "", "", "" );
 #~ my $fullengthbranchtbl = "";
 
 my $geneidgffsorted = "";
-my $total_genomic   = "";
+#~ my $total_genomic   = "";
 my $bckgrnd         = "";
 
 #~ my $reducedtraining = 0;
@@ -254,6 +255,14 @@ my $optimize = 0;
 ## XX BUG: it does not store the used variables + subsequent eval $_ is
 ## XX BUG: against the good PERL practice
 
+
+#~ ## LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
+
+    #~ else {    # seqs < $train_loci_cutoff
+        #~ ## BUG we do not do jacknife anyway here
+        #~ croak "we do not have >= $train_loci_cutoff sequences, quitting now";
+    #~ }    # seqs < 500
+
 # my $varsmemory = $species . ".variables";
 # open( my $fh_STORV, ">", "$varsmemory" ) or die;
 #############################################################
@@ -263,23 +272,7 @@ my $optimize = 0;
 #######################################################
 ## CREATE FASTAS CDS; INTRON, SITES DIRs WITHIN PATH (ONLY FIRST TIME)
 
-#
-#######################################################
-## store statistics directory variable
-my $fh_STORV;
-open( $fh_STORV, ">", "$work_dir/geneid_trainer_global.log" )
-  or croak "Failed here";
 
-print $fh_STORV Data::Dumper->Dump( [$stats_dir], ['$stats_dir'] );
-
-##CREATE A STATS/PARAMETER FILE
-my @timeData = localtime(time);
-
-#STATS DIR CREATED FIRST TIME PIPELINE IS RUN FOR A GIVEN SPECIES
-my $statsout = "$stats_dir" . join( '_', @timeData ) . "_$sout";
-###OPEN STATISTICS OUTPUT AT THIS TIME...EVERY TIME PIPELINE IS RUN
-open( $fh_SOUT, ">", "$statsout" ) or croak "Failed here";
-print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
 
 
 ## CREATE BLANK PARAMETER FILE############
@@ -300,15 +293,15 @@ sub normal_run {
 
 ## Convert fasta to tabular format
 ## Fasta process to sub later
-    
+my $t0 = Benchmark->new; 
     my $my_command = "grep '^>' $fasta";
     my $headers_fasta_seq  = capture($my_command);
         
     $my_command = "grep '^>' $fasta | sort | uniq ";
     my $uniq_fasta_seq = capture($my_command);
     
-    my $tot_headers_fasta_seq = length($headers_fasta_seq);
-    my $tot_uniq_fasta_seq    = length($uniq_fasta_seq);
+    my $tot_headers_fasta_seq = capture("grep '^>' $fasta | wc -l");
+    my $tot_uniq_fasta_seq    = capture("grep '^>' $fasta | sort | uniq | wc -l");
     
     if ($tot_headers_fasta_seq !=  $tot_uniq_fasta_seq )
     {  say "\n\nERROR\n\n";
@@ -316,7 +309,7 @@ sub normal_run {
 		}
     
     print STDERR
-      "\nThe user has provided length($tot_uniq_fasta_seq) genomic sequences\n";
+      "\nThe user has provided   genomic sequences\n";
 
     print STDERR
       "\nConverting genomics fasta file ($fasta) to tabular format\n";
@@ -345,26 +338,7 @@ sub normal_run {
     print $fh_FOUT_caps "$tblcaps";
     close $fh_FOUT_caps;
 
-    #prints a lort of seq on the screen!
-    #my @tabular = split(/\n/, $tblcaps);
-    #my  @tabular = "";
-    #push (@tabular,$tblcaps);
-    #foreach my $line (@tabular) {print STDERR "$line END";}
 
-
-
-
-
-
-    #~ ## store file with number of genomic sequences used in training
-    #~ print $fh_STORV Data::Dumper->Dump( [$value], ['$value'] );
-    #~ ## store tabular file directory
-    #~ print $fh_STORV Data::Dumper->Dump( [$temptbl], ['$temptbl'] );
-    #~ ## store CAPPED tabular  file directory
-    #~ print $fh_STORV Data::Dumper->Dump( [$temptblcaps], ['$temptblcaps'] );
-    #~ ## store fastas dir and plots dir
-    #~ print $fh_STORV Data::Dumper->Dump( [$fastas_dir], ['$fastas_dir'] );
-    #~ print $fh_STORV Data::Dumper->Dump( [$plots_dir],  ['$plots_dir'] );
 
 ## place genomic sequences in "fastas_$species" directory
     print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
@@ -391,11 +365,7 @@ sub normal_run {
 "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff";
     $filtergff = capture($my_command);
 
-#~ open $fh_LOCID,
-#~ "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $gff |";
-#~ while (<$fh_LOCID>) {
-#~ $filtergff .= $_;
-#~ }
+
 
     ## XXX BUG!!! overwrites input gff!!!
     open( my $fh_FOUT, ">", "$gff" ) or croak "Failed here";
@@ -412,10 +382,7 @@ sub normal_run {
     open( $fh_FOUT, ">", "$templocus_id" ) or croak "Failed here";
     print $fh_FOUT "$locus_id";
     close $fh_FOUT;
-##
 
-## store locus id for a given species the first time we run the pipeline #ALL GENE MODELS
-    print $fh_STORV Data::Dumper->Dump( [$templocus_id], ['$templocus_id'] );
 
 ## number of gene models TOTAL
     $my_command = " gawk '{print \$2}' $templocus_id | sort | uniq | wc -l";
@@ -426,7 +393,7 @@ sub normal_run {
     chomp $total_seqs;
 ## number of genomic sequences TOTAL
     $my_command    = "gawk '{print \$1}' $templocus_id | sort | uniq | wc -l";
-    $total_genomic = capture($my_command);
+    my $total_genomic = capture($my_command);
 
 #~ $total_genomic =
 #~ ` gawk '{print \$1}' $templocus_id | sort | uniq | wc | gawk '{print \$1}' `;
@@ -435,11 +402,6 @@ sub normal_run {
     print STDERR
 "\nThe gff file ($gff) contains a total of $total_genomic genomic sequences and $total_seqs gene models\n";
 
-## store total number of gene models and genomic sequences containing them
-    print $fh_STORV Data::Dumper->Dump(
-        [ $total_seqs,   $total_genomic ],
-        [ '$total_seqs', '$total_genomic' ]
-    );
 
 ## get a list of genes TOTAL
     print STDERR "\nObtain list of all genes\n\n";
@@ -453,18 +415,9 @@ sub normal_run {
     print $fh_FOUT "$list_seqs";
     close $fh_FOUT;
 
-## store list of gene models the first time the pipeline is run for a given species
-    print $fh_STORV Data::Dumper->Dump( [$templist], ['$templist'] );
-
-    #XXXVVV
-
-    #RUN ONLY FIRST TIME FOR EACH SPECIES /ONLY FIRST TIME
-    #~ if ( $total_seqs >= $train_loci_cutoff || !$tenfold ) {
     if ( $total_seqs >= $train_loci_cutoff ) {
 		
         $totalseqs4training = int( $train_fraction * $total_seqs );
-
-#print $fh_STORV Data::Dumper->Dump( [$totalseqs4training],             ['$totalseqs4training'] );
 
         print STDERR
 "\nA subset of $totalseqs4training sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
@@ -483,14 +436,16 @@ sub normal_run {
         print $fh_FOUT "$new_locus_id";
         close $fh_FOUT;
 
-        print $fh_STORV Data::Dumper->Dump( [$templocus_id_new],
-            ['$templocus_id_new'] );
 
 ## ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
         $my_command =
           "gawk '{print \$2}' $templocus_id_new | sort | uniq | wc -l";
         $seqsused = capture($my_command);
         chomp $seqsused;
+my $t1 = Benchmark->new;
+my $td = timediff($t1, $t0);
+print "\nTTT the code took t0->t1:",timestr($td),"\n";
+$last_bench_time = $t1;
 
 ###################
 ## gff for training subset
@@ -509,10 +464,6 @@ sub normal_run {
         print $fh_FOUT "$gff4training";
         close $fh_FOUT;
 
-        print $fh_STORV Data::Dumper->Dump(
-            [ $tempgff4training,   $seqsused ],
-            [ '$tempgff4training', '$seqsused' ]
-        );
 
         print STDERR "\nObtain list of training genes\n\n";
 
@@ -525,10 +476,6 @@ sub normal_run {
         open( $fh_FOUT, ">", "$templist_train" ) or croak "Failed here";
         print $fh_FOUT "$list_seqs_train";
         close $fh_FOUT;
-
-## Store variable with list of sequences set aside for training
-        print $fh_STORV Data::Dumper->Dump( [$templist_train],
-            ['$templist_train'] );
 
 #########################
 ## new locus_id for evaluation test set
@@ -546,10 +493,7 @@ sub normal_run {
         print $fh_FOUT "$locusideval";
         close $fh_FOUT;
 
-## Store variable with list of sequences set aside for evaluating
-        print $fh_STORV Data::Dumper->Dump( [$templocusid_eval],
-            ['$templocusid_eval'] );
-#########################
+######################
 ## gff for evaluation test set
 #########################
 
@@ -557,10 +501,8 @@ sub normal_run {
 "gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff | gawk '{ print \$9}' | sort | uniq | wc -l";
         ## ??? BUG this is a number...
         $gffseqseval = capture($my_command);
-        chomp $gffseqseval;
+        #chomp $gffseqseval;
 
-#~ $gffseqseval = ` gawk '{print \$2\"\$\"}' $templocusid_eval | sort | uniq | egrep -wf - $gff | gawk '{ print \$9}' | sort | uniq | wc | gawk '{print \$1}' `;
-#~ chomp $gffseqseval;
 
         print STDERR
 "The evaluation gff file includes $gffseqseval gene models (20% of total seqs)\n\n";
@@ -575,14 +517,7 @@ sub normal_run {
         print $fh_FOUT "$gff4evaluation";
         close $fh_FOUT;
 
-## STORE INFO ON NUMBER OF SEQUENCES TO EVALUATE PLUS GFF FILE  OF SET ASIDE SEQUENCES..
-        print $fh_STORV Data::Dumper->Dump(
-            [ $tempgff4evaluation,   $gffseqseval ],
-            [ '$tempgff4evaluation', '$gffseqseval' ]
-        );
-
     }    # seqs > 500
-
 ####LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
 
     else {    # seqs < $train_loci_cutoff
@@ -607,12 +542,17 @@ sub normal_run {
     #ONLY FIRST TIME ("NOT SHORT VERSION") FOR A GIVEN SPECIES
 
     if ( !$useallseqs ) {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
-
+        print STDERR "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
 ## Convert general gff2 to geneid gff format
 ## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
 ## TRAIN
+#~ my $t1 = Benchmark->new;
+#~ my $td = timediff($t1, $t0);
+#~ print "\nTTT the code took t0->t1:",timestr($td),"\n";
+#~ $last_bench_time = $t1;
 
-        print STDERR "\nConvert general gff2 to geneid-gff format\n\n";
+## BUG => there is no need to convert gff to geneid format each time we run
+
         $tempgeneidgffsorted =
           generalGFFtoGFFgeneid( $tempgff4training, $species, ".train" );
 
@@ -639,6 +579,9 @@ sub normal_run {
 
     }
     elsif ($useallseqs) {    #USE SAME SEQS TO TRAIN/EVALUATE
+		
+   print STDERR "\n  XXX OPTION XXX Convert general gff2 to geneid-gff format  USE_ALL_SEQS \n\n";
+		
 ## Convert general gff2 to geneid gff format
 ## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
 
@@ -675,39 +618,18 @@ sub normal_run {
       @{ processSequences4Optimization( $outgff, ".train", 0 ) };
     print STDERR "$gptraingff";
 
-    #~ ## STORE VARIABLE INFO IN DATA DUMPER###
-    #~ print $fh_STORV Data::Dumper->Dump(
-    #~ [
-    #~ $outcds,              $outintron,       $outlocus_id,
-    #~ $outgff,              $outcdseval,      $outintroneval,
-    #~ $outlocus_id_eval,    $outgffeval,      $inframeeval,
-    #~ $tempgeneidgffsorted, $inframe,         $outdonortbl,
-    #~ $totalnoncandon,      $outacceptortbl,  $totalnoncanacc,
-    #~ $outstarttbl,         $totalnoncansta,  $gptraingff,
-    #~ $gptrainfa,           $gptraintbl,      $gptrainlen,
-    #~ $gptraincontiggff,    $gptraincontigfa, $gptraincontigtbl,
-    #~ $gptraincontiglen
-    #~ ],
-    #~ [
-    #~ '$outcds',           '$outintron',
-    #~ '$outlocus_id',      '$outgff',
-    #~ '$outcdseval',       '$outintroneval',
-    #~ '$outlocus_id_eval', '$outgffeval',
-    #~ '$inframeeval',      '$tempgeneidgffsorted',
-    #~ '$inframe',          '$outdonortbl',
-    #~ '$totalnoncandon',   '$outacceptortbl',
-    #~ '$totalnoncanacc',   '$outstarttbl',
-    #~ '$totalnoncansta',   '$gptraingff',
-    #~ '$gptrainfa',        '$gptraintbl',
-    #~ '$gptrainlen',       '$gptraincontiggff',
-    #~ '$gptraincontigfa',  '$gptraincontigtbl',
-    #~ '$gptraincontiglen'
-    #~ ]
-    #~ );
 ########################################
 
-    #NOT USING ALL SEQS FOR TRAINING/EVALUATION ALSO PROCESS EVAL SEQS
+my $t3 = Benchmark->new;
+my $td = timediff($t3, $last_bench_time);
+print "\nTTT the code took t2->t3:",timestr($td),"\n";
+$last_bench_time = $t3;
+
+
+## NOT USING ALL SEQS FOR TRAINING/EVALUATION ALSO PROCESS EVAL SEQS
     if ( !$useallseqs ) {
+	print STDERR "\n NNN NOT USING ALL SEQS FOR TRAINING/EVALUATION ALSO PROCESS EVAL SEQS\nn";	
+		
 
 ## prepare test set for evaluation of newly developed parameter file (EVAL)
 
@@ -725,45 +647,17 @@ sub normal_run {
         ) = @{ processSequences4Optimization( $outgffeval, ".eval", 1 ) };
         print STDERR "DONE\n";
 
-## STORE VARIABLE INFO IN DATA DUMPER###
-        print $fh_STORV Data::Dumper->Dump(
-            [
-                $gpevalgff,       $gpevalfa,
-                $gpevaltbl,       $gpevallen,
-                $gpevalcontiggff, $gpevalcontigfa,
-                $gpevalcontigtbl, $gpevalcontiglen,
-                $tempgeneidgffsortedeval
-            ],
-            [
-                '$gpevalgff',       '$gpevalfa',
-                '$gpevaltbl',       '$gpevallen',
-                '$gpevalcontiggff', '$gpevalcontigfa',
-                '$gpevalcontigtbl', '$gpevalcontiglen',
-                '$tempgeneidgffsortedeval'
-            ]
-        );
-########################################
 
     }
 
-## DELETE DIRECTORIES NO LONGER NEEDED
-    print STDERR
-"the CDS-containing directory in $cds_dir is no longer needed..\nRemove directory and its contents\n";
+#~ ## DELETE DIRECTORIES NO LONGER NEEDED
+    #~ print STDERR
+#~ "the CDS-containing directory in $cds_dir is no longer needed..\nRemove directory and its contents\n";
 
-    #rmtree( ["$work_dir/cds/"] );
-    print STDERR
-"the intron-containing directory in $introns_dir is no longer needed..\nRemove directory and its contents\n";
+    #~ #rmtree( ["$work_dir/cds/"] );
+    #~ print STDERR
+#~ "the intron-containing directory in $introns_dir is no longer needed..\nRemove directory and its contents\n";
 
-    #rmtree( ["$work_dir/intron/"] );
-
-#print STDERR "the splice-site-containing directory in $path/sites/ is no longer needed..\nRemove directory and its contents\n";
-#	rmtree([ "$path/sites/" ]);
-#print STDERR "the fastas-containing directory in $path/fastas_$species/ is no longer needed..\nRemove directory and its contents\n";
-#	rmtree([ "$fastas_dir" ]);
-###
-    close $fh_STORV;
-
-    #XXXVVV2
 
 ### EVERYTHING BELOW ALWAYS EXECUTED EVEN ON SHORT VERSION OF THE PIPELINE (REDUCED)
 
@@ -777,8 +671,7 @@ sub normal_run {
    #$bckgrnd = getBackground( $kmer, $fasta, $temptblcaps, $numseqs, $bckgrnd );
     getBackground( $backgrnd_kmer_size, $fasta, $temptblcaps,
         $backgrnd_kmer_num, $bckgrnd );
-###STORE VARIABLE INFO IN DATA DUMPER###
-    #   print STORV Data::Dumper->Dump([$bckgrnd], ['$bckgrnd']);
+
 
 #############################################################
 
@@ -789,19 +682,13 @@ sub normal_run {
     my $numbersites;
     $numbersites = num_of_lines_in_file($outdonortbl);
 
-    #my $numbersites =  `wc -l $outdonortbl | gawk '{print \$1}'`;
-    #chomp $numbersites;
-    #$numbersites = int($numbersites);
     my $donoffset =
       $bases_offset;   #position before intron (last of exon (31) -1 for offset)
 
     if ( $numbersites > $train_sites_cutoff ) {
-
         $order = "1";
-
     }
     elsif ( $numbersites <= $train_sites_cutoff ) {
-
         $order = "0";
     }
 
@@ -834,19 +721,13 @@ sub normal_run {
     print $fh_FOUT "$donsub";
     close $fh_FOUT;
 
- #print STDERR "$path/pictogram $donorsubprofile $statsdir/Donor -bits -land\n";
-## BUG?
+
     $my_command =
 "./bin/pictogram $donorsubprofile $plots_dir/donor_profile.pictogram -bits -land";
     print "\n$my_command\n";
     run($my_command);
 
-    #unlink $donorsubprofile;
 
-    # print STDERR "donormatrix: \n";
-    # foreach my $i (@$donormatrix){
-    #     print STDERR join("\t",@$i),"\n";
-    #}
 
 #########
 ## get acceptor site statistics
@@ -894,7 +775,7 @@ sub normal_run {
 
     my $accsub = "";
 
-#print STDERR "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_don+6))}' $outacceptortbl\n";
+
 
     $my_command =
 "gawk '{print  substr(\$2,($startacceptor-3),($prof_len_acc+6))}' $outacceptortbl ";
@@ -905,21 +786,12 @@ sub normal_run {
     print $fh_FOUT "$accsub";
     close $fh_FOUT;
 
-#print STDERR "$path/pictogram $acceptorsubprofile $statsdir/Acceptor -bits -land\n";
 
-## BUG?
     $my_command =
 "./bin/pictogram $acceptorsubprofile $plots_dir/acceptor_profile.pictogram -bits -land";
     print "\n$my_command\n";
     run($my_command);
 
-   # run("./bin/pictogram $acceptorsubprofile $plots_dir/Acceptor -bits -land");
-   #unlink $acceptorsubprofile;
-
-    #  print STDERR "acceptormatrix: \n";
-    #   foreach my $i (@$acceptormatrix){
-    #       print STDERR join("\t",@$i),"\n";
-    #   }
 
 #########
 ## get start site statistics
@@ -928,10 +800,7 @@ sub normal_run {
     $order       = "0";
     $numbersites = num_of_lines_in_file($outstarttbl);
 
-    #$numbersites = `wc -l $outstarttbl | gawk '{print \$1}'`;
-    #print "#1136 numbersites: $numbersites";
-    #chomp $numbersites;
-    #$numbersites = int($numbersites);
+
     my $staoffset =
       $bases_offset;  #before first position of the exon (31)minus 1 for offset)
 
@@ -981,14 +850,7 @@ sub normal_run {
     #print "\n$my_command\n";
     run($my_command);
 
-    #unlink $startsubprofile;
 
-    #~ ## OPTIONAL BRANCH STATS (FUNGI NORMALLY, AFTER RUNNING MEME)
-    #~ if ($usebranch) {
-    #~ refactor_branch_sub();
-    #~ }
-
-    #~ ## NO BRANCH AGAIN
 
 ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -1011,44 +873,6 @@ sub normal_run {
     }
 ######################################
 
-## PRODUCE FILE WITH STATS
-    #~ if ($usebranch) {
-
-        #~ ( $shortintron, $longintron, $minintergenic, $maxintergenic ) =
-          #~ WriteStatsFile(
-            #~ $species,        $sout,           $outintron,
-            #~ $outcds,         $outgff,         $inframe,
-            #~ $inframeeval,    $seqsused,       $totalnoncandon,
-            #~ $totalnoncanacc, $totalnoncansta, $markovmodel,
-            #~ $totalcoding,    $totalnoncoding, $startdonor,
-            #~ $enddonor,       $startacceptor,  $endacceptor,
-            #~ $startstart,     $endstart,       $startbranch,
-            #~ $endbranch,      $usebranch,      $useallseqs
-          #~ );
-
-    #~ }
- 
- dump_stats();
- sub dump_stats {
-
-        ( $shortintron, $longintron, $minintergenic, $maxintergenic ) =
-          WriteStatsFile(
-            $species,        $sout,
-            $outintron,      $outcds,
-            $outgff,         $inframe,
-            $inframeeval,    $seqsused,
-            $totalnoncandon, $totalnoncanacc,
-            $totalnoncansta, $markovmodel,
-            $totalcoding,    $totalnoncoding,
-            $startdonor,     $enddonor,
-            $startacceptor,  $endacceptor,
-            $startstart,     $endstart,
-            0,               0,
-            0,               $useallseqs
-          );
-
-    }
-
 }
 print STDERR
 "\nshortest intron: $shortintron\nlongest intron: $longintron\nminimum intergenic: $minintergenic\nmaximum intergenic: $maxintergenic\n";
@@ -1059,18 +883,6 @@ print STDERR
 my $newparam = "$work_dir/$species.geneid.param";
 $param->writeParam($newparam);
 
-##############################################
-## Select subset for training/evaluation###
-##############################################
-#if ( !$reducedtraining )
-
-#~ print STDERR
-#~ "\nCHECK: use all sequences ?: $useallseqs\njacknife ?: $jacknifevalidate\n";
-
-##############################################
-## CALL SUBS:
-##############################################
-#if ( !$reducedtraining )
 
 ### if reduced training (non-default) do not calculate any of the above ALL OF THE ABOVE MUST BE RUN ONLY FIRST TIME GENEID IS TRAINED FOR A GIVEN SPECIES
 ###EVERYTHING BELOW WILL BE RUN EVERYTIME THE TRAINING PIPELINE IS RUN WHETHER "REDUCED" OR "FULL"
@@ -1088,34 +900,9 @@ $opttype = "contig";
 $contigopt = 1;
 $jacknifevalidate = 0;
 
-#~ if ($interactive) {
-    #~ do {
-        #~ print STDERR
-#~ "\nDo you wish to optimize the internal parameter file on individual 400-nt flanked sequences or on an artificial contig made up of the concatenated flanked sequences (approx. 800 nt between genes)? (Write down \"f(lanked)\" if you choose the first option and \"c(contig)\" if you prefer the second)\n";
-        #~ $opttype = readline(STDIN);
-    #~ } while ( $opttype !~ /^(flanked|f)|(contig|c)$/i );
-#~ }
-#~ else {
-    #~ $opttype = "contig";
-#~ }
-
-#~ if ( $opttype =~ /^(contig|c)$/i ) {
-
-    #~ $contigopt = 1;
-    #~ print STDERR
-#~ "\nYou chose to optimize the internal parameters of geneid based on the artificial contig and therefore NO 10x cross validation will be performed\n\n";
-    #~ my $fh_SOUT;
-    #~ open( $fh_SOUT, ">", "$species.middle.log" ) or croak "Failed here";
-    #~ print $fh_SOUT
-#~ "\nThe user chose to optimize the internal parameters of geneid based on an artificial contig and therefore NO 10x cross validation will be performed\n\n";
-
-    #~ $jacknifevalidate = 0;
-#~ }
-#~ else {
-    #~ $contigopt = 0;
-#~ }
 
 
+## BUG settings need to be set forward. Also these are numbers.
 
 ## OPTIMIZATION FUNCTION NO BRANCH
 my $array_ref = "";
@@ -1137,63 +924,11 @@ my $iAccCtx = "40";
 my $dAccCtx = "10";
 my $fAccCtx = "70";
 
-#~ if ( !$branchp ) {    # no clear separate branch profile
-    #~ if ($interactive) {
-        #~ my $respo = "";
-        #~ do {
-            #~ print STDERR
-#~ "Use default range values for the optimization of geneid eWF (exon weight) and oWF (exon/oligo factor) internal parameters?\n\n(eWF: $IeWF to $FeWF; step $deWF\noWF: $IoWF to $FoWF; step $doWF)\n\nDo you prefer to change these values? ";
-            #~ $respo = readline(STDIN);
-        #~ } while ( $respo !~ /^(yes|y)|(n|no)$/i );
 
-        #~ if ( $respo =~ /^(yes|y)/i ) {
-
-            #~ my $sline = "";
-            #~ my $eline = "";
-            #~ my $dline = "";
-            #~ do {
-                #~ print STDERR "\nType new initial eWF (IeWF): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $IeWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new final eWF (FeWF): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $FeWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType step (delta) eWF (deWF)): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $deWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new initial oWF (IoWF): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $IoWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new final oWF (FoWF): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $FoWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType step (delta) oWF (doWF): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $doWF = $1;
-
-        #~ }
-    #~ }
-#~ ## OPTIMIZATION FUNCTIONS
+## OPTIMIZATION FUNCTIONS
 
     if ( !$contigopt ) {
+		print STDERR "\n DEBUG: NOT CONTIG OPT\n";
         @evaluation = @{
             OptimizeParameter( $gptrainfa, $gptraingff, $newparam, 0, 0, 0, 0,
                 $IeWF, $deWF, $FeWF, $IoWF, $doWF, $FoWF, 0, 0, 0, 0, 0, 0 )
@@ -1204,7 +939,7 @@ my $fAccCtx = "70";
 
     }
     elsif ($contigopt) {
-
+        print STDERR "\n DEBUG: CONTIG OPT\n";
         @evaluation = @{
             OptimizeParameter( $gptraincontigfa, $gptraincontiggff,
                 $newparam, 0, 0, 0, 0, $IeWF, $deWF, $FeWF, $IoWF, $doWF,
@@ -1216,151 +951,7 @@ my $fAccCtx = "70";
 
     }
 
-#~ } ## end of if not branch
-#~ elsif ($usebranch) {    #use separate branch profile
-    #~ if ($interactive) {
-        #~ my $respo = "";
-        #~ do {
-            #~ print STDERR
-#~ "Use automatically selected range values for the optimization of geneid eWF (exon weight)/oWF (exon/oligo factor)/Minimum Branch Distance from Acceptor and Context length in which Branch sites should be scored (AccCtx) internal parameters?\n\n(eWF: $IeWF to $FeWF; step $deWF\noWF: $IoWF to $FoWF; step $doWF\nMinBranchDistance: $iMin to $fMin; step $dMin\nAcceptorBranchCtx: $iAccCtx to $fAccCtx; step $dAccCtx)\n\nDo you prefer to change these values? (we do not recommed you change the Min Branch Distance and AccBranch context)";
-            #~ $respo = readline(STDIN);
-        #~ } while ( $respo !~ /^(yes|y)|(n|no)$/i );
 
-        #~ if ( $respo =~ /^(yes|y)/i ) {
-
-            #~ my $sline = "";
-            #~ my $eline = "";
-            #~ my $dline = "";
-            #~ do {
-                #~ print STDERR "\nType new initial eWF (IeWF): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $IeWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new final eWF (FeWF): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $FeWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType step (delta) eWF (deWF)): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $deWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new initial oWF (IoWF): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $IoWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new final oWF (FoWF): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $FoWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType step (delta) oWF (doWF): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $doWF = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new initial Min Branch Distance (iMin): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $iMin = $1;
-
-            #~ do {
-                #~ print STDERR "\nType new final Min Branch Distance (fMin): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $fMin = $1;
-
-            #~ do {
-                #~ print STDERR
-                  #~ "\nType step (delta) Min Branch Distance (dMin)): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $dMin = $1;
-
-            #~ do {
-                #~ print STDERR
-                  #~ "\nType new initial Acceptor/Branch Context (iAccCtx): ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $iAccCtx = $1;
-
-            #~ do {
-                #~ print STDERR
-                  #~ "\nType new final Acceptor/Branch Context (fAccCtx): ";
-                #~ $eline = readline(STDIN);
-              #~ } while ( $eline !~ /(-*[0-9]*\.*[0-9]+)/
-                #~ || $eline <= $sline );
-            #~ $fAccCtx = $1;
-
-            #~ do {
-                #~ print STDERR
-                  #~ "\nType step (delta) Acceptor/Branch Context (dAccCtx): ";
-                #~ $dline = readline(STDIN);
-            #~ } while ( $dline !~ /(-*[0-9]*\.*[0-9]+)/ );
-            #~ $dAccCtx = $1;
-
-        #~ }
-    #~ }
-#~ ## OPTIMIZATION FUNCTIONS
-
-    #~ if ( !$contigopt ) {
-
-        #~ @evaluation = @{
-            #~ OptimizeParameter(
-                #~ $gptrainfa,    $gptraingff,   $newparam,     1,
-                #~ $prof_len_bra, $fxdbraoffset, $branchmatrix, $IeWF,
-                #~ $deWF,         $FeWF,         $IoWF,         $doWF,
-                #~ $FoWF,         $iMin,         $dMin,         $fMin,
-                #~ $iAccCtx,      $dAccCtx,      $fAccCtx
-            #~ )
-        #~ };
-
-        #~ ( $bestIeWF, $bestIoWF, $bestAcc, $bestMin, $array_ref ) = @{
-            #~ BuildOptimizedParameterFile(
-                #~ \@evaluation,  $branchp, $prof_len_bra,
-                #~ $fxdbraoffset, $branchmatrix
-            #~ )
-        #~ };
-
-    #~ }
-    #~ elsif ($contigopt) {
-
-        #~ @evaluation = @{
-            #~ OptimizeParameter(
-                #~ $gptraincontigfa, $gptraincontiggff, $newparam,
-                #~ 1,                $prof_len_bra,     $fxdbraoffset,
-                #~ $branchmatrix,    $IeWF,             $deWF,
-                #~ $FeWF,            $IoWF,             $doWF,
-                #~ $FoWF,            $iMin,             $dMin,
-                #~ $fMin,            $iAccCtx,          $dAccCtx,
-                #~ $fAccCtx
-            #~ )
-        #~ };
-
-        #~ ( $bestIeWF, $bestIoWF, $bestAcc, $bestMin, $array_ref ) = @{
-            #~ BuildOptimizedParameterFile(
-                #~ \@evaluation,  $branchp, $prof_len_bra,
-                #~ $fxdbraoffset, $branchmatrix
-            #~ )
-        #~ };
-
-    #~ }
-
-#~ #############################
-
-#~ } #end of elseif branch
 
 my @evaluationinit = @$array_ref;
 my @evaluationtest = ();
@@ -3348,65 +2939,11 @@ sub WriteStatsFile {
       $mean + ( $st * 3 ) > 100000 ? 100000 : $mean + ( $st * 3 );
     chomp $longintron;
     
-    ## BUG non interactive
-    #~ if ($interactive) {
-        #~ my $answer = "";
-        #~ do {
-            #~ print
-#~ "\nDo you want to use this automatically selected range of introns ($shortintron to $longintron) in the geneid gene model (yes/no)?\n(Note that the 5 smallest introns were found to be: "
-              #~ . join( ", ", @slice1 )
-              #~ . " nucleotides long and the 5 longest introns: "
-              #~ . join( ", ", @slice2 )
-              #~ . " bases in length)\n";
-            #~ $answer = <ARGV>;
-            #~ chomp $answer;
-        #~ } while ( $answer !~ /^(yes|y)|(n|no)$/i );
 
-        #~ if ( $answer =~ /^(no|n)$/i ) {
-            #~ my $sline = "";
-            #~ my $eline = "";
-            #~ do {
-                #~ print STDERR "\nType new intron minimum length boundary: ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(\d+)/ );
-            #~ $shortintron = $1;
-            #~ do {
-                #~ print STDERR "\nType maximum intron length boundary: ";
-                #~ $eline = readline(STDIN);
-            #~ } while ( $eline !~ /(\d+)/ || $eline <= $sline );
-            #~ $longintron = $1;
-        #~ }
-
-    #~ }
     my $minintergenic = 200;
     my $maxintergenic = 'Infinity';
     
-    ## BUG non interactive
-    #~ if ($interactive) {
-        #~ do {
-            #~ print
-#~ "\nDo you want to use this automatically selected intergenic distance range ($minintergenic to $maxintergenic) in the geneid gene model (yes/no)?\n";
-            #~ $answer = <ARGV>;
-            #~ chomp $answer;
-        #~ } while ( $answer !~ /^(yes|y)|(n|no)$/i );
 
-        #~ if ( $answer =~ /^(no|n)$/i ) {
-            #~ my $sline = "";
-            #~ my $eline = "";
-            #~ do {
-                #~ print STDERR "\nType new minimum intergenic distance: ";
-                #~ $sline = readline(STDIN);
-            #~ } while ( $sline !~ /(\d+)/ );
-            #~ $minintergenic = $1;
-            #~ do {
-                #~ print STDERR
-#~ "\nType maximum intergenic distance (type a number or 'Infinity'): ";
-                #~ $eline = readline(STDIN);
-            #~ } while ( $eline !~ /(\d+|Infinity)/ || $eline <= $sline );
-            #~ $maxintergenic = $1;
-
-        #~ }
-    #~ }
 ## use shortest and longest intron lengths in gene model of parameter file
     $param->geneModel->intronRange( $shortintron, $longintron );
     $param->geneModel->intergenicRange( $minintergenic, $maxintergenic );
@@ -3861,43 +3398,6 @@ sub generalGFFtoGFFgeneid {
 
 }
 
-## NO need to clean if we need to look at temp files to debug
-#~ sub go_to_die() {
-#~ ( warn "@_\n" ); #&& &clean_tmp();
-#~ &clean_ext();    #unless $ext_flg;
-#~ exit(1);
-#~ }
-
-## EVAL OPTIMIZATION SORTING FUNCTION
-
-## NO need to clean if we need to look at temp files to debug
-#~ sub clean_ext() {
-
-#~ # Obtaining the list of extended files
-#~ my @files = (qw( "" ));
-
-#~ # Unlinking the temporary files if they exist
-#~ foreach my $file (@files) {
-#~ unlink $file if ( -e $file );
-#~ }
-
-#~ # rmdir "geneid_params" if (-e "geneid_params");
-
-#~ }
-
-## no need to look for patterns if all temp files are outside of the /tmp
-#~ sub clean_tmp() {
-
-#~ # Obtaining the list of temporary files
-#~ opendir( my $dh_DIR, "$tmp_dir" ) or croak "err: $tmp_dir\n";
-#~ my @files = map { "$tmp_dir/$_" } grep { /^$TMPROOT/ } readdir($dh_DIR);
-#~ closedir($dh_DIR);
-
-#~ foreach my $file (@files) {
-#~ unlink $file if ( -e $file );
-#~ }
-#~ }
-
 sub sorteval {
 
          $b->[7] <=> $a->[7]
@@ -3907,8 +3407,6 @@ sub sorteval {
       || $a->[12] <=> $b->[12]
 
 }
-
-
 
 #DK_subs
 sub num_of_lines_in_file {
@@ -4015,17 +3513,6 @@ sub write_sizes_from_tbl_fn {
     close $fh_input;
     return 1;
 }    #end write_sizes_from_tbl_fn
-
-## extracted from main flow
-    ###IF THERE IS A MEME-DISCOVERED BRANCH POINT PROFILE END
-
-sub start_reduced {
-#############################################################
-## reduced/short version training starting with PWMs PLUS BACKGROUND#
-#############################################################
-    croak "no reduced training option in the simplified script";
-    return 1;
-}    #end reduced
 
 sub getBackground {
 
