@@ -1206,3 +1206,124 @@ sub OptimizeParameter {
 
             #~ }    #if $branchswitch
             #~ elsif ( !$branchswitch ) 
+
+
+sub sortevalbranch {
+
+         $b->[9] <=> $a->[9]
+      || $b->[12] <=> $a->[12]
+      || $b->[6] <=> $a->[6]
+      || $a->[13] <=> $b->[13]
+      || $a->[14] <=> $b->[14]
+
+}
+
+   #~ elsif ($branchswitch) {
+
+        #~ @sortedeval = sort sortevalbranch @$evalarray;
+
+        #~ $bestIoWF = $sortedeval[0][0];    #0.2
+        #~ $bestIeWF = $sortedeval[0][1];    #-3.5
+        #~ $bestAcc  = $sortedeval[0][2];
+        #~ $bestMin  = $sortedeval[0][3];
+
+        #~ print STDERR "\nBest performance obtained using IoWF: "
+          #~ . $sortedeval[0][0]
+          #~ . " , IeWF: "
+          #~ . $sortedeval[0][1]
+          #~ . ", MinimalBranchDist: "
+          #~ . $bestMin
+          #~ . ", Optimal Branch Context: "
+          #~ . $bestAcc . "\n";
+        #~ print $fh_SOUT "best performance obtained using IoWF: "
+          #~ . $sortedeval[0][0]
+          #~ . " , IeWF: "
+          #~ . $sortedeval[0][1]
+          #~ . ", MinimalBranchDist: "
+          #~ . $bestMin
+          #~ . ", Optimal Branch Context: "
+          #~ . $bestAcc . "\n";
+
+        #~ #INITIALIZE ARRAY WITH EVALUATION PARAMETERS
+        #~ @evaluationinit =
+          #~ (
+            #~ qw(oWF eWF AccCtx MinD SN SP CC SNe SPe SNSP SNg SPg SNSPg raME raWE)
+          #~ );
+
+        #~ print STDERR
+#~ "(Sorted performance results (Three best performance estimates) for different values of oWF, eWF, AccCtx and MinD)\n\n"
+          #~ . join( "\t", @evaluationinit ), "\n";
+        #~ print $fh_SOUT
+#~ "(Sorted performance results (best to worst) for different values of oWF, eWF, AccCtx and MinD)\n\n"
+          #~ . join( "\t", @evaluationinit ), "\n";
+
+        #~ foreach my $eval_ref (@sortedeval) {
+
+            #~ print $fh_SOUT join( "\t", @$eval_ref ), "\n";
+
+        #~ }
+
+#~ ###THREE BEST PERFORMANCE RESULTS AFTER OPTIMIZATION
+        #~ for ( my $i = 0 ; $i <= 2 ; $i++ ) {
+            #~ print STDERR join( "\t", @{ $sortedeval[$i] } ), "\n";
+        #~ }
+#~ ############
+
+        #~ ## BUILD BEST PERFORMANCE (OPTIMIZED) PARAMETER FILE (USE VALUES OBTAINED ABOVE)
+
+        #~ my $param = Geneid::Param->new();
+        #~ $param->readParam("$newparam");
+
+        #~ for ( my $i = 0 ; $i < $param->numIsocores ; $i++ ) {
+            #~ if (
+                #~ !defined @{ $param->isocores }[$i]->Exon_weights(
+                    #~ [ $bestIeWF, $bestIeWF, $bestIeWF, $bestIeWF ]
+                #~ )
+              #~ )
+            #~ {
+                #~ croak "error in setting exon weights\n";
+            #~ }
+            #~ if ( !defined @{ $param->isocores }[$i]
+                #~ ->Exon_factor( [ $bestIoWF, $bestIoWF, $bestIoWF, $bestIoWF ] )
+              #~ )
+            #~ {
+#~ #   if (!defined @{$param->isocores}[$i]->Exon_factor([0.4,$bestIoWF,$bestIoWF,0.4])) {
+                #~ croak "error in setting exon weights\n";
+            #~ }
+            #~ if (
+                #~ !defined @{ $param->isocores }[$i]->Site_factor(
+                    #~ [
+                        #~ 1 - $bestIoWF,
+                        #~ 1 - $bestIoWF,
+                        #~ 1 - $bestIoWF,
+                        #~ 1 - $bestIoWF
+                    #~ ]
+                #~ )
+              #~ )
+            #~ {
+#~ #  if (!defined @{$param->isocores}[$i]->Site_factor([0.55,1-$bestIoWF,1-$bestIoWF,0.55])) {
+                #~ croak "error in setting exon weights\n";
+            #~ }
+            #~ if (
+                #~ !defined @{ $param->isocores }[$i]->set_profile(
+                    #~ 'Branch_point_profile', $prof_len_bra, $fxdbraoffset,
+                    #~ -50, 0, 0, 1, $bestAcc, $bestMin, 0, 0, $branchmatrix
+                #~ )
+              #~ )
+            #~ {
+                #~ croak "error in setting profile\n";
+            #~ }
+        #~ }
+
+        #~ #write new parameter file (optimized)
+        #~ $param->writeParam("$species.geneid.optimized.param");
+
+        #~ print STDERR
+#~ "\nNew optimized parameter file named: $species.geneid.optimized.param \n";
+        #~ print $fh_SOUT
+#~ "\nNew optimized parameter file named: $species.geneid.optimized.param \n";
+
+        #~ return [ $bestIeWF, $bestIoWF, $bestAcc, $bestMin, \@evaluationinit ];
+
+    #~ }    #if branch switch
+    

@@ -3,7 +3,8 @@
 rm test.*
 rm *tbl
 rm -Rf workdir_00_gtrain/*
-rm -Rf 00_gtrain_workdir/*
+rm -Rf /tmp/workdir_00_gtrain/*
+rmdir /tmp/workdir_00_gtrain
 rm pmar01*
 rm Acceptor_sites*
 rm *log
