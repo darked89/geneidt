@@ -33,12 +33,16 @@ use Readonly;
 
 use feature 'say';
 use Benchmark qw(:all);
+use Devel::Size qw(size total_size);
 
 ## geneid_trained modules
 use Geneid::Param;
 use Geneid::Isocore;
 use Geneid::geneid;
 use Geneid::geneidCEGMA;
+
+## experimental
+#~ use Inline::Python;
 
 ## MAIN VARIABLES
 my $PROGRAM      = "geneid_trainer";
@@ -127,7 +131,24 @@ Readonly::Scalar my $non_coding_bp_limit_B => 150_000;
 #~ || (   $totalnoncodingbases > 35000
 #~ && $totalcodingbases > ( 25 * $totalnoncodingbases ) )
 
-## End Constant values
+my %profile_params = (
+## EXON WEIGHT PARAMETER
+    IeWF => -4.5,
+    deWF => 0.5,
+    FeWF => -2.5,
+## EXON/OLIGO FACTOR PARAMETER
+    IoWF => 0.25,
+    doWF => 0.05,
+    FoWF => 0.50,
+## Minimum Branch Profile Distance
+    iMin => 7,
+    dMin => 2,
+    fMin => 9,
+## ACCEPTOR CONTEXT
+    iAccCtx => 40,
+    dAccCtx => 10,
+    fAccCtx => 70,
+);
 
 ## end set CONSTANTS
 
@@ -197,7 +218,6 @@ my $gptraingff       = "";
 my $gptrainlen       = "";
 my $gptraintbl       = "";
 
-
 ## Weights for profiles??
 my $bestIeWF = "";
 my $bestIoWF = "";
@@ -206,43 +226,43 @@ my $bestMin  = "";
 
 my $acceptorsubprofile = "";
 my $donorsubprofile    = "";
-my $startsubprofile         = "";
+my $startsubprofile    = "";
 
-my $geneidgffsorted         = "";
-my $gffseqseval             = "";
-my $inframe                 = 0;
-my $inframeeval             = 0;
-my $locus_id                = "";
-my $longintron              = "";
-my $maxintergenic           = "";
-my $minintergenic           = "";
-my $new_locus_id            = "";
-my $outacceptortbl          = "";
-my $outcds                  = "";
-my $outcdseval              = "";
-my $outdonortbl             = "";
-my $outgff                  = "";
-my $outgffeval              = "";
-my $outintron               = "";
-my $outintroneval           = "";
-my $outlocus_id             = "";
-my $outlocus_id_eval        = "";
-my $outstarttbl             = "";
-my $seqs4evaluation         = "";
-my $seqs4training           = "";
-my $shortintron             = "";
+my $geneidgffsorted  = "";
+my $gffseqseval      = "";
+my $inframe          = 0;
+my $inframeeval      = 0;
+my $locus_id         = "";
+my $longintron       = "";
+my $maxintergenic    = "";
+my $minintergenic    = "";
+my $new_locus_id     = "";
+my $outacceptortbl   = "";
+my $outcds           = "";
+my $outcdseval       = "";
+my $outdonortbl      = "";
+my $outgff           = "";
+my $outgffeval       = "";
+my $outintron        = "";
+my $outintroneval    = "";
+my $outlocus_id      = "";
+my $outlocus_id_eval = "";
+my $outstarttbl      = "";
+my $seqs4evaluation  = "";
+my $seqs4training    = "";
+my $shortintron      = "";
 
 my $starttbl                = "";
 my $tempgeneidgffsorted     = "";
 my $tempgeneidgffsortedeval = "";
 my $templist_train          = "";
 
-my $totalnoncanacc          = "";
-my $totalnoncandon          = "";
-my $totalnoncansta          = "";
+my $totalnoncanacc = "";
+my $totalnoncandon = "";
+my $totalnoncansta = "";
 
-my $total_seqs              = "";
-my $totalseqs4training      = "";
+my $total_seqs         = "";
+my $totalseqs4training = "";
 
 #############################################################
 ## INITIAL CHECKS
@@ -251,6 +271,18 @@ my $totalseqs4training      = "";
 ## 1. fasta / gff file accessible?
 ## 2. limits:
 ## 2a. >= 500 genes in gff
+
+## test python access
+use Inline Python => << 'PYEND';
+from pygeneid import check_fasta
+
+PYEND
+my $fasta_names = check_fasta($fasta);
+
+print "\n GGG $fasta_names GGG \n";
+
+#~ hello_from_python();
+die;
 
 ## CREATE A VARIABLE SPECIES FOR A GIVEN SPECIES ONLY ONCE####
 ## XX BUG: it does not store the used variables + subsequent eval $_ is
@@ -507,23 +539,9 @@ sub normal_run {
     else {    # seqs < $train_loci_cutoff
         ## BUG we do not do jacknife anyway here
         croak "we do not have >= $train_loci_cutoff sequences, quitting now";
-
-        #~ $jacknifevalidate = 1;
-        #~ ##ALWAYS USE ALL SEQS IF USER PROVIDES FEWER THAN 500 SEQS
-        #~ $useallseqs = 1;
-
-#~ ###STORE INFORMATION AS TO WHETHER WE WOULD LIKE TO RUN JACKNIFE AND THAT SEQS WERE NOT set aside for eval $useallseqs=1 <500 seqs
-#~ print $fh_STORV Data::Dumper->Dump(
-#~ [ $jacknifevalidate,   $useallseqs ],
-#~ [ '$jacknifevalidate', '$useallseqs' ]
-#~ );
-
     }    # seqs < 500
 
-    ######### ONLY EXECUTED FIRST TIME THE PIPELINE IS RUN FOR A GIVEN SPECIES
-    #XXXVVV2
 
-    #ONLY FIRST TIME ("NOT SHORT VERSION") FOR A GIVEN SPECIES
 
     if ( !$useallseqs ) {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
         print STDERR
@@ -634,13 +652,7 @@ sub normal_run {
 
     }
 
-#~ ## DELETE DIRECTORIES NO LONGER NEEDED
-#~ print STDERR
-#~ "the CDS-containing directory in $cds_dir is no longer needed..\nRemove directory and its contents\n";
 
-#~ #rmtree( ["$work_dir/cds/"] );
-#~ print STDERR
-#~ "the intron-containing directory in $introns_dir is no longer needed..\nRemove directory and its contents\n";
 
 ### EVERYTHING BELOW ALWAYS EXECUTED EVEN ON SHORT VERSION OF THE PIPELINE (REDUCED)
 
@@ -823,6 +835,22 @@ sub normal_run {
 
     #print "\n$my_command\n";
     run($my_command);
+
+#~ ## DEBUG MEM
+
+#~ {
+    #~ #no scrict 'refs';
+    #~ my $size = 0;
+    #~ for my $var (keys %{'main::'}) {
+		#~ $size = size("A string");
+        #~ print "$var = $size \n";
+    #~ }
+#~ }
+#~ ## DEBUG MEM END
+
+
+
+
 
 ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -1007,9 +1035,6 @@ sub extractCDSINTRON {
 
     my ( $gff, $locus_id, $type ) = @_;
 
-    #ERASE FASTA FILES FOR PARTICULAR SPECIES IF ALREADY EXIST
-    #	unlink "$work_dir/cds/${species}.${type}.cds.fa";
-    #	unlink "$work_dir/intron/${species}.${type}.intron.fa";
 
     # #####extract CDS and INTRON SEQUENCES
     #my
@@ -1080,14 +1105,6 @@ sub extractCDSINTRON {
     my $introntblpositive = "";
     my $my_command = "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron ";
     $introntblpositive = capture($my_command);
-
-    #~ open( my $fh_LOCID,
-    #~ "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron |" );
-    #~ while (<$fh_LOCID>) {
-
-    #~ $introntblpositive .= $_;
-    #~ }
-    #~ close $fh_LOCID;
 
     my $tempallintron_positive =
       $work_dir . $species . "$type" . ".intron_positivelength.tbl";
@@ -1311,9 +1328,8 @@ sub extractprocessSITES {
     }    #while $fh_LOC_sites
     close $fh_LOC_sites;
 
-    my $accsites = "$sites_dir/Acceptor_sites.fa";
 
-    #print STDERR "$accsites\n..";
+    my $accsites   = "$sites_dir/Acceptor_sites.fa";
     my $donsites   = "$sites_dir/Donor_sites.fa";
     my $startsites = "$sites_dir/Start_sites.fa";
     my $stopsites  = "$sites_dir/Stop_sites.fa";
@@ -1329,12 +1345,13 @@ sub extractprocessSITES {
 
 ##ADD N TO START SITES############
     ## POTENTIAL BUG
+    my $starttbl = "$sites_dir" . "Start_sites_complete.tbl";
     my $my_command =
-"gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl";
+"gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $prestarttbl > $starttbl";
     run($my_command);
 
 #`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl`;
-    my $starttbl = "$sites_dir" . "Start_sites_complete.tbl";
+ 
 #################################
 
     print STDERR "\n\nEliminate non-canonical donors/acceptors/starts:\n";
@@ -2704,17 +2721,13 @@ sub OptimizeParameter {
 #` ./bin/geneid -GP ${newparam}.temp $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
 ## BUG very complex comand line
 
+             
             my @evaluation_output = split " ",
 ` ./bin/evaluation -sta $temp0_geneid_pred_gff_fh $gpgff | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
 
             push( @evaluation_total, \@evaluation_output );
 
-            #~ }    #elseif
-
         }    #end for_#2
-
-        # $iAccCtx = $iAccCtxini;
-        # $iMin=$iMinini;
         $IoWF = $IoWFini;
         print STDERR "\n";
 
@@ -3088,7 +3101,7 @@ sub TblToFasta {
     open( my $fh_IN,   "<", "$tbl" )   or croak "Failed here";
     open( my $fh_FOUT, ">", "$faout" ) or croak "Failed here";
     while (<$fh_IN>) {
-        chomp $_;
+        chomp;
         my ( $n, $s ) = split( /\s+/, $_ );
         my ( $i, $e ) = ( 1, length($s) );
         print $fh_FOUT ">$n\n";

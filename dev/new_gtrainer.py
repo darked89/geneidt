@@ -337,6 +337,7 @@ def extract_cds_seqs(*transcript_list):
 		except:
 			print "error: transcript_id", transcript_id
 
-extract_splices(transcript_dict, genome_fas, genome_fas_dict, "acceptors")
-extract_splices(transcript_dict, genome_fas, genome_fas_dict, "donors")
-extract_cds_seqs()
+if __name__ == "__main__":
+    extract_splices(transcript_dict, genome_fas, genome_fas_dict, "acceptors")
+    extract_splices(transcript_dict, genome_fas, genome_fas_dict, "donors")
+    extract_cds_seqs()
