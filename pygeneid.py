@@ -34,8 +34,9 @@ from pyfaidx import Fasta
 def check_fasta(fasta_fn):
     genome_fas = Fasta(fasta_fn , sequence_always_upper=True)
     genome_fas_dict = {}
+    
     for contig_name in genome_fas.keys():
-        print contig_name, len(genome_fas[contig_name][:])
+        #print contig_name, len(genome_fas[contig_name][:])
         genome_fas_dict[contig_name] = len(genome_fas[contig_name][:])
         #print "%key"
     return len(genome_fas.keys())

@@ -272,17 +272,17 @@ my $totalseqs4training = "";
 ## 2. limits:
 ## 2a. >= 500 genes in gff
 
-## test python access
 use Inline Python => << 'PYEND';
 from pygeneid import check_fasta
 
 PYEND
-my $fasta_names = check_fasta($fasta);
 
-print "\n GGG $fasta_names GGG \n";
+my $headers_fasta_seq; 
+$headers_fasta_seq  = check_fasta($fasta);
 
-#~ hello_from_python();
-die;
+print STDERR "\n PYTHON The user has provided $headers_fasta_seq  genomic sequences\n";
+
+##die;
 
 ## CREATE A VARIABLE SPECIES FOR A GIVEN SPECIES ONLY ONCE####
 ## XX BUG: it does not store the used variables + subsequent eval $_ is
@@ -294,6 +294,8 @@ die;
 #~ ## BUG we do not do jacknife anyway here
 #~ croak "we do not have >= $train_loci_cutoff sequences, quitting now";
 #~ }    # seqs < 500
+
+
 
 # my $varsmemory = $species . ".variables";
 # open( my $fh_STORV, ">", "$varsmemory" ) or die;
@@ -317,24 +319,17 @@ normal_run();
 
 sub normal_run {
 
+my $my_command; 
 ## Convert fasta to tabular format
 ## Fasta process to sub later
     my $t0                = Benchmark->new;
-    my $my_command        = "grep '^>' $fasta";
-    my $headers_fasta_seq = capture($my_command);
+    
+## test python access
 
-    $my_command = "grep '^>' $fasta | sort | uniq ";
-    my $uniq_fasta_seq = capture($my_command);
 
-    my $tot_headers_fasta_seq = capture("grep '^>' $fasta | wc -l");
-    my $tot_uniq_fasta_seq = capture("grep '^>' $fasta | sort | uniq | wc -l");
 
-    if ( $tot_headers_fasta_seq != $tot_uniq_fasta_seq ) {
-        say "\n\nERROR\n\n";
-        croak "\n non-unique fasta contig names, quitting\n";
-    }
 
-    print STDERR "\nThe user has provided   genomic sequences\n";
+    
 
     print STDERR
       "\nConverting genomics fasta file ($fasta) to tabular format\n";
