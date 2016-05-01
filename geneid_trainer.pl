@@ -1250,7 +1250,7 @@ sub extractprocessSITES {
         print $fh_FOUT "$noncanonicalname";
         close $fh_FOUT;
 
-        open $fh_LOCID, "egrep -vf $tempnoncanonicalname $donortbl |";
+        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $donortbl";
         while (<$fh_LOCID>) {
             $newdonortbl .= $_;
         }
@@ -1291,14 +1291,14 @@ sub extractprocessSITES {
     my $newacceptortbl = "";
     my $foobar_tmp     = "";
 
-    $my_command =
-      "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCGn]{28}AG'";
+    #$my_command =
+    #  "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCG]{28}AG'";
 
     # BUG this blows if there are no such sites...
     #$foobar_tmp = capture($my_command);
 
-    open $fh_LOCID,
-      "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCGn]{28}AG' |";
+    open $fh_LOCID, "-|",
+      "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCG]{28}AG'";
     while (<$fh_LOCID>) {
         $noncanonical .= $_;
     }
@@ -1320,8 +1320,8 @@ sub extractprocessSITES {
     if ($totnoncanonical) {    #if there are non-canonical acceptors
 
         my @noncanonicalname = ();
-        open $fh_LOCID,
-"egrep -f $tempacceptornoncanonical $acceptortbl | gawk '{print \$1}' - | sort | uniq |";
+        open $fh_LOCID, "-|",
+"egrep -f $tempacceptornoncanonical $acceptortbl | gawk '{print \$1}' - | sort | uniq ";
         while (<$fh_LOCID>) {
             push( @noncanonicalname, "$_" );
         }
@@ -1344,7 +1344,7 @@ sub extractprocessSITES {
         print $fh_FOUT "$noncanonicalname";
         close $fh_FOUT;
 
-        open $fh_LOCID, "egrep -vf $tempnoncanonicalname $acceptortbl |";
+        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $acceptortbl";
         while (<$fh_LOCID>) {
             $newacceptortbl .= $_;
         }
@@ -1388,8 +1388,8 @@ sub extractprocessSITES {
     $totcanonical     = "";
     my $newstarttbl = "";
 
-    open $fh_LOCID,
-      "gawk '{print \$2}' $ATGx_tbl | egrep -v '^[NATCGn]{30}ATG' |";
+    open $fh_LOCID, "-|",
+      "gawk '{print \$2}' $ATGx_tbl | egrep -v '^[NATCG]{30}ATG' ";
     while (<$fh_LOCID>) {
         $noncanonical .= $_;
     }
@@ -1413,8 +1413,8 @@ sub extractprocessSITES {
     if ($totnoncanonical) {    #if there are non-canonical starts
 
         my @noncanonicalname = ();
-        open $fh_LOCID,
-"egrep -wf $tempstartnoncanonical $ATGx_tbl | gawk '{print \$1}' - | sort | uniq |";
+        open $fh_LOCID, "-|";
+"egrep -wf $tempstartnoncanonical $ATGx_tbl | gawk '{print \$1}' - | sort | uniq ";
         while (<$fh_LOCID>) {
             push( @noncanonicalname, "$_" );
         }
@@ -1435,7 +1435,7 @@ sub extractprocessSITES {
         print $fh_FOUT "$noncanonicalname";
         close $fh_FOUT;
 
-        open( $fh_LOCID, "egrep -vf $tempnoncanonicalname $ATGx_tbl |" );
+        open( $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $ATGx_tbl " );
         while (<$fh_LOCID>) {
             $newstarttbl .= $_;
         }
@@ -1609,7 +1609,7 @@ sub processSequences4Optimization {
 
     #my $work_dir;
 
-    open( my $fh_LOCID, "./bin/gff2gp.awk $input_gff_fn | sort -k 1 |" );
+    open( my $fh_LOCID, "-|", "./bin/gff2gp.awk $input_gff_fn | sort -k 1 " );
     while (<$fh_LOCID>) {
 
         $gff2gp .= $_;
@@ -1634,8 +1634,8 @@ sub processSequences4Optimization {
 #~ run($my_command);
 #~ $my_command =  "sort seq4Optimization_temp_1_fn | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |";
 #open( $fh_LOCID, $my_command );
-    open( $fh_LOCID,
-"gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $pretblgp | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |"
+    open( $fh_LOCID, "-|",
+"gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $pretblgp | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - "
     );
 
     while (<$fh_LOCID>) {
@@ -1648,8 +1648,8 @@ sub processSequences4Optimization {
     print $fh_FOUT "$tblgp";
     close $fh_FOUT;
 
-    open( $fh_LOCID,
-"gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $pretblgp | egrep -v '(Intron|Utr)' - |"
+    open( $fh_LOCID, "-|",
+"gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $pretblgp | egrep -v '(Intron|Utr)' - "
     );
     while (<$fh_LOCID>) {
         $gffgp .= $_;
@@ -1684,8 +1684,8 @@ sub processSequences4Optimization {
     close $fh_FOUT;
 
     my $cdsgp = "";
-    open( $fh_LOCID,
-"./bin/gff2cds.awk source=\"annotations\" $tempgp_gff | sort -k1,1 | join $tempseqlen - |"
+    open( $fh_LOCID, "-|",
+"./bin/gff2cds.awk source=\"annotations\" $tempgp_gff | sort -k1,1 | join $tempseqlen - "
     );
     while (<$fh_LOCID>) {
         $cdsgp .= $_;
@@ -1698,8 +1698,8 @@ sub processSequences4Optimization {
     close $fh_FOUT;
 
     my $gffgpeval = "";
-    open( $fh_LOCID,
-"gawk 'BEGIN{while (getline<ARGV[1]>0){len[\$1]=\$2;};ARGV[1]=\"\";OFS=\"\\t\";}{if (NR==1) {ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"};if (\$1!=ant) {print \"\#\$\";ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"}; print }' $tempcdsgp $tempgp_gff |"
+    open( $fh_LOCID, "-|",
+"gawk 'BEGIN{while (getline<ARGV[1]>0){len[\$1]=\$2;};ARGV[1]=\"\";OFS=\"\\t\";}{if (NR==1) {ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"};if (\$1!=ant) {print \"\#\$\";ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"}; print }' $tempcdsgp $tempgp_gff "
     );
     while (<$fh_LOCID>) {
         $gffgpeval .= $_;
@@ -1750,8 +1750,8 @@ sub processSequences4Optimization {
         close $fh_FOUT;
 
         my $gpcontig = "";
-        open( $fh_LOCID,
-"./bin/multiple_annot2one.awk species=$species leng=$lengp $tempcdsgp |"
+        open( $fh_LOCID, "-|",
+"./bin/multiple_annot2one.awk species=$species leng=$lengp $tempcdsgp "
         );
         while (<$fh_LOCID>) {
 
@@ -1766,8 +1766,8 @@ sub processSequences4Optimization {
         close $fh_FOUT;
 
         my $cds2gffcontig = "";
-        open( $fh_LOCID,
-"./bin/cds2gff.awk $tempgff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$lengp,\".\",\".\",\".\",\".\";print}else {print}}' - | "
+        open( $fh_LOCID, "-|",
+"./bin/cds2gff.awk $tempgff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$lengp,\".\",\".\",\".\",\".\";print}else {print}}' - "
         );
         while (<$fh_LOCID>) {
             $cds2gffcontig .= $_;
@@ -2319,6 +2319,7 @@ sub getKmatrix {
             chomp;
             @fields = split;
             printf STDERR "%2s %2.2f %s",
+            ##
               ( $fields[0], $fields[1], "=" x int( $fields[1] * 30 ) );
             if ( $fields[1] > $info_thresh ) {
                 push( @info, $fields[0] );
@@ -3240,7 +3241,7 @@ sub convert_GFF_2_geneidGFF {
     }
 
     my $X_geneid_sorted_gff = "";
-    open( my $fh_LOCID, "sort -s -k8,9 -k4,5n $geneidgff |" );
+    open( my $fh_LOCID, "-|", "sort -s -k8,9 -k4,5n $geneidgff") or croak "Failed here";
     while (<$fh_LOCID>) {
         $X_geneid_sorted_gff .= $_;
     }
