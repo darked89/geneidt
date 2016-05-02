@@ -5,7 +5,7 @@
 
 ## checks & debugs modules
 use Modern::Perl;
-use English;
+use English '-no_match_vars';
 
 use strict;
 use warnings;
@@ -101,9 +101,10 @@ my $usage =
 
 #~ -branch -reduced -path <executables_path>\n";
 
-if  (! ($species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta) ){
-	print STDERR $usage and exit
-	}
+if ( !( $species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta ) ) {
+    print STDERR $usage and exit;
+}
+
 #  unless ( $species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta );
 ## EXAMPLE COMMAND LINE: ./geneidTRAINer1_2TA.pl -species S.cerevisiae -gff S_cerevisiae4training.gff -fastas yeast_genome.fa -sout stats.txt -branch -reduced
 ## Get arguments (command line) END
@@ -286,29 +287,28 @@ sub validate_input_gff {
 }
 
 sub select_test_eval {
-	return 1;
+    return 1;
 }
 
 sub extract_CDS {
-return 1;
+    return 1;
 }
 
 sub extract_introns {
-return 1;
+    return 1;
 }
 
 sub extract_donors {
-return 1;
+    return 1;
 }
 
 sub extract_acceptors {
-return 1;
+    return 1;
 }
 
 sub extract_ATGx {
-return 1;
+    return 1;
 }
-
 
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
@@ -413,25 +413,25 @@ sub normal_run {
 ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
     ##  ## Q_FRANCISCO: can we assume some sane GFF/GFT format as an input?  Why _ and "."?
     my $old_option = 0;
-    
+
     if ($old_option) {
-    print STDERR
-      "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
+        print STDERR
+          "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
 
-    my $filtergff = "";
+        my $filtergff = "";
 
-    $my_command =
+        $my_command =
 "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $input_gff_fn";
-    $filtergff = capture($my_command);
+        $filtergff = capture($my_command);
 
-    open( my $fh_FOUT, ">", "$no_dots_gff_fn" ) or croak "Failed here";
-    print $fh_FOUT "$filtergff";
-    close $fh_FOUT;
+        open( my $fh_FOUT, ">", "$no_dots_gff_fn" ) or croak "Failed here";
+        print $fh_FOUT "$filtergff";
+        close $fh_FOUT;
 
     }
     else {
         $no_dots_gff_fn = $input_gff_fn;
-        }
+    }
     print STDERR "\nObtain locus_id (list of genomic sequences / genes)\n";
 
     $my_command = "gawk '{print \$1,\$9}' $no_dots_gff_fn | sort | uniq ";
@@ -853,7 +853,7 @@ sub normal_run {
 
     }
 
-    my @evaluationinit = @{ $array_ref };
+    my @evaluationinit = @{$array_ref};
     my @evaluationtest = ();
 
 ############
@@ -2208,15 +2208,15 @@ sub getKmatrix {
     my @orders  = (qw(order-0 di tri order-4 order-5 order-6 order-7 order-8));
     my $ordname = $orders[$order];
     my $sort    = "sort -n";
-    if ($order > 1) {
-		$sort = "sort -k1,1n -k2,2" ;
-	}
+    if ( $order > 1 ) {
+        $sort = "sort -k1,1n -k2,2";
+    }
 
     #    my @info = ($offset-1,$offset+1);
     my $prof_len    = 0;
     my $info_thresh = "";    #bits
     ## BUG ?? why pid is needed?
-    my $pid         = $PROCESS_ID;
+    #my $pid         = $PROCESS_ID;
     ## BUG?
     my $true_seq_name = $true_kmers_tbl;
     $true_seq_name =~ s/\.tbl$//;
@@ -2374,9 +2374,9 @@ sub getKmatrix {
 
         my @sortedinfo = sort numerically @info;
         my $start      = ( shift @sortedinfo );
-        if ($start < 1) {
-			$start = 1 ;
-			}
+        if ( $start < 1 ) {
+            $start = 1;
+        }
         my $end = pop @sortedinfo;
 
         return ( $start, $end );
@@ -2633,6 +2633,7 @@ sub OptimizeParameter {
             open( my $fh_IN, "<", "$temp1_evalout_fn" ) or croak "Failed here";
             while (<$fh_IN>) {
                 @evaluation_output = split " ";
+
                 #@evaluation_output = split " ", $_;
             }
             close $fh_IN;
@@ -2681,7 +2682,7 @@ sub BuildOptimizedParameterFile {
 
     if ( !$branchswitch ) {
         ## BUG ???
-        @sortedeval = sort sorteval @{ $evalarray };
+        @sortedeval = sort sorteval @{$evalarray};
 
         $best_IoWF = $sortedeval[0][0];    #0.2
         $best_IeWF = $sortedeval[0][1];    #-3.5
@@ -2708,7 +2709,7 @@ sub BuildOptimizedParameterFile {
 
         foreach my $eval_ref (@sortedeval) {
 
-            print $fh_SOUT join( "\t", @{ $eval_ref }), "\n";
+            print $fh_SOUT join( "\t", @{$eval_ref} ), "\n";
 
         }
 
@@ -2789,11 +2790,16 @@ sub EvaluateParameter {
       tempfile( DIR => $geneid_dir, SUFFIX => '.eval_par.geneid' );
     print "\ntemp geneid file: $fname_geneid \n";
     $my_command = "./bin/geneid -GP $newparam $gpfa > $fname_geneid";
-    print STDERR "\n$my_command, not running\n";
 
-    #run($my_command);
+    #print STDERR "\n$my_command, not running\n";
+    run($my_command);
 
-` ./bin/geneid -GP $newparam $gpfa | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $geneid_test_predict_gff_fn `;
+    #` ./bin/geneid -GP $newparam $gpfa
+    $my_command =
+"cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $geneid_test_predict_gff_fn";
+    run($my_command);
+
+#`./bin/geneid -GP $newparam $gpfa| gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $geneid_test_predict_gff_fn `;
 
     my @evaluation_test = split " ",
 ` ./bin/evaluation -sta $geneid_test_predict_gff_fn $gpgff | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
@@ -3011,7 +3017,7 @@ sub average {
     my $total       = 0;
     my ( $mean, $st );
 
-    foreach my $seq (@{ $sequences }) {
+    foreach my $seq ( @{$sequences} ) {
         $sum += $seq;
         $total++;
     }
@@ -3021,7 +3027,7 @@ sub average {
 
     $sum = 0;
 
-    foreach my $seq (@ {$sequences} ) {
+    foreach my $seq ( @{$sequences} ) {
         $sum += ( $seq - $mean ) * ( $seq - $mean );
 
     }
@@ -3098,8 +3104,8 @@ sub fasta_2_tbl {
         chomp;
         $_ =~ s/\|//;
         if ( $_ =~ /\>(\S+)/ ) {
-            if ($count > 0) {
-                print $fh_TOUT "\n" ;
+            if ( $count > 0 ) {
+                print $fh_TOUT "\n";
             }
             print $fh_TOUT $1 . "\t";
             $count++;
@@ -3267,12 +3273,12 @@ sub convert_GFF_2_geneidGFF {
             $id,     $ctg, $str, $nex, $go,   $ge, $coords,
             @coords, $ce,  $CE,  $cur, $feat, $c
         );
-        ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @{ $GN };
+        ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @{$GN};
 
        # print STDERR Data::Dumper->Dump([ \@$coords ], [ qw/ *coords / ])."\n";
         @coords = map { $_->[0], $_->[1] }
           sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
-          map { $_ } @{ $coords };
+          map { $_ } @{$coords};
 
         # print STDERR Data::Dumper->Dump([ \@coords ], [ qw/ *Coords / ])."\n";
         #print "# $id $ctg $str $nex $go $ge\n";
