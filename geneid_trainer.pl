@@ -260,7 +260,8 @@ my $seqs_4training_listX    = "";
 
 my $ATGx_tbl                = "";
 my $tmp_X_geneid_sorted_gff     = "";
-my $tmp_X_eval_geneid_sotred_gff = "";
+my $train_2cols_seq_locusid_fn  = "";
+my $eval_2cols_seq_locusid_fn = "";
 my $templist_train          = "";
 
 my $tot_noncanon_accept_intX = "";
@@ -570,26 +571,28 @@ print "\n TTT $work_dir \n";
 
 ## BUG => there is no need to convert gff to geneid format each time we run
 
-        $tmp_X_geneid_sorted_gff =
+        $train_2cols_seq_locusid_fn =
           convert_GFF_2_geneidGFF( $tmp_4train_gff, $species, ".train" );
-
+         print STDERR "L575 : $train_2cols_seq_locusid_fn \t $tmp_locus_id_X_new \n";
+         
         ( $out_cds_X, $out_intron_X, $out_locus_id_X, $out_gff_X, $inframe_X ) = @{
-            extractCDSINTRON( $tmp_X_geneid_sorted_gff, $tmp_locus_id_X_new,
+            extractCDSINTRON( $train_2cols_seq_locusid_fn, $tmp_locus_id_X_new,
                 ".train" )
         };
 
 #  print STDERR " OUTSIDE EXTRACTCDSINTRON outgff: $out_gff_X\noutlocus_id: $out_locus_id_X\n";
 ## TRAIN
 ## EVAL
-        $tmp_X_eval_geneid_sotred_gff =
+        $eval_2cols_seq_locusid_fn =
           convert_GFF_2_geneidGFF( $tmp_4eval_gff, $species, ".eval" );
 
+         print STDERR "L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $tmp_locus_id_eval_X,\n";
         (
             $out_cds_X_eval, $out_intron_eval_X, $out_locus_id_X_eval,
             $out_eval_gff_X, $inframe_X_eval
           )
           = @{
-            extractCDSINTRON( $tmp_X_eval_geneid_sotred_gff, $tmp_locus_id_eval_X,
+            extractCDSINTRON( $eval_2cols_seq_locusid_fn, $tmp_locus_id_eval_X,
                 ".eval" )
           };
 ###EVAL
@@ -597,26 +600,27 @@ print "\n TTT $work_dir \n";
     }
     
 ###########    
-    if ($use_allseqs_flag) {    #USE SAME SEQS TO TRAIN/EVALUATE
+    #~ if ($use_allseqs_flag) {    #USE SAME SEQS TO TRAIN/EVALUATE
 
-        print STDERR
-"\n  XXX OPTION XXX Convert general gff2 to geneid-gff format  USE_ALL_SEQS \n\n";
+        #~ print STDERR
+#~ "\n  XXX OPTION XXX Convert general gff2 to geneid-gff format  USE_ALL_SEQS \n\n";
 
-## Convert general gff2 to geneid gff format
-## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
+#~ ## Convert general gff2 to geneid gff format
+#~ ## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
 
-        print STDERR
-"\nConvert general gff2 to geneid-gff format $no_dots_gff_fn ###SAME SEQS USED TP TRAIN/EVALUATE\n\n";
-        $tmp_X_geneid_sorted_gff =
-          convert_GFF_2_geneidGFF( $no_dots_gff_fn, $species, ".train" );
+        #~ print STDERR
+#~ "\nConvert general gff2 to geneid-gff format $no_dots_gff_fn ###SAME SEQS USED TP TRAIN/EVALUATE\n\n";
+        #~ $tmp_X_geneid_sorted_gff =
+          #~ convert_GFF_2_geneidGFF( $no_dots_gff_fn, $species, ".train" );
 
-        ( $out_cds_X, $out_intron_X, $out_locus_id_X, $out_gff_X, $inframe_X ) =
-          @{ extractCDSINTRON( $tmp_X_geneid_sorted_gff, $tmp_locus_id_X, ".train" )
-          };
+        #~ ( $out_cds_X, $out_intron_X, $out_locus_id_X, $out_gff_X, $inframe_X ) =
+          #~ @{ extractCDSINTRON( $tmp_X_geneid_sorted_gff, $tmp_locus_id_X, ".train" )
+          #~ };
 
-    }    #USE SAME SEQS TO TRAIN/EVALUATE
+    #~ }    #USE SAME SEQS TO TRAIN/EVALUATE
 
 ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
+     print STDERR "L623 :  $out_gff_X \t $out_locus_id_X  \n";
     (
         $out_donor_tbl,    $tot_noncanon_donors_intX, $out_acceptor_tbl,
         $tot_noncanon_accept_intX, $out_ATGxs_tbl,    $tot_noncanon_ATGx
@@ -894,7 +898,7 @@ return 1;
 sub extractCDSINTRON {
 
     my ( $no_dots_gff_fn, $locus_id, $type ) = @_;
-
+    
 
     # #####extract CDS and INTRON SEQUENCES
     #my
@@ -3256,25 +3260,29 @@ sub convert_GFF_2_geneidGFF {
             $c++;
         }
     }
-
-    my $X_geneid_sorted_gff = "";
-    open( my $fh_LOCID, "-|", "sort -s -k8,9 -k4,5n $geneidgff") or croak "Failed here";
-    while (<$fh_LOCID>) {
-        $X_geneid_sorted_gff .= $_;
-    }
-    close $fh_LOCID;
-
-####
-    my $tmp_X_geneid_sorted_gff =
-      $work_dir . $species . $type . ".geneid.gff_sorted";
-    open( my $fh_FOUT, ">", "$tmp_X_geneid_sorted_gff" ) or croak "Failed here";
-    print $fh_FOUT "$X_geneid_sorted_gff";
-    close $fh_FOUT;
-
     close $fh_GFF;
     close $fh_GFFOUT;
+    
+    #~ my $X_geneid_sorted_gff = "";
+    #~ open( my $fh_LOCID, "-|", "sort -s -k8,9 -k4,5n $geneidgff") or croak "Failed here";
+    #~ while (<$fh_LOCID>) {
+        #~ $X_geneid_sorted_gff .= $_;
+    #~ }
+    #~ close $fh_LOCID;
 
-    return $tmp_X_geneid_sorted_gff;
+####
+    my $geneid_sorted_gff_fn =
+      $work_dir . $species . $type . ".geneid.gff_sorted";
+    my $my_command = "sort -s -k8,9 -k4,5n $geneidgff > $geneid_sorted_gff_fn";
+    run($my_command);
+    
+    #~ open( my $fh_FOUT, ">", "$geneid_sorted_gff_fn" ) or croak "Failed here";
+    #~ print $fh_FOUT "$geneid_sorted_gff_fn";
+    #~ close $fh_FOUT;
+
+
+
+    return $geneid_sorted_gff_fn;
 
     #exit(0);
 
