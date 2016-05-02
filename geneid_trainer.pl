@@ -5,6 +5,7 @@
 
 ## checks & debugs modules
 use Modern::Perl;
+use English;
 
 use strict;
 use warnings;
@@ -96,12 +97,14 @@ GetOptions(
       #'gff2ps'        => \$input_gff_fn2ps
 );
 my $usage =
-"Usage: $0 -species H.sapiens -gff gff_name -fasta fasta_name -sout statsfile_out -fix_fasta 1";
+"Usage: $PROGRAM_NAME -species H.sapiens -gff gff_name -fasta fasta_name -sout statsfile_out -fix_fasta 1";
 
 #~ -branch -reduced -path <executables_path>\n";
 
-print STDERR $usage and exit
-  unless ( $species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta );
+if  (! ($species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta) ){
+	print STDERR $usage and exit
+	}
+#  unless ( $species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta );
 ## EXAMPLE COMMAND LINE: ./geneidTRAINer1_2TA.pl -species S.cerevisiae -gff S_cerevisiae4training.gff -fastas yeast_genome.fa -sout stats.txt -branch -reduced
 ## Get arguments (command line) END
 
@@ -282,6 +285,31 @@ sub validate_input_gff {
     return 1;
 }
 
+sub select_test_eval {
+	return 1;
+}
+
+sub extract_CDS {
+return 1;
+}
+
+sub extract_introns {
+return 1;
+}
+
+sub extract_donors {
+return 1;
+}
+
+sub extract_acceptors {
+return 1;
+}
+
+sub extract_ATGx {
+return 1;
+}
+
+
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
 
@@ -402,8 +430,8 @@ sub normal_run {
 
     }
     else {
-		$no_dots_gff_fn = $input_gff_fn;
-		}
+        $no_dots_gff_fn = $input_gff_fn;
+        }
     print STDERR "\nObtain locus_id (list of genomic sequences / genes)\n";
 
     $my_command = "gawk '{print \$1,\$9}' $no_dots_gff_fn | sort | uniq ";
@@ -2180,12 +2208,15 @@ sub getKmatrix {
     my @orders  = (qw(order-0 di tri order-4 order-5 order-6 order-7 order-8));
     my $ordname = $orders[$order];
     my $sort    = "sort -n";
-    $sort = "sort -k1,1n -k2,2" if $order > 1;
+    if ($order > 1) {
+		$sort = "sort -k1,1n -k2,2" ;
+	}
 
     #    my @info = ($offset-1,$offset+1);
     my $prof_len    = 0;
     my $info_thresh = "";    #bits
-    my $pid         = $$;
+    ## BUG ?? why pid is needed?
+    my $pid         = $PROCESS_ID;
     ## BUG?
     my $true_seq_name = $true_kmers_tbl;
     $true_seq_name =~ s/\.tbl$//;
@@ -2203,7 +2234,7 @@ sub getKmatrix {
 ## Open false (background???) sequences
     #    print STDERR "$bacgrnd_kmers_tbl (false)\n";
     open( my $fh_FALSE_SEQ, "<", "$bacgrnd_kmers_tbl" )
-      or croak "Couldn't open $bacgrnd_kmers_tbl: $!\n";
+      or croak "Couldn't open $bacgrnd_kmers_tbl: $OS_ERROR \n";
     $_ = <$fh_FALSE_SEQ>;
     my @f    = split;
     my $len2 = length( $f[1] );
@@ -2343,7 +2374,9 @@ sub getKmatrix {
 
         my @sortedinfo = sort numerically @info;
         my $start      = ( shift @sortedinfo );
-        $start = 1 if $start < 1;
+        if ($start < 1) {
+			$start = 1 ;
+			}
         my $end = pop @sortedinfo;
 
         return ( $start, $end );
@@ -2599,7 +2632,8 @@ sub OptimizeParameter {
             my @evaluation_output;
             open( my $fh_IN, "<", "$temp1_evalout_fn" ) or croak "Failed here";
             while (<$fh_IN>) {
-                @evaluation_output = split " ", $_;
+                @evaluation_output = split " ";
+                #@evaluation_output = split " ", $_;
             }
             close $fh_IN;
 
@@ -3064,7 +3098,9 @@ sub fasta_2_tbl {
         chomp;
         $_ =~ s/\|//;
         if ( $_ =~ /\>(\S+)/ ) {
-            print $fh_TOUT "\n" if $count > 0;
+            if ($count > 0) {
+                print $fh_TOUT "\n" ;
+            }
             print $fh_TOUT $1 . "\t";
             $count++;
         }
@@ -3351,7 +3387,7 @@ sub check_external_progs() {
     #BASH AWK
     #system("which gff2ps > /dev/null;")
     #    && &go_to_die("The gff2ps package is not found or is not executable");
-    say "/nNeccessary binaries are executable\n";
+    say "\nNeccessary binaries are executable\n";
     return 1;
 }
 
@@ -3381,7 +3417,7 @@ sub write_sizes_from_tbl_fn {
     print "calc size for  $input_tbl_fn \n";
 
     open( my $fh_input, '<', $input_tbl_fn )
-      or croak "Could not open file $input_tbl_fn' $!";
+      or croak "Could not open file $input_tbl_fn' $OS_ERROR";
 
     while ( my $line = <$fh_input> ) {
         chomp $line;
@@ -3399,7 +3435,7 @@ sub write_sizes_from_tbl_fn {
 
         #print  " $tmp_out_fn \t"
         open( my $fh_out, '>', $tmp_out_fn )
-          or croak "Could not open file '$tmp_out_fn' $!";
+          or croak "Could not open file '$tmp_out_fn' $OS_ERROR";
         print $fh_out "$name $lengfasta\n";
         close $fh_out;
 
