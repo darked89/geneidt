@@ -15,8 +15,10 @@ Latest commit works  (80% training, 20% for eveluation mode)
 
 * install required Perl modules
 easiest is to use cpanm to get modules located in:
+
 `$HOME/perl5/lib/perl5/`
- 
+
+`cpanm Modern::Perl`
 
 `cpanm Carp`
 
@@ -53,6 +55,8 @@ i.e. in fish shell
 * C programs 
 ```
 cd src/c/evaluation
+mkdir ./bin
+mkdir ./objects
 make
 cp -i ./bin/* ../../../bin/
 cd ../../../
@@ -74,3 +78,6 @@ compile geneid (not included in this distribution)
 
 ### clean up all training results ###
 `clean_test_train_results.sh`
+
+# Bitbucket code access etc. #
+For an easy "git clone" etc. one needs to create a personal ssh key on a workstation/server of interest and make it known to Bitbucket.
