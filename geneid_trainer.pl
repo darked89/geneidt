@@ -360,19 +360,22 @@ normal_run();
 sub normal_run {
     my $fh_FOUT;
     my $my_command;
-
+    my $old_option = 0;
+    
 ## Convert fasta to tabular format
 ## Fasta process to sub later
     my $t0 = Benchmark->new;
 
-## test python access
 
+ if ($old_option) {
+	 print "not yet\n";
+ }
     print STDERR
       "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
 
-    my $temptbl = $work_dir . $species . ".genomic.tbl";
-    $temptbl = fasta_2_tbl( $input_fas_fn, $temptbl );
-    run("sort -o $temptbl $temptbl");
+    my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
+    fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
+    run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
 
     print STDERR "actg to ACTG conversion of input fasta \n";
     my $tblcaps = "";
@@ -380,7 +383,7 @@ sub normal_run {
     open(
         my $fh_LOCID,
         "-|",
-"gawk '{gsub(/_/,\"\",\$1);gsub(/\\./,\"\",\$1);print \$1, toupper(\$2)}' $temptbl "
+"gawk '{gsub(/_/,\"\",\$1);gsub(/\\./,\"\",\$1);print \$1, toupper(\$2)}' $genomic_temp_tbl "
     );
     while (<$fh_LOCID>) {
         $tblcaps .= $_;
@@ -412,7 +415,7 @@ sub normal_run {
 
 ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
     ##  ## Q_FRANCISCO: can we assume some sane GFF/GFT format as an input?  Why _ and "."?
-    my $old_option = 0;
+    
 
     if ($old_option) {
         print STDERR
@@ -976,28 +979,28 @@ sub extractCDSINTRON {
 "\nCreate tabular format of CDS and INTRON sequences for $type sequences\n";
 
 ## CDS
-    my $tempcdsfa = $cds_dir . ${species} . "$type" . ".cds.fa";
-    print STDERR "$tempcdsfa\n\n";
-    my $tempcds = $cds_dir . ${species} . "$type" . ".cds.tbl";
-    $tempcds = fasta_2_tbl( $tempcdsfa, $tempcds );
+    my $cds_tmp_fa = $cds_dir . ${species} . "$type" . ".cds.fa";
+    print STDERR "$cds_tmp_fa\n\n";
+    my $cds_temp_tbl = $cds_dir . ${species} . "$type" . ".cds.tbl";
+    fasta_2_tbl( $cds_tmp_fa, $cds_temp_tbl );
     print STDERR "cds tabular file created for $type sequences \n";
 
     # ##INTRON
-    my $tempintronfa = $introns_dir . ${species} . "$type" . ".intron.fa";
-    my $tempintron   = $introns_dir . ${species} . "$type" . ".intron.tbl";
-    $tempintron = fasta_2_tbl( $tempintronfa, $tempintron );
+    my $intron_tmp_fa = $introns_dir . ${species} . "$type" . ".intron.fa";
+    my $intron_tmp_tbl   = $introns_dir . ${species} . "$type" . ".intron.tbl";
+    fasta_2_tbl( $intron_tmp_fa, $intron_tmp_tbl );
 
 ## INTRONS LARGER THAN 0 ONLY
 
-    my $introntblpositive = "";
-    my $my_command = "gawk '{if(length(\$2)>0){print \$1,\$2}}' $tempintron ";
-    $introntblpositive = capture($my_command);
+    my $intron_nonzero_tmp = "";
+    my $my_command = "gawk '{if(length(\$2)>0){print \$1,\$2}}' $intron_tmp_tbl ";
+    $intron_nonzero_tmp = capture($my_command);
 
-    my $tempallintron_positive =
+    my $intron_nonzero_tbl =
       $work_dir . $species . "$type" . ".intron_positivelength.tbl";
 
-    open( my $fh_FOUT, ">", "$tempallintron_positive" ) or croak "Failed here";
-    print $fh_FOUT "$introntblpositive";
+    open( my $fh_FOUT, ">", "$intron_nonzero_tbl" ) or croak "Failed here";
+    print $fh_FOUT "$intron_nonzero_tmp";
     close $fh_FOUT;
 
     print STDERR
@@ -1005,7 +1008,7 @@ sub extractCDSINTRON {
 ## GET LIST OF SEQUENCES WITH LENGTH >0 and EXCLUDE FROM CDS/locus_id/gff FILES SEQUENCES WITH INTRONS WITH 0 LENGTH
     my $intronzero = "";
     $my_command =
-"gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
+"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
     $intronzero = capture($my_command);
 
     my $tempall_intron_zero_list =
@@ -1017,7 +1020,7 @@ sub extractCDSINTRON {
 
     my $intronzero2 = "";
     $my_command =
-"gawk '{if(length(\$2)==0){print \$1}}' $tempintron | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
+"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
     $intronzero2 = capture($my_command);
 
     my $tempall_intron_zero_list2 =
@@ -1029,7 +1032,7 @@ sub extractCDSINTRON {
 
 ## FILTER SEQUENCES WITH 0 SIZE INTRONS FROM CDS!
 
-    $my_command = "egrep -vf $tempall_intron_zero_list $tempcds ";
+    $my_command = "egrep -vf $tempall_intron_zero_list $cds_temp_tbl ";
     my $cdstblnozero = capture($my_command);
 
     my $tempallcds_nozero = $work_dir . $species . "$type" . ".cds_nozero.tbl";
@@ -1125,7 +1128,7 @@ sub extractCDSINTRON {
         my $introntbl2 = "";
 
         $my_command =
-"sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $tempallintron_positive ";
+"sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $intron_nonzero_tbl ";
         $introntbl2 = capture($my_command);
 
         my $tempall_intron2 =
@@ -1166,7 +1169,7 @@ sub extractCDSINTRON {
     }
     else {    ## ??? END IF THERE ARE INFRAME STOPS
         return [
-            $tempallcds_nozero,   $tempallintron_positive,
+            $tempallcds_nozero,   $intron_nonzero_tbl,
             $templocus_id_nozero, $tempgffnozero,
             0
         ];
@@ -1215,25 +1218,25 @@ sub extractprocessSITES {
     }    #while $fh_LOC_sites
     close $fh_LOC_sites;
 
-    my $accsites   = "$sites_dir/Acceptor_sites.fa";
-    my $donsites   = "$sites_dir/Donor_sites.fa";
-    my $startsites = "$sites_dir/Start_sites.fa";
-    my $stopsites  = "$sites_dir/Stop_sites.fa";
+    my $accesions_fa   = "$sites_dir/Acceptor_sites.fa";
+    my $donors_fa   = "$sites_dir/Donor_sites.fa";
+    my $ATGx_fa = "$sites_dir/Start_sites.fa";
+    my $stops_fa  = "$sites_dir/Stop_sites.fa";
 
-    my $prestarttbl = "$work_dir/Start_sites.tbl";
-    $prestarttbl = fasta_2_tbl( $startsites, $prestarttbl );
-    my $acceptortbl = "$work_dir/Acceptor_sites.tbl";
-    $acceptortbl = fasta_2_tbl( $accsites, $acceptortbl );
+    my $preATGx_tbl = "$work_dir/Start_sites.tbl";
+    fasta_2_tbl( $ATGx_fa, $preATGx_tbl );
+    my $acceptors_tbl = "$work_dir/Acceptor_sites.tbl";
+    fasta_2_tbl( $accesions_fa, $acceptors_tbl );
 
     #print STDERR "$acceptortbl\n";
-    my $donortbl = "$work_dir/Donor_sites.tbl";
-    $donortbl = fasta_2_tbl( $donsites, $donortbl );
+    my $donors_tbl = "$work_dir/Donor_sites.tbl";
+    fasta_2_tbl( $donors_fa, $donors_tbl );
 
 ##ADD N TO START SITES############
     ## POTENTIAL BUG
     my $ATGx_tbl = "$sites_dir" . "Start_sites_complete.tbl";
     my $my_command =
-"gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $prestarttbl > $ATGx_tbl";
+"gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $preATGx_tbl > $ATGx_tbl";
     run($my_command);
 
 #`gawk '{printf \$1" ";for (i=1;i<=60-length(\$2);i++) printf "n"; print \$2}' $prestarttbl > $sites_dir/Start_sites_complete.tbl`;
@@ -1249,7 +1252,7 @@ sub extractprocessSITES {
     my $totcanonical     = "";
     my $newdonortbl      = "";
 
-    $my_command = "gawk '{print \$2}' $donortbl  | egrep -v '^[NATCGn]{31}GT' ";
+    $my_command = "gawk '{print \$2}' $donors_tbl  | egrep -v '^[NATCGn]{31}GT' ";
     my $noncanonical = capture($my_command);
 
     my $tempdonornoncanonical = $work_dir . $species . "_non_canonical_donor";
@@ -1267,7 +1270,7 @@ sub extractprocessSITES {
 
         my @noncanonicalname = ();
         open $fh_LOCID, "-|",
-"egrep -wf $tempdonornoncanonical $donortbl | gawk '{print \$1}' - | sort | uniq";
+"egrep -wf $tempdonornoncanonical $donors_tbl | gawk '{print \$1}' - | sort | uniq";
         while (<$fh_LOCID>) {
 
             push( @noncanonicalname, "$_" );
@@ -1293,7 +1296,7 @@ sub extractprocessSITES {
         print $fh_FOUT "$noncanonicalname";
         close $fh_FOUT;
 
-        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $donortbl";
+        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $donors_tbl";
         while (<$fh_LOCID>) {
             $newdonortbl .= $_;
         }
@@ -1315,11 +1318,11 @@ sub extractprocessSITES {
         push( @newsites, "$totnoncanonical" );
     }
     else {    #if there are no non-canonical
-        my $totcanonical = num_of_lines_in_file($donortbl);
+        my $totcanonical = num_of_lines_in_file($donors_tbl);
 
         print STDERR
           "There are $totcanonical canonical donors within the training set:\n";
-        push( @newsites, "$donortbl" );
+        push( @newsites, "$donors_tbl" );
         push( @newsites, "" );
 
     }    #if there are no non-canonical
@@ -1341,7 +1344,7 @@ sub extractprocessSITES {
     #$foobar_tmp = capture($my_command);
 
     open $fh_LOCID, "-|",
-      "gawk '{print \$2}' $acceptortbl | egrep -v '^[NATCG]{28}AG'";
+      "gawk '{print \$2}' $acceptors_tbl | egrep -v '^[NATCG]{28}AG'";
     while (<$fh_LOCID>) {
         $noncanonical .= $_;
     }
@@ -1364,7 +1367,7 @@ sub extractprocessSITES {
 
         my @noncanonicalname = ();
         open $fh_LOCID, "-|",
-"egrep -f $tempacceptornoncanonical $acceptortbl | gawk '{print \$1}' - | sort | uniq ";
+"egrep -f $tempacceptornoncanonical $acceptors_tbl | gawk '{print \$1}' - | sort | uniq ";
         while (<$fh_LOCID>) {
             push( @noncanonicalname, "$_" );
         }
@@ -1387,7 +1390,7 @@ sub extractprocessSITES {
         print $fh_FOUT "$noncanonicalname";
         close $fh_FOUT;
 
-        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $acceptortbl";
+        open $fh_LOCID, "-|", "egrep -vf $tempnoncanonicalname $acceptors_tbl";
         while (<$fh_LOCID>) {
             $newacceptortbl .= $_;
         }
@@ -1413,11 +1416,11 @@ sub extractprocessSITES {
 
     }
     else {    #if there are only canonical use initial file list
-        my $totcanonical = num_of_lines_in_file($acceptortbl);
+        my $totcanonical = num_of_lines_in_file($acceptors_tbl);
 
         print STDERR
 "There are $totcanonical canonical acceptors within the training set:\n";
-        push( @newsites, "$acceptortbl" );
+        push( @newsites, "$acceptors_tbl" );
         push( @newsites, "0" );
     }    #if there are only canonical use initial file list
 
