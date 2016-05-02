@@ -825,7 +825,7 @@ sub normal_run {
 
     }
 
-    my @evaluationinit = @$array_ref;
+    my @evaluationinit = @{ $array_ref };
     my @evaluationtest = ();
 
 ############
@@ -2647,7 +2647,7 @@ sub BuildOptimizedParameterFile {
 
     if ( !$branchswitch ) {
         ## BUG ???
-        @sortedeval = sort sorteval @$evalarray;
+        @sortedeval = sort sorteval @{ $evalarray };
 
         $best_IoWF = $sortedeval[0][0];    #0.2
         $best_IeWF = $sortedeval[0][1];    #-3.5
@@ -2674,7 +2674,7 @@ sub BuildOptimizedParameterFile {
 
         foreach my $eval_ref (@sortedeval) {
 
-            print $fh_SOUT join( "\t", @$eval_ref ), "\n";
+            print $fh_SOUT join( "\t", @{ $eval_ref }), "\n";
 
         }
 
@@ -2977,7 +2977,7 @@ sub average {
     my $total       = 0;
     my ( $mean, $st );
 
-    foreach my $seq (@$sequences) {
+    foreach my $seq (@{ $sequences }) {
         $sum += $seq;
         $total++;
     }
@@ -2987,7 +2987,7 @@ sub average {
 
     $sum = 0;
 
-    foreach my $seq (@$sequences) {
+    foreach my $seq (@ {$sequences} ) {
         $sum += ( $seq - $mean ) * ( $seq - $mean );
 
     }
@@ -3231,12 +3231,12 @@ sub convert_GFF_2_geneidGFF {
             $id,     $ctg, $str, $nex, $go,   $ge, $coords,
             @coords, $ce,  $CE,  $cur, $feat, $c
         );
-        ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @$GN;
+        ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @{ $GN };
 
        # print STDERR Data::Dumper->Dump([ \@$coords ], [ qw/ *coords / ])."\n";
         @coords = map { $_->[0], $_->[1] }
           sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
-          map { $_ } @$coords;
+          map { $_ } @{ $coords };
 
         # print STDERR Data::Dumper->Dump([ \@coords ], [ qw/ *Coords / ])."\n";
         #print "# $id $ctg $str $nex $go $ge\n";
