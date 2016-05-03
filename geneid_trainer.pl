@@ -2233,7 +2233,7 @@ sub get_K_matrix {
     $true_seq_name =~ s/\.tbl$//;
     my $false_seq_name = $backgrnd_kmers_tbl;
     $false_seq_name =~ s/\.tbl$//;
-    print "\n XXX L2182 true_seq_name $false_seq_name \n";
+    print "\n XXX L2136: $true_seq_name $false_seq_name \n";
 
 ## Open true sequences
     #    print STDERR "$true_kmers_tbl (true)\n";
@@ -3622,10 +3622,10 @@ sub compute_sites_pictogram {
     print {$fh_FOUT} "$donsub";
     close $fh_FOUT;
 
-    $my_command =
-"./bin/pictogram $subprofile_donors $plots_dir/donor_profile.pictogram -bits -land";
-    print "\n$my_command\n";
-    run($my_command);
+## BUG pictogram
+    #~ $my_command = "./bin/pictogram $subprofile_donors $plots_dir/donor_profile.pictogram -bits -land";
+    #~ print "\n$my_command\n";
+    #~ run($my_command);
 
 #########
 ## get acceptor site statistics
@@ -3682,10 +3682,10 @@ sub compute_sites_pictogram {
     print {$fh_FOUT} "$accsub";
     close $fh_FOUT;
 
-    $my_command =
-"./bin/pictogram $subprofile_acceptors $plots_dir/acceptor_profile.pictogram -bits -land";
-    print "\n$my_command\n";
-    run($my_command);
+## BUG pictogram
+    #~ $my_command = "./bin/pictogram $subprofile_acceptors $plots_dir/acceptor_profile.pictogram -bits -land";
+    #~ print "\n$my_command\n";
+    #~ run($my_command);
 
 #########
 ## get start site statistics
@@ -3738,11 +3738,10 @@ sub compute_sites_pictogram {
     print {$fh_FOUT} "$stasub";
     close $fh_FOUT;
 
-    $my_command =
-"./bin/pictogram $subprofile_ATGs $plots_dir/ATGx_profile.pictogram -bits -land";
-
-    print "\n$my_command\n";
-    run($my_command);
+## BUG pictogram
+    #~ $my_command = "./bin/pictogram $subprofile_ATGs $plots_dir/ATGx_profile.pictogram -bits -land";
+    #~ print "\n$my_command\n";
+    #~ run($my_command);
 
 ## end get start site statistics
     return $donor_start, $donor_end, $acceptor_start, $acceptor_end,
