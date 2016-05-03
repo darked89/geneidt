@@ -12,7 +12,8 @@ PRODUCT= $(BIN)/$(PROGRAM)
 #normal compile with optimization
 #OPT1: gcc
 CC= gcc
-OPTS= -I$(INCLUDE) -std=c11  -gdwarf-2 -g3 -Wpedantic -Wall -Wextra  -Wshadow -Wstrict-overflow -fno-strict-aliasing
+OPTS= -I$(INCLUDE)  -gdwarf-2 -g3 -Wall -Wextra  
+#-Wshadow -Wstrict-overflow -fno-strict-aliasing
 
 #OPTS=-I$(INCLUDE) -Wall -Wextra -O3
 
