@@ -2157,7 +2157,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 sub BitScoreGraph {
 
     my ( $infooutput, $info_thresh, $offset ) = @_;
-    print STDERR "bitscoregraph input:  $infooutput, $info_thresh, $offset";
+    print STDERR "bitscoregraph input:  $infooutput, $info_thresh, $offset\n";
     my @info = ( $offset - 1, $offset + 1 );
     my @fields;
 
@@ -2167,7 +2167,7 @@ sub BitScoreGraph {
         last if m/^\s/;
         last if m/^[^\d]/;
         chomp;
-        print STDERR "QQQ prefields: $_";
+        #print STDERR "QQQ prefields: $_";
         
         @fields = split;
         printf STDERR "%2s %2.2f %s",
@@ -2179,7 +2179,7 @@ sub BitScoreGraph {
         print STDERR "\n";
     }
     close $fh_INFO;
-    print STDERR "\n BitScoreGraph \n";
+    
 
     my @sortedinfo = sort numerically @info;
     my $start      = ( shift @sortedinfo );
@@ -2187,7 +2187,7 @@ sub BitScoreGraph {
         $start = 1;
     }
     my $end = pop @sortedinfo;
-
+    print STDERR "\nBitScoreGraph out: $start, $end\n";
     return ( $start, $end );
 }    #end BitScoreGraph
 
