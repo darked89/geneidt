@@ -2157,7 +2157,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 sub BitScoreGraph {
 
     my ( $infooutput, $info_thresh, $offset ) = @_;
-
+    print STDERR "bitscoregraph input:  $infooutput, $info_thresh, $offset";
     my @info = ( $offset - 1, $offset + 1 );
     my @fields;
 
@@ -2167,6 +2167,8 @@ sub BitScoreGraph {
         last if m/^\s/;
         last if m/^[^\d]/;
         chomp;
+        print STDERR "QQQ prefields: $_";
+        
         @fields = split;
         printf STDERR "%2s %2.2f %s",
           ##
@@ -3079,7 +3081,8 @@ sub TblToFasta {
     open( my $fh_FOUT, ">", "$faout" ) or croak "Failed here";
     while (<$fh_IN>) {
         chomp;
-        my ( $n, $s ) = split( /\s+/, $_ );
+        #~ my ( $n, $s ) = split( /\s+/, $_ );
+        my ( $n, $s ) = split( /\s+/);
         my ( $i, $e ) = ( 1, length($s) );
         print {$fh_FOUT} ">$n\n";
         while ( $i <= $e ) {
@@ -3286,7 +3289,7 @@ sub convert_GFF_2_geneidGFF {
         $c = ":";
         $_ =~ s/\|//;
         chomp;
-        @f = split /\s+/o, $_;
+        @f = split(/\s+/o);
         $id = $f[8];    #seq name i.e. 7000000188934730
         ( exists( $G{$id} ) ) || do {
             $c = "#";

@@ -6,8 +6,10 @@ import sys
 
 from math import log
 
-bckg_freq_fn = sys.argv[1]
-true_freq_fn = sys.argv[2]
+
+true_freq_fn = sys.argv[1]
+bckg_freq_fn = sys.argv[2]
+
 
 
 #print "## from information.py: "
