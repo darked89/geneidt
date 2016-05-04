@@ -1629,7 +1629,7 @@ sub processSequences4Optimization {
 
     my ( $no_dots_gff_fn, $type, $run_contig_opt_flag ) = @_;
 
-    my $pso_out_tbl = "";
+    #my $pso_out_tbl = "";
     my $pso_gp_tbl  = "";
     my $gp_from_gff = "";
 
@@ -1651,11 +1651,11 @@ sub processSequences4Optimization {
     open( my $fh_FOUT, ">", "$pso_tmp_gp_from_gff" );
     print {$fh_FOUT} "$gp_from_gff";
     close $fh_FOUT;
-    print STDERR
-"BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
+   # print STDERR "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
+    print STDERR "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir \n";
 
     my $gp_Xgetgenes_tmp_pre_tbl =
-      GetGenes( $fastas_dir, $pso_tmp_gp_from_gff, $work_dir, $pso_out_tbl );
+      GetGenes( $fastas_dir, $pso_tmp_gp_from_gff, $work_dir );
     print STDERR "PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl \n";
 
     print STDERR
@@ -1830,7 +1830,7 @@ sub processSequences4Optimization {
 ## GETGENES FUNCTION: EXTRACT FLANKED SEQUENCES FROM GENE MODELS FOR LATER OPTIMIZATION
 sub GetGenes {
     ## BUG last variable is passed empty
-    my ( $my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir, $gp_out_tbl ) = @_;
+    my ( $my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir ) = @_;
 
 #print STDERR "IN FUNCTION: $my_fastas_dir : $my_pso_tmp_gp_from_gff : $path : OUT: $gp_out_tbl\n\n";
 
@@ -1841,7 +1841,7 @@ sub GetGenes {
     my $trail      = "";
 
     #my %genenames; unused var
-    $gp_out_tbl = "$work_dir/gp_out_X.tbl";
+    my $gp_out_tbl = "$work_dir/gp_exon_utr_intron.tbl";
 
     #~ chomp($my_fastas_dir);
     #~ chomp($genes_fn_X);
