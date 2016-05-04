@@ -34,7 +34,8 @@ use Readonly;
 
 use feature 'say';
 use Benchmark qw(:all);
-use Devel::Size qw(size total_size);
+## Problem with my 5.18.1 install @CRG
+## use Devel::Size qw(size total_size);
 
 ## geneid_trained modules
 use Geneid::Param;
