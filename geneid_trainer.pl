@@ -176,7 +176,7 @@ my $results_dir = "$work_dir/results/";
 my @data_dirs = (
     $work_dir,  $tmp_dir,    $fastas_dir,  $stats_dir,
     $sites_dir, $plots_dir,  $introns_dir, $backgrd_dir,
-    $cds_dir,   $geneid_dir, $results_dir
+    $cds_dir,   $geneid_dir, $results_dir,
 );
 
 create_data_dirs(@data_dirs);
@@ -197,16 +197,16 @@ my @evaluation = ();
 my $run_jacknife_flag   = 0;
 my $use_allseqs_flag    = 0;
 my $use_branch_flag     = 0;
-my $run_optimizeX_flag  = 0;    ## UNUSED
+#~ my $run_optimizeX_flag  = 0;    ## UNUSED
 my $run_contig_opt_flag = 0;
 ## my $ext_flg          = 0;
 
 my $tmp_4train_gff      = "";
 my $tmp_4eval_gff       = "";
-my $tmp_locus_id_X      = "";
-my $tmp_locus_id_X_new  = "";
-my $tmp_locus_id_eval_X = "";
-my $seqs_used_XX        = "";
+my $all_contigs_transcr_2cols      = "";
+my $train_contigs_transcr_2cols  = "";
+my $eval_contigs_transcr_2cols = "";
+my $training_transc_used_num        = "";
 
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
@@ -427,24 +427,20 @@ sub normal_run {
     $locus_id   = capture($my_command);
 
     # say "\n TTT got here TTT\n";
-    $tmp_locus_id_X = $work_dir . $species . "_locus_id";
-    open( $fh_FOUT, ">", "$tmp_locus_id_X" ) or croak "Failed here";
+    $all_contigs_transcr_2cols = $work_dir . $species . "_locus_id";
+    open( $fh_FOUT, ">", "$all_contigs_transcr_2cols" ) or croak "Failed here";
     print $fh_FOUT "$locus_id";
     close $fh_FOUT;
 
 ## number of gene models TOTAL
-    $my_command = " gawk '{print \$2}' $tmp_locus_id_X | sort | uniq | wc -l";
+    $my_command = " gawk '{print \$2}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
     $total_seqs = capture($my_command);
 
-#~ $total_seqs =
-#~ ` gawk '{print \$2}' $tmp_locus_id_X | sort | uniq | wc | gawk '{print \$2}' `;
     chomp $total_seqs;
 ## number of genomic sequences TOTAL
-    $my_command = "gawk '{print \$1}' $tmp_locus_id_X | sort | uniq | wc -l";
+    $my_command = "gawk '{print \$1}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
     my $total_genomic = capture($my_command);
 
-#~ $total_genomic =
-#~ ` gawk '{print \$1}' $tmp_locus_id_X | sort | uniq | wc | gawk '{print \$1}' `;
     chomp $total_genomic;
 
     print STDERR
@@ -470,24 +466,24 @@ sub normal_run {
 "\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
         ## DEBUG KEEP !!! shuf => random select
         ## head -$tot_seqs4training_intX just the first ones
-#my $my_command =           "shuf --head-count=$tot_seqs4training_intX $tmp_locus_id_X | sort | uniq";
+#my $my_command =           "shuf --head-count=$tot_seqs4training_intX $all_contigs_transcr_2cols | sort ";
 
         my $my_command =
-          "head --lines=$tot_seqs4training_intX $tmp_locus_id_X | sort | uniq";
+          "head --lines=$tot_seqs4training_intX $all_contigs_transcr_2cols ";
 
         $locus_id_new = capture($my_command);
 
-        $tmp_locus_id_X_new =
+        $train_contigs_transcr_2cols =
           $work_dir . $species . "_locus_id_training_setaside80";
-        open( my $fh_FOUT, ">", "$tmp_locus_id_X_new" ) or croak "Failed here";
+        open( my $fh_FOUT, ">", "$train_contigs_transcr_2cols" ) or croak "Failed here";
         print $fh_FOUT "$locus_id_new";
         close $fh_FOUT;
 
 ## ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
         $my_command =
-          "gawk '{print \$2}' $tmp_locus_id_X_new | sort | uniq | wc -l";
-        $seqs_used_XX = capture($my_command);
-        chomp $seqs_used_XX;
+          "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
+        $training_transc_used_num = capture($my_command);
+        chomp $training_transc_used_num;
         my $t1 = Benchmark->new;
         my $td = timediff( $t1, $t0 );
         print "\nTTT the code took t0->t1:", timestr($td), "\n";
@@ -499,10 +495,10 @@ sub normal_run {
         my $gff4training = "";
 
         print STDERR
-"\nThe new training gff file includes $seqs_used_XX gene models (80% of total seqs)\n";
+"\nThe new training gff file includes $training_transc_used_num gene models (80% of total seqs)\n";
         ## ??? BUG ???
         $my_command =
-"gawk '{print \$2\"\$\"}' $tmp_locus_id_X_new | sort | uniq | egrep -wf - $no_dots_gff_fn";
+"gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn";
         $gff4training = capture($my_command);
 
         $tmp_4train_gff = $work_dir . $species . ".gff_training_setaside80";
@@ -528,13 +524,13 @@ sub normal_run {
         my $locusideval = "";
 
         $my_command =
-"gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $tmp_locus_id_X";
+"gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $all_contigs_transcr_2cols";
         $locusideval = capture($my_command);
         chomp $locusideval;
 
-        $tmp_locus_id_eval_X =
+        $eval_contigs_transcr_2cols =
           $work_dir . $species . "_locus_id_evaluation_setaside20";
-        open( $fh_FOUT, ">", "$tmp_locus_id_eval_X" ) or croak "Failed here";
+        open( $fh_FOUT, ">", "$eval_contigs_transcr_2cols" ) or croak "Failed here";
         print $fh_FOUT "$locusideval";
         close $fh_FOUT;
 
@@ -543,7 +539,7 @@ sub normal_run {
 #########################
 
         $my_command =
-"gawk '{print \$2\"\$\"}' $tmp_locus_id_eval_X | sort | uniq | egrep -wf - $no_dots_gff_fn | gawk '{ print \$9}' | sort | uniq | wc -l";
+"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn | gawk '{ print \$9}' | sort | uniq | wc -l";
         ## ??? BUG this is a number...
         $seqs_eval_gff_X = capture($my_command);
 
@@ -553,7 +549,7 @@ sub normal_run {
 "The evaluation gff file includes $seqs_eval_gff_X gene models (20% of total seqs)\n\n";
 
         $my_command =
-"gawk '{print \$2\"\$\"}' $tmp_locus_id_eval_X | sort | uniq | egrep -wf - $no_dots_gff_fn ";
+"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn ";
         my $gff4evaluation = capture($my_command);
 
         $tmp_4eval_gff = $work_dir . $species . ".gff_evaluation_setaside20";
@@ -590,14 +586,14 @@ sub normal_run {
         $train_2cols_seq_locusid_fn =
           convert_GFF_2_geneidGFF( $tmp_4train_gff, $species, ".train" );
         print STDERR
-          "L575 : $train_2cols_seq_locusid_fn \t $tmp_locus_id_X_new \n";
+          "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
 
         (
             $cds_all_nozero_tbl, $out_intron_X, $out_locus_id_X, $out_gff_X,
             $inframe_X
           )
           = @{
-            extractCDSINTRON( $train_2cols_seq_locusid_fn, $tmp_locus_id_X_new,
+            extractCDSINTRON( $train_2cols_seq_locusid_fn, $train_contigs_transcr_2cols,
                 ".train" )
           };
 
@@ -608,13 +604,13 @@ sub normal_run {
           convert_GFF_2_geneidGFF( $tmp_4eval_gff, $species, ".eval" );
 
         print STDERR
-"L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $tmp_locus_id_eval_X,\n";
+"L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
         (
             $cds_eval_nonzero_tbl, $out_intron_eval_X, $out_locus_id_X_eval,
             $out_eval_gff_X,       $inframe_X_eval
           )
           = @{
-            extractCDSINTRON( $eval_2cols_seq_locusid_fn, $tmp_locus_id_eval_X,
+            extractCDSINTRON( $eval_2cols_seq_locusid_fn, $eval_contigs_transcr_2cols,
                 ".eval" )
           };
 ###EVAL
@@ -738,7 +734,7 @@ sub normal_run {
         $species,                  $sout,
         $out_intron_X,             $cds_all_nozero_tbl,
         $out_gff_X,                $inframe_X,
-        $inframe_X_eval,           $seqs_used_XX,
+        $inframe_X_eval,           $training_transc_used_num,
         $tot_noncanon_donors_intX, $tot_noncanon_accept_intX,
         $tot_noncanon_ATGx,        $markov_model,
         $total_coding,             $total_noncoding,
@@ -781,7 +777,7 @@ sub normal_run {
 
 ## EXON WEIGHT PARAMETER
     my $IeWF = -4.5;
-    my $deWF = 0.5;
+    my $deWF = 0.50;
     my $FeWF = -2.5;
 ## EXON/OLIGO FACTOR PARAMETER
     my $IoWF = 0.25;
@@ -801,7 +797,6 @@ sub normal_run {
     if ( !$run_contig_opt_flag ) {
         print STDERR "\n DEBUG: NOT CONTIG OPT\n";
         croak "bad bug!\n";
-        ;
     }    #end if
          #~ if ( !$run_contig_opt_flag ) {
          #~ print STDERR "\n DEBUG: NOT CONTIG OPT\n";
@@ -1221,13 +1216,11 @@ sub extractprocessSITES {
 
     #      ##EXTRACT NON CANONICAL DONORS
     #my $noncanonical     = "";
-    my $generic_noncanonical = "";
-    my $tot_generic_noncanonical  = "";
-    my $tot_generic_canonical     = "";
-    
-    
-    
-    my $newdonortbl      = "";
+    my $generic_noncanonical     = "";
+    my $tot_generic_noncanonical = "";
+    my $tot_generic_canonical    = "";
+
+    my $newdonortbl = "";
     $my_command =
       "gawk '{print \$2}' $donors_tbl  | egrep -v '^[NATCGn]{31}GT' ";
     my $noncanonical = capture($my_command);
@@ -1298,7 +1291,7 @@ sub extractprocessSITES {
         my $tot_generic_canonical = num_of_lines_in_file($donors_tbl);
 
         print STDERR
-          "There are $tot_generic_canonical canonical donors within the training set:\n";
+"There are $tot_generic_canonical canonical donors within the training set:\n";
         push( @newsites, "$donors_tbl" );
         push( @newsites, "" );
 
@@ -1308,10 +1301,11 @@ sub extractprocessSITES {
 
     #      ####
     #      ##EXTRACT NON CANONICAL ACCEPTORS
-    $noncanonical     = "";
-    $generic_noncanonical = "";
-    $tot_generic_canonical     = "";
+    $noncanonical          = "";
+    $generic_noncanonical  = "";
+    $tot_generic_canonical = "";
     my $acceptor_new_tbl = "";
+
     #~ my $foobar_tmp     = "";
 
     #$my_command =
@@ -1335,7 +1329,8 @@ sub extractprocessSITES {
     print {$fh_FOUT} "$noncanonical";
     close $fh_FOUT;
 
-    $tot_generic_noncanonical = num_of_lines_in_file($acceptor_noncanonical_temp);
+    $tot_generic_noncanonical =
+      num_of_lines_in_file($acceptor_noncanonical_temp);
 
     print STDERR
 "\nThere are $tot_generic_noncanonical non-canonical acceptors within the training set:\n";
@@ -1377,13 +1372,15 @@ sub extractprocessSITES {
 
         my $acceptor_canonical_temp =
           $work_dir . $species . ".canonical.acceptor.tbl";
-        open( $fh_FOUT, ">", "$acceptor_canonical_temp" ) or croak "Failed here";
+        open( $fh_FOUT, ">", "$acceptor_canonical_temp" )
+          or croak "Failed here";
         print {$fh_FOUT} "$acceptor_new_tbl";
         close $fh_FOUT;
 
         #unlink $noncanonical_name_tmp;
 
-        my $tot_generic_canonical = num_of_lines_in_file($acceptor_canonical_temp);
+        my $tot_generic_canonical =
+          num_of_lines_in_file($acceptor_canonical_temp);
 
         print STDERR
 "\nThere are $tot_generic_canonical canonical acceptors within the training set:\n";
@@ -1406,9 +1403,9 @@ sub extractprocessSITES {
     #      ###
     #      ##EXTRACT NON CANONICAL STARTS
 
-    $noncanonical     = "";
-    $generic_noncanonical = "";
-    $tot_generic_canonical     = "";
+    $noncanonical          = "";
+    $generic_noncanonical  = "";
+    $tot_generic_canonical = "";
     my $newstarttbl = "";
 
     open $fh_LOCID, "-|",
@@ -2151,7 +2148,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 
     return $gp_out_tbl;
 
-}    #getgenes 
+}    #getgenes
 
 ## GET BACKGROUND SEQUENCES (ex. 62 Kmer) used to compute log likelihoods
 
@@ -2168,8 +2165,9 @@ sub BitScoreGraph {
         last if m/^\s/;
         last if m/^[^\d]/;
         chomp;
+
         #print STDERR "QQQ prefields: $_";
-        
+
         @fields = split;
         printf STDERR "%2s %2.2f %s",
           ##
@@ -2180,7 +2178,6 @@ sub BitScoreGraph {
         print STDERR "\n";
     }
     close $fh_INFO;
-    
 
     my @sortedinfo = sort numerically @info;
     my $start      = ( shift @sortedinfo );
@@ -2703,7 +2700,8 @@ sub BuildOptimizedParameterFile {
           . $sortedeval[0][0]
           . " and IeWF: "
           . $sortedeval[0][1] . "\n";
-        print {$fh_SOUT} "\nBest parameter file performance obtained using oWF: "
+        print {$fh_SOUT}
+          "\nBest parameter file performance obtained using oWF: "
           . $sortedeval[0][0]
           . " and eWF: "
           . $sortedeval[0][1] . "\n";
@@ -2847,12 +2845,12 @@ sub EvaluateParameter {
 }    # evaluate parameter function
 
 sub calculate_stats {
-
+## BUG variable names hard to guess
     my (
         $species,                  $sout,
         $out_intron_X,             $cds_all_nozero_tbl,
         $out_gff_X,                $inframe_X,
-        $inframe_X_eval,           $seqs_used_XX,
+        $inframe_X_eval,           $training_transc_used_num,
         $tot_noncanon_donors_intX, $tot_noncanon_accept_intX,
         $tot_noncanon_ATGx,        $markov_model,
         $total_coding,             $total_noncoding,
@@ -2980,7 +2978,7 @@ sub calculate_stats {
     my $total_seqs;
     if ( !$use_allseqs_flag ) {
         print $fh_SOUT
-"The user has selected to use $seqs_used_XX gene models (80 % of total) for training and to set aside BUG  was xxgffseqseval annotations (20 % of total) for evaluation\n\n";
+"The user has selected to use $training_transc_used_num gene models (80 % of total) for training and to set aside BUG  was xxgffseqseval annotations (20 % of total) for evaluation\n\n";
     }
     else {
         print $fh_SOUT
@@ -3022,7 +3020,7 @@ sub calculate_stats {
 
     if ( !$use_allseqs_flag ) {
         print $fh_SOUT
-"The training set includes $singlegenes single-exon genes (out of $seqs_used_XX ) gene models\n\n";
+"The training set includes $singlegenes single-exon genes (out of $training_transc_used_num ) gene models\n\n";
     }
     else {
         print $fh_SOUT
@@ -3082,8 +3080,9 @@ sub TblToFasta {
     open( my $fh_FOUT, ">", "$faout" ) or croak "Failed here";
     while (<$fh_IN>) {
         chomp;
+
         #~ my ( $n, $s ) = split( /\s+/, $_ );
-        my ( $n, $s ) = split( /\s+/);
+        my ( $n, $s ) = split(/\s+/);
         my ( $i, $e ) = ( 1, length($s) );
         print {$fh_FOUT} ">$n\n";
         while ( $i <= $e ) {
@@ -3284,18 +3283,18 @@ sub convert_GFF_2_geneidGFF {
     my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
 
     open( my $fh_GFF,    "<", "$no_dots_gff_fn" ) or croak "Failed here";
-    open( my $fh_GFFOUT, ">", "$geneid_gff" )      or croak "Failed here";
+    open( my $fh_GFFOUT, ">", "$geneid_gff" )     or croak "Failed here";
     while (<$fh_GFF>) {
         my ( $c, @f, $id );
         $c = ":";
         $_ =~ s/\|//;
         chomp;
-        @f = split(/\s+/o);
-        $id = $f[8];    #seq name i.e. 7000000188934730
+        @f  = split(/\s+/o);
+        $id = $f[8];           #seq name i.e. 7000000188934730
         ( exists( $G{$id} ) ) || do {
             $c = "#";
             $G{$id} = [ @f[ 8, 0, 6 ], 0, @f[ 3, 4 ], [] ]
-              ;    # [7000000188934730 1.4 - 0 46549    46680 ]
+              ;                # [7000000188934730 1.4 - 0 46549    46680 ]
         };
         push @{ $G{$id}[6] }, [ @f[ 3, 4 ] ];
         $G{$id}[3]++;
@@ -3624,9 +3623,9 @@ sub compute_sites_pictogram {
     close $fh_FOUT;
 
 ## BUG pictogram
-    #~ $my_command = "./bin/pictogram $subprofile_donors $plots_dir/donor_profile.pictogram -bits -land";
-    #~ print "\n$my_command\n";
-    #~ run($my_command);
+#~ $my_command = "./bin/pictogram $subprofile_donors $plots_dir/donor_profile.pictogram -bits -land";
+#~ print "\n$my_command\n";
+#~ run($my_command);
 
 #########
 ## get acceptor site statistics
@@ -3684,9 +3683,9 @@ sub compute_sites_pictogram {
     close $fh_FOUT;
 
 ## BUG pictogram
-    #~ $my_command = "./bin/pictogram $subprofile_acceptors $plots_dir/acceptor_profile.pictogram -bits -land";
-    #~ print "\n$my_command\n";
-    #~ run($my_command);
+#~ $my_command = "./bin/pictogram $subprofile_acceptors $plots_dir/acceptor_profile.pictogram -bits -land";
+#~ print "\n$my_command\n";
+#~ run($my_command);
 
 #########
 ## get start site statistics
@@ -3740,9 +3739,9 @@ sub compute_sites_pictogram {
     close $fh_FOUT;
 
 ## BUG pictogram
-    #~ $my_command = "./bin/pictogram $subprofile_ATGs $plots_dir/ATGx_profile.pictogram -bits -land";
-    #~ print "\n$my_command\n";
-    #~ run($my_command);
+#~ $my_command = "./bin/pictogram $subprofile_ATGs $plots_dir/ATGx_profile.pictogram -bits -land";
+#~ print "\n$my_command\n";
+#~ run($my_command);
 
 ## end get start site statistics
     return $donor_start, $donor_end, $acceptor_start, $acceptor_end,
