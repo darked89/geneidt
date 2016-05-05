@@ -185,10 +185,10 @@ create_data_dirs(@data_dirs);
 
 my $fh_SOUT;
 my $last_bench_time;    #for benchmarking parts of the script
-my $no_dots_gff_fn = "$work_dir/input_gff_no_dots.gff";
-say "\nXXX $no_dots_gff_fn \n";
+my $input_nodots_gff = "$work_dir/input_gff_no_dots.gff";
+say "\nXXX $input_nodots_gff \n";
 
-my $temp_GENOMEX_tblcaps = "";
+my $genome_all_contigs_tbl = "";
 my $backgrnd_kmers_fn    = "";
 ## my $tblseq      = "";
 
@@ -274,7 +274,7 @@ my $tot_noncanon_donors_intX = "";
 my $tot_noncanon_ATGx        = "";
 
 my $transcripts_all_number             = "";
-my $tot_seqs4training_intX = "";
+my $training_transc_num = "";
 
 #############################################################
 ## INITIAL CHECKS
@@ -344,6 +344,18 @@ $param->isocores( [ Geneid::Isocore->new() ] );
 
 ## END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
 
+$genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
+my $my_command = "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
+# $fastas_dir";
+run($my_command);
+#fasta_2_tbl( $input_fas_fn, $genome_all_contigs_tbl );
+
+run("sort -o $genome_all_contigs_tbl $genome_all_contigs_tbl");
+#tbl_2_single_fastas( $fastas_dir, $genome_all_contigs_tbl );
+#write_sizes_from_tbl_fn($genome_all_contigs_tbl);
+$my_command = "cp $input_gff_fn $input_nodots_gff";
+say "$my_command";
+run($my_command);
 normal_run();
 
 sub normal_run {
@@ -358,76 +370,76 @@ sub normal_run {
     if ($old_option) {
         print "not yet\n";
     }
-    print STDERR
-      "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
+#     print STDERR
+#       "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
 
-    my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
-    fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
-    run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
+#     my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
+#     fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
+#     run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
 
-    print STDERR "actg to ACTG conversion of input fasta \n";
-    my $tblcaps = "";
+#     print STDERR "actg to ACTG conversion of input fasta \n";
+#     my $tblcaps = "";
 
-    open(
-        my $fh_LOCID,
-        "-|",
-"gawk '{gsub(/_/,\"\",\$1);gsub(/\\./,\"\",\$1);print \$1, toupper(\$2)}' $genomic_temp_tbl "
-    ) or croak "Failed here";
-    while (<$fh_LOCID>) {
-        $tblcaps .= $_;
-    }
-    close $fh_LOCID;
+#     open(
+#         my $fh_LOCID,
+#         "-|",
+# "gawk '{gsub(/_/,\"\",\$1);gsub(/\\./,\"\",\$1);print \$1, toupper(\$2)}' $genomic_temp_tbl "
+#     ) or croak "Failed here";
+#     while (<$fh_LOCID>) {
+#         $tblcaps .= $_;
+#     }
+#     close $fh_LOCID;
 
-    chomp $tblcaps;
-    $temp_GENOMEX_tblcaps = $work_dir . $species . ".genomic.tbl";
-    open( my $fh_FOUT_caps, ">", "$temp_GENOMEX_tblcaps" )
-      or croak "Failed here";
-    print {$fh_FOUT_caps} "$tblcaps";
-    close $fh_FOUT_caps;
+#     chomp $tblcaps;
+#     $genome_all_contigs_tbl = $work_dir . $species . ".genomic.tbl";
+#     open( my $fh_FOUT_caps, ">", "$genome_all_contigs_tbl" )
+#       or croak "Failed here";
+#     print {$fh_FOUT_caps} "$tblcaps";
+#     close $fh_FOUT_caps;
 
-## place genomic sequences in "fastas_$species" directory
-    print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
-    print STDERR "(also transfer genomic fasta length info)\n\n";
-## do not create fastas in diretory if they are already created and their number corresponds to the number of sequences in thr array
-## CONVERT GENOMICS FASTA TO MULTI FASTA AND PLACE THEM IN APPROPRIATE DIRECTORY
+# ## place genomic sequences in "fastas_$species" directory
+#     print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
+#     print STDERR "(also transfer genomic fasta length info)\n\n";
+# ## do not create fastas in diretory if they are already created and their number corresponds to the number of sequences in thr array
+# ## CONVERT GENOMICS FASTA TO MULTI FASTA AND PLACE THEM IN APPROPRIATE DIRECTORY
 
-    print STDERR
-"Convert $temp_GENOMEX_tblcaps to multiple genomic fastas and place them in $fastas_dir:\n";
+#     print STDERR
+# "Convert $genome_all_contigs_tbl to multiple genomic fastas and place them in $fastas_dir:\n";
 
-    TblToFastaFile( $fastas_dir, $temp_GENOMEX_tblcaps );
-    print STDERR
-"\n\nConversion of $temp_GENOMEX_tblcaps to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
-    write_sizes_from_tbl_fn($temp_GENOMEX_tblcaps);
+#     tbl_2_single_fastas( $fastas_dir, $genome_all_contigs_tbl );
+#     print STDERR
+# "\n\nConversion of $genome_all_contigs_tbl to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
+#     write_sizes_from_tbl_fn($genome_all_contigs_tbl);
 
-#################################################
+# #################################################
 
 ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
     ##  ## Q_FRANCISCO: can we assume some sane GFF/GFT format as an input?  Why _ and "."?
 
-    if ($old_option) {
-        print STDERR
-          "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
+#     if ($old_option) {
+#         print STDERR
+#           "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
 
-        my $filtergff = "";
+#         my $filtergff = "";
 
-        $my_command =
-"gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $input_gff_fn";
-        $filtergff = capture($my_command);
+#         $my_command =
+# "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $input_gff_fn";
+#         $filtergff = capture($my_command);
 
-        open( my $fh_FOUT, ">", "$no_dots_gff_fn" ) or croak "Failed here";
-        print $fh_FOUT "$filtergff";
-        close $fh_FOUT;
+#         open( my $fh_FOUT, ">", "$input_nodots_gff" ) or croak "Failed here";
+#         print $fh_FOUT "$filtergff";
+#         close $fh_FOUT;
 
-    }
-    else {
-        $no_dots_gff_fn = $input_gff_fn;
-    }
+#     }
+#     else {
+#         $input_nodots_gff = $input_gff_fn;
+#     }
     print STDERR "\nObtain locus_id (list of genomic sequences / genes)\n";
 
-    $my_command = "gawk '{print \$1,\$9}' $no_dots_gff_fn | sort | uniq ";
+    $my_command = "gawk '{print \$1,\$9}' $input_nodots_gff | sort | uniq ";
     $locus_id   = capture($my_command);
 
-    # say "\n TTT got here TTT\n";
+    say "\n TTT got here TTT\n";
     $all_contigs_transcr_2cols = $work_dir . $species . "_locus_id";
     open( $fh_FOUT, ">", "$all_contigs_transcr_2cols" ) or croak "Failed here";
     print $fh_FOUT "$locus_id";
@@ -445,13 +457,14 @@ sub normal_run {
     chomp $total_genomic;
 
     print STDERR
-"\nThe gff file ($no_dots_gff_fn) contains a total of $total_genomic genomic sequences and $transcripts_all_number gene models\n";
+"\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcripts_all_number gene models\n";
+
 
 ## get a list of genes TOTAL
     print STDERR "\nObtain list of all transcripts\n\n";
 
 
-    $my_command = "gawk '{print \$9}' $no_dots_gff_fn | sort | uniq ";
+    $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
     my $transcripts_list_tmp  = capture($my_command);
 
     my $transcripts_all_list_fn = $work_dir . $species . "_all_seqs.lst";
@@ -461,16 +474,16 @@ sub normal_run {
 
     if ( $transcripts_all_number >= $train_loci_cutoff ) {
 
-        $tot_seqs4training_intX = int( $train_fraction * $transcripts_all_number );
+        $training_transc_num = int( $train_fraction * $transcripts_all_number );
 
         print STDERR
-"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n";
+"\nA subset of $training_transc_num sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n";
         ## DEBUG KEEP !!! shuf => random select
-        ## head -$tot_seqs4training_intX just the first ones
-#my $my_command =           "shuf --head-count=$tot_seqs4training_intX $all_contigs_transcr_2cols | sort ";
+        ## head -$training_transc_num just the first ones
+#my $my_command =           "shuf --head-count=$training_transc_num $all_contigs_transcr_2cols | sort ";
 
         my $my_command =
-          "head --lines=$tot_seqs4training_intX $all_contigs_transcr_2cols ";
+          "head --lines=$training_transc_num $all_contigs_transcr_2cols ";
 
         $locus_id_new = capture($my_command);
 
@@ -499,7 +512,7 @@ sub normal_run {
 "\nThe new training gff file includes $train_transc_used_num gene models (80% of total seqs)\n";
         ## ??? BUG ???
         $my_command =
-"gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn";
+"gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
         $gff4training = capture($my_command);
 
         $train_set_gff = $work_dir . $species . "_training_setaside80.gff";
@@ -540,7 +553,7 @@ sub normal_run {
 #########################
 
         $my_command =
-"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn | gawk '{ print \$9}' | sort | uniq | wc -l";
+"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff | gawk '{ print \$9}' | sort | uniq | wc -l";
         ## ??? BUG this is a number...
         $seqs_eval_gff_X = capture($my_command);
 
@@ -550,7 +563,7 @@ sub normal_run {
 "The evaluation gff file includes $seqs_eval_gff_X gene models (20% of total seqs)\n\n";
 
         $my_command =
-"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn ";
+"gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff ";
         my $gff4evaluation = capture($my_command);
 
         $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
@@ -688,7 +701,7 @@ sub normal_run {
 
     $backgrnd_kmers_fn = $work_dir . $species . "_background.tbl";
     get_background_kmers(
-        $backgrnd_kmer_size, $input_fas_fn, $temp_GENOMEX_tblcaps,
+        $backgrnd_kmer_size, $input_fas_fn, $genome_all_contigs_tbl,
         $backgrnd_kmer_num,  $backgrnd_kmers_fn
     );
 
@@ -900,17 +913,17 @@ sub normal_run {
 
 sub extractCDSINTRON {
 
-    my ( $no_dots_gff_fn, $locus_id, $type ) = @_;
+    my ( $my_nodots_gff, $locus_id, $type ) = @_;
 
     # #####extract CDS and INTRON SEQUENCES
     #my
     print STDERR "\nEXTRACT CDS and INTRON SEQUENCES from $type set..\n\n";
     open( my $fh_LOCUS, "<", "$locus_id" ) or croak "Failed here";
-    print STDERR "$locus_id and $no_dots_gff_fn\n";
+    print STDERR "$locus_id and $my_nodots_gff\n";
     my $count = 0;
     while (<$fh_LOCUS>) {
         my ( $genomic_id, $gene_id ) = split;
-        run(" egrep -w '$gene_id\$' $no_dots_gff_fn > $tmp_dir/$gene_id.gff");
+        run(" egrep -w '$gene_id\$' $my_nodots_gff > $tmp_dir/$gene_id.gff");
         ## POTENTIAL BUG, split commands below
 
         #~ my $fh_ssgff_A    = File::Temp->new();
@@ -1029,7 +1042,7 @@ sub extractCDSINTRON {
 ## ENSURE GFF DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
 
     my $gffnozero = "";
-    $my_command = "egrep -vwf $tempall_intron_zero_list2 $no_dots_gff_fn ";
+    $my_command = "egrep -vwf $tempall_intron_zero_list2 $my_nodots_gff ";
     $gffnozero  = capture($my_command);
 
     my $exCI_temp_nonzero_gff =
@@ -1159,7 +1172,7 @@ sub extractCDSINTRON {
 ## FUNCTION TO EXTRACT AND PROCESS SPLICE SITES AND START CODON
 sub extractprocessSITES {
 
-    my ( $no_dots_gff_fn, $locus_id ) = @_;
+    my ( $my_input_nodots_gff, $locus_id ) = @_;
     my $fh_LOCID;
 
 ## SPLICE SITES
@@ -1174,7 +1187,7 @@ sub extractprocessSITES {
         my ( $genomic_id, $gene_id ) = split;
 
         #  print STDERR "$genomic_id,$gene_id\n";
-        run("egrep -w '$gene_id\$' $no_dots_gff_fn > $tmp_dir/$gene_id.gff");
+        run("egrep -w '$gene_id\$' $my_input_nodots_gff > $tmp_dir/$gene_id.gff");
 
         #  print STDERR "$gene_id $input_gff_fn $tmp_dir/$gene_id.gff \n\n";
         ## POTENTIAL BUG SPLIT
@@ -1629,7 +1642,7 @@ sub deriveCodingPotential {
 ## PROCESS SEQUENCES FUNCTION ( FLANKED GENE MODELS OBTAINED FOR OPTIMIZATION)
 sub processSequences4Optimization {
 
-    my ( $no_dots_gff_fn, $type, $run_contig_opt_flag ) = @_;
+    my ( $my_input_nodots_gff, $type, $run_contig_opt_flag ) = @_;
 
     #my $pso_out_tbl = "";
     my $pso_gp_tbl  = "";
@@ -1641,7 +1654,7 @@ sub processSequences4Optimization {
 
     #my $work_dir;
 
-    open( my $fh_LOCID, "-|", "./bin/gff2gp.awk $no_dots_gff_fn | sort -k 1 " );
+    open( my $fh_LOCID, "-|", "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 " );
     while (<$fh_LOCID>) {
 
         $gp_from_gff .= $_;
@@ -2579,6 +2592,7 @@ sub OptimizeParameter {
         $FoWF,         $iMin,         $dMin,          $fMin,
         $iAccCtx,      $dAccCtx,      $fAccCtx
     ) = @_;
+
     my @evaluation_total = ();
     my $IeWFini          = $IeWF;
     my $IoWFini          = $IoWF;
@@ -2593,6 +2607,7 @@ sub OptimizeParameter {
     print STDERR "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
     print {$fh_SOUT}
       "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
+    close $fh_SOUT; 
 
     for ( $IeWF = $IeWFini ; $IeWF <= $FeWF ; $IeWF += $deWF ) {    #for_#1
         print STDERR "eWF: $IeWF\noWF: ";
@@ -3005,7 +3020,7 @@ sub calculate_stats {
     #print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
 
     print $fh_SOUT
-"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n\n";
+"\nA subset of $training_transc_num sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n\n";
     my $transcripts_all_number;
     if ( !$use_allseqs_flag ) {
         print $fh_SOUT
@@ -3126,7 +3141,7 @@ sub TblToFasta {
     return $faout;
 }
 
-sub TblToFastaFile {
+sub tbl_2_single_fastas {
 
     my ( $dir, $tbl_fn ) = @_;
 
@@ -3306,10 +3321,10 @@ sub translate_2_protein {
 
 
 sub convert_GFF_2_geneidGFF {
-    my ( $no_dots_gff_fn, $species, $type ) = @_;
+    my ( $my_input_nodots_gff, $species, $type ) = @_;
     say "fake convert_GFF_2_geneidGFF\n";
     my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
-    my $my_command = "cp $no_dots_gff_fn $geneid_gff";
+    my $my_command = "cp $my_input_nodots_gff $geneid_gff";
     say "$my_command\n";
     run($my_command);
 
@@ -3319,13 +3334,13 @@ sub convert_GFF_2_geneidGFF {
 ## CONVERT GFF2 TO GENEID GFF
 # sub convert_GFF_2_geneidGFF {
 
-#     my ( $no_dots_gff_fn, $species, $type ) = @_;
+#     my ( $my_input_nodots_gff, $species, $type ) = @_;
 #     my %G;
 #     my @G = ();
 
 #     my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
 
-#     open( my $fh_GFF,    "<", "$no_dots_gff_fn" ) or croak "Failed here";
+#     open( my $fh_GFF,    "<", "$my_input_nodots_gff" ) or croak "Failed here";
 #     open( my $fh_GFFOUT, ">", "$geneid_gff" )     or croak "Failed here";
 #     while (<$fh_GFF>) {
 #         my ( $c, @f, $id );
