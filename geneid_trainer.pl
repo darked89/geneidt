@@ -189,24 +189,25 @@ my $input_nodots_gff = "$work_dir/input_gff_no_dots.gff";
 say "\nXXX $input_nodots_gff \n";
 
 my $genome_all_contigs_tbl = "";
-my $backgrnd_kmers_fn    = "";
+my $backgrnd_kmers_fn      = "";
 ## my $tblseq      = "";
 
 my @evaluation = ();
 ## flow control / option variables
-my $run_jacknife_flag   = 0;
-my $use_allseqs_flag    = 0;
-my $use_branch_flag     = 0;
+my $run_jacknife_flag = 0;
+my $use_allseqs_flag  = 0;
+my $use_branch_flag   = 0;
+
 #~ my $run_optimizeX_flag  = 0;    ## UNUSED
 my $run_contig_opt_flag = 0;
 ## my $ext_flg          = 0;
 
-my $train_set_gff      = "";
-my $eval_set_gff       = "";
-my $all_contigs_transcr_2cols      = "";
-my $train_contigs_transcr_2cols  = "";
-my $eval_contigs_transcr_2cols = "";
-my $train_transc_used_num        = "";
+my $train_set_gff               = "";
+my $eval_set_gff                = "";
+my $all_contigs_transcr_2cols   = "";
+my $train_contigs_transcr_2cols = "";
+my $eval_contigs_transcr_2cols  = "";
+my $train_transc_used_num       = "";
 
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
@@ -259,7 +260,7 @@ my $out_intron_X           = "";
 my $out_intron_eval_X      = "";
 my $out_locus_id_X         = "";
 my $out_locus_id_X_eval    = "";
-my $out_ATGx_tbl          = "";
+my $out_ATGx_tbl           = "";
 my $seqs_4evaluation_listX = "";
 my $seqs_4training_listX   = "";
 
@@ -267,14 +268,14 @@ my $ATGx_tbl                   = "";
 my $tmp_X_geneid_sorted_gff    = "";
 my $train_2cols_seq_locusid_fn = "";
 my $eval_2cols_seq_locusid_fn  = "";
-my $train_transcr_lst_fn             = "";
+my $train_transcr_lst_fn       = "";
 
 my $tot_noncanon_accept_intX = "";
 my $tot_noncanon_donors_intX = "";
 my $tot_noncanon_ATGx        = "";
 
-my $transcripts_all_number             = "";
-my $training_transc_num = "";
+my $transcripts_all_number = "";
+my $training_transc_num    = "";
 
 #############################################################
 ## INITIAL CHECKS
@@ -345,12 +346,16 @@ $param->isocores( [ Geneid::Isocore->new() ] );
 ## END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
 
 $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
-my $my_command = "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
+my $my_command =
+  "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
+
 # $fastas_dir";
 run($my_command);
+
 #fasta_2_tbl( $input_fas_fn, $genome_all_contigs_tbl );
 
 run("sort -o $genome_all_contigs_tbl $genome_all_contigs_tbl");
+
 #tbl_2_single_fastas( $fastas_dir, $genome_all_contigs_tbl );
 #write_sizes_from_tbl_fn($genome_all_contigs_tbl);
 $my_command = "cp $input_gff_fn $input_nodots_gff";
@@ -370,15 +375,16 @@ sub normal_run {
     if ($old_option) {
         print "not yet\n";
     }
-#     print STDERR
-#       "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
 
-#     my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
-#     fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
-#     run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
+ #     print STDERR
+ #       "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
 
-#     print STDERR "actg to ACTG conversion of input fasta \n";
-#     my $tblcaps = "";
+    #     my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
+    #     fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
+    #     run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
+
+    #     print STDERR "actg to ACTG conversion of input fasta \n";
+    #     my $tblcaps = "";
 
 #     open(
 #         my $fh_LOCID,
@@ -390,12 +396,12 @@ sub normal_run {
 #     }
 #     close $fh_LOCID;
 
-#     chomp $tblcaps;
-#     $genome_all_contigs_tbl = $work_dir . $species . ".genomic.tbl";
-#     open( my $fh_FOUT_caps, ">", "$genome_all_contigs_tbl" )
-#       or croak "Failed here";
-#     print {$fh_FOUT_caps} "$tblcaps";
-#     close $fh_FOUT_caps;
+    #     chomp $tblcaps;
+    #     $genome_all_contigs_tbl = $work_dir . $species . ".genomic.tbl";
+    #     open( my $fh_FOUT_caps, ">", "$genome_all_contigs_tbl" )
+    #       or croak "Failed here";
+    #     print {$fh_FOUT_caps} "$tblcaps";
+    #     close $fh_FOUT_caps;
 
 # ## place genomic sequences in "fastas_$species" directory
 #     print STDERR "move genomic sequences into \"$fastas_dir\" directory\n";
@@ -411,7 +417,7 @@ sub normal_run {
 # "\n\nConversion of $genome_all_contigs_tbl to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
 #     write_sizes_from_tbl_fn($genome_all_contigs_tbl);
 
-# #################################################
+    # #################################################
 
 ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
     ##  ## Q_FRANCISCO: can we assume some sane GFF/GFT format as an input?  Why _ and "."?
@@ -420,20 +426,20 @@ sub normal_run {
 #         print STDERR
 #           "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
 
-#         my $filtergff = "";
+    #         my $filtergff = "";
 
 #         $my_command =
 # "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $input_gff_fn";
 #         $filtergff = capture($my_command);
 
-#         open( my $fh_FOUT, ">", "$input_nodots_gff" ) or croak "Failed here";
-#         print $fh_FOUT "$filtergff";
-#         close $fh_FOUT;
+ #         open( my $fh_FOUT, ">", "$input_nodots_gff" ) or croak "Failed here";
+ #         print $fh_FOUT "$filtergff";
+ #         close $fh_FOUT;
 
-#     }
-#     else {
-#         $input_nodots_gff = $input_gff_fn;
-#     }
+    #     }
+    #     else {
+    #         $input_nodots_gff = $input_gff_fn;
+    #     }
     print STDERR "\nObtain locus_id (list of genomic sequences / genes)\n";
 
     $my_command = "gawk '{print \$1,\$9}' $input_nodots_gff | sort | uniq ";
@@ -446,12 +452,14 @@ sub normal_run {
     close $fh_FOUT;
 
 ## number of gene models TOTAL
-    $my_command = " gawk '{print \$2}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
+    $my_command =
+      " gawk '{print \$2}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
     $transcripts_all_number = capture($my_command);
 
     chomp $transcripts_all_number;
 ## number of genomic sequences TOTAL
-    $my_command = "gawk '{print \$1}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
+    $my_command =
+      "gawk '{print \$1}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
     my $total_genomic = capture($my_command);
 
     chomp $total_genomic;
@@ -459,13 +467,11 @@ sub normal_run {
     print STDERR
 "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcripts_all_number gene models\n";
 
-
 ## get a list of genes TOTAL
     print STDERR "\nObtain list of all transcripts\n\n";
 
-
     $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
-    my $transcripts_list_tmp  = capture($my_command);
+    my $transcripts_list_tmp = capture($my_command);
 
     my $transcripts_all_list_fn = $work_dir . $species . "_all_seqs.lst";
     open( $fh_FOUT, ">", "$transcripts_all_list_fn" ) or croak "Failed here";
@@ -489,13 +495,13 @@ sub normal_run {
 
         $train_contigs_transcr_2cols =
           $work_dir . $species . "_training_setaside80.2cols";
-        open( my $fh_FOUT, ">", "$train_contigs_transcr_2cols" ) or croak "Failed here";
+        open( my $fh_FOUT, ">", "$train_contigs_transcr_2cols" )
+          or croak "Failed here";
         print $fh_FOUT "$locus_id_new";
         close $fh_FOUT;
 
 ## ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
-        $my_command =
-          "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
+        $my_command = "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
         $train_transc_used_num = capture($my_command);
         chomp $train_transc_used_num;
         my $t1 = Benchmark->new;
@@ -524,7 +530,7 @@ sub normal_run {
 
         #my $train_transcripts_list_tmp = "";
 
-        $my_command      = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
+        $my_command = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
         my $train_transcripts_list_tmp = capture($my_command);
 
         $train_transcr_lst_fn = $work_dir . $species . "train_setaside80.lst";
@@ -544,7 +550,8 @@ sub normal_run {
 
         $eval_contigs_transcr_2cols =
           $work_dir . $species . "_evaluation_setaside20.2cols";
-        open( $fh_FOUT, ">", "$eval_contigs_transcr_2cols" ) or croak "Failed here";
+        open( $fh_FOUT, ">", "$eval_contigs_transcr_2cols" )
+          or croak "Failed here";
         print $fh_FOUT "$locusideval";
         close $fh_FOUT;
 
@@ -581,7 +588,7 @@ sub normal_run {
 
     if ( !$use_allseqs_flag ) {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
         print STDERR "NOT_USE_ALL_SEQS \n\n";
-        
+
         ## not used
         #  "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
         ### XXX function name
@@ -602,15 +609,17 @@ sub normal_run {
         $train_2cols_seq_locusid_fn =
           convert_GFF_2_geneidGFF( $train_set_gff, $species, ".train" );
         print STDERR
-          "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
+"L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
 
         (
             $cds_all_nozero_tbl, $out_intron_X, $out_locus_id_X, $out_gff_X,
             $inframe_X
           )
           = @{
-            extractCDSINTRON( $train_2cols_seq_locusid_fn, $train_contigs_transcr_2cols,
-                ".train" )
+            extractCDSINTRON(
+                $train_2cols_seq_locusid_fn, $train_contigs_transcr_2cols,
+                ".train"
+            )
           };
 
 #  print STDERR " OUTSIDE EXTRACTCDSINTRON outgff: $out_gff_X\noutlocus_id: $out_locus_id_X\n";
@@ -626,8 +635,10 @@ sub normal_run {
             $out_eval_gff_X,       $inframe_X_eval
           )
           = @{
-            extractCDSINTRON( $eval_2cols_seq_locusid_fn, $eval_contigs_transcr_2cols,
-                ".eval" )
+            extractCDSINTRON(
+                $eval_2cols_seq_locusid_fn, $eval_contigs_transcr_2cols,
+                ".eval"
+            )
           };
 ###EVAL
 
@@ -640,7 +651,7 @@ sub normal_run {
     (
         $out_donor_tbl,    $tot_noncanon_donors_intX,
         $out_acceptor_tbl, $tot_noncanon_accept_intX,
-        $out_ATGx_tbl,    $tot_noncanon_ATGx
+        $out_ATGx_tbl,     $tot_noncanon_ATGx
     ) = @{ extractprocessSITES( $out_gff_X, $out_locus_id_X ) };
 
 ## prepare sequences for optimization of newly developed parameter file (TRAIN)
@@ -651,12 +662,12 @@ sub normal_run {
     (
         $gp_traincontig_gff, $gp_traincontig_fa,
         $gp_traincontig_tbl, $gp_traincontig_len_int
-    ) = @{ processSequences4Optimization( $out_gff_X, ".train", 1 ) };
+    ) = @{ process_seqs_4opty( $out_gff_X, ".train", 1 ) };
 
     print STDERR
 "\nConvert gff to gp (golden-path-like)format (training set for later optimization -400-nt flanked sequences)\n";
     ( $gp_train_gff_X, $gp_train_fa_X, $gp_train_tbl_X, $gp_train_len_int_X ) =
-      @{ processSequences4Optimization( $out_gff_X, ".train", 0 ) };
+      @{ process_seqs_4opty( $out_gff_X, ".train", 0 ) };
     print STDERR "$gp_train_gff_X";
 
 ########################################
@@ -671,7 +682,7 @@ sub normal_run {
         print STDERR
 "\nConvert gff to gp (golden-path-like)format (400-nt flanking)(test set for evaluation of new parameter file)\n";
         ( $gp_eval_gff_X, $gp_eval_fa_X, $gp_eval_tbl_X, $gp_eval_len_intX ) =
-          @{ processSequences4Optimization( $out_eval_gff_X, ".eval", 0 ) };
+          @{ process_seqs_4opty( $out_eval_gff_X, ".eval", 0 ) };
         print STDERR "DONE\n";
 
         print STDERR
@@ -680,7 +691,7 @@ sub normal_run {
         (
             $gp_evalcontig_gff, $gp_evalcontig_fa,
             $gp_evalcontig_tbl, $gp_evalcontig_len_int
-        ) = @{ processSequences4Optimization( $out_eval_gff_X, ".eval", 1 ) };
+        ) = @{ process_seqs_4opty( $out_eval_gff_X, ".eval", 1 ) };
         print STDERR "DONE\n";
 
     }
@@ -709,11 +720,13 @@ sub normal_run {
     #     $donor_start,  $donor_end,  $acceptor_start,
     #     $acceptor_end, $ATGx_start, $ATGx_end
     # ) = compute_sites_pictogram();
-    
-    my ($donor_start,    $donor_end)    = compute_matrices_4sites( $out_donor_tbl, 'donor' );
-    my ($acceptor_start, $acceptor_end) = compute_matrices_4sites( $out_acceptor_tbl, 'acceptor');
-    my ($ATGx_start,     $ATGx_end)     = compute_matrices_4sites( $out_ATGx_tbl, 'ATGx' );
-       
+
+    my ( $donor_start, $donor_end ) =
+      compute_matrices_4sites( $out_donor_tbl, 'donor' );
+    my ( $acceptor_start, $acceptor_end ) =
+      compute_matrices_4sites( $out_acceptor_tbl, 'acceptor' );
+    my ( $ATGx_start, $ATGx_end ) =
+      compute_matrices_4sites( $out_ATGx_tbl, 'ATGx' );
 
     #~ ## DEBUG MEM
 
@@ -732,7 +745,7 @@ sub normal_run {
     my (
         $markov_mod_ini,  $markov_mod_trans, $total_coding,
         $total_noncoding, $markov_model
-    ) = @{ deriveCodingPotential( $cds_all_nozero_tbl, $out_intron_X ) };
+    ) = @{ derive_coding_potential( $cds_all_nozero_tbl, $out_intron_X ) };
 
     #add markov matrices to the parameter file
     if ( !defined @{ $param->isocores }[0]->Markov_order($markov_model) ) {
@@ -1187,7 +1200,8 @@ sub extractprocessSITES {
         my ( $genomic_id, $gene_id ) = split;
 
         #  print STDERR "$genomic_id,$gene_id\n";
-        run("egrep -w '$gene_id\$' $my_input_nodots_gff > $tmp_dir/$gene_id.gff");
+        run("egrep -w '$gene_id\$' $my_input_nodots_gff > $tmp_dir/$gene_id.gff"
+        );
 
         #  print STDERR "$gene_id $input_gff_fn $tmp_dir/$gene_id.gff \n\n";
         ## POTENTIAL BUG SPLIT
@@ -1516,7 +1530,7 @@ sub extractprocessSITES {
 }    #subectractprocesssites
 
 ## FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
-sub deriveCodingPotential {
+sub derive_coding_potential {
     my ( $cds, $intron ) = @_;
 
     my $markov_mod_A = "";
@@ -1640,7 +1654,7 @@ sub deriveCodingPotential {
 }    #derive coding potential
 
 ## PROCESS SEQUENCES FUNCTION ( FLANKED GENE MODELS OBTAINED FOR OPTIMIZATION)
-sub processSequences4Optimization {
+sub process_seqs_4opty {
 
     my ( $my_input_nodots_gff, $type, $run_contig_opt_flag ) = @_;
 
@@ -1654,7 +1668,8 @@ sub processSequences4Optimization {
 
     #my $work_dir;
 
-    open( my $fh_LOCID, "-|", "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 " );
+    open( my $fh_LOCID, "-|",
+        "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 " );
     while (<$fh_LOCID>) {
 
         $gp_from_gff .= $_;
@@ -1666,8 +1681,10 @@ sub processSequences4Optimization {
     open( my $fh_FOUT, ">", "$pso_tmp_gp_from_gff" );
     print {$fh_FOUT} "$gp_from_gff";
     close $fh_FOUT;
-   # print STDERR "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
-    print STDERR "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir \n";
+
+# print STDERR "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
+    print STDERR
+      "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir \n";
 
     my $gp_Xgetgenes_tmp_pre_tbl =
       GetGenes( $fastas_dir, $pso_tmp_gp_from_gff, $work_dir );
@@ -1726,7 +1743,8 @@ sub processSequences4Optimization {
 
     #  ` gawk '{print \$1,length(\$2)}' $tempgp_tbl | sort -k1,1 `;    ##XX
 
-    my $type_cds_contigs_total_bp = $work_dir . $species . $type . ".gp_cds_length";
+    my $type_cds_contigs_total_bp =
+      $work_dir . $species . $type . ".gp_cds_length";
     open( $fh_FOUT, ">", "$type_cds_contigs_total_bp" ) or croak "Failed here";
     print {$fh_FOUT} "$seqslenggp";
     close $fh_FOUT;
@@ -1837,7 +1855,10 @@ sub processSequences4Optimization {
     }
     elsif ( !$run_contig_opt_flag ) {
         print STDERR "L1803, NOT CONTIG OPT\n";
-        return [ $eval_gp_out_gff, $tempgp_fa, $tempgp_tbl, $type_cds_contigs_total_bp ];
+        return [
+            $eval_gp_out_gff, $tempgp_fa,
+            $tempgp_tbl,      $type_cds_contigs_total_bp
+        ];
     }
 
 }    #processSequences optimization
@@ -1863,7 +1884,8 @@ sub GetGenes {
     #~ chomp($work_dir);
     #~ chomp($gp_out_tbl);
 
-    open( my $fh_REFGENE,   "<", "$my_pso_tmp_gp_from_gff" ) or croak "Failed here";
+    open( my $fh_REFGENE, "<", "$my_pso_tmp_gp_from_gff" )
+      or croak "Failed here";
     open( my $fh_OUT_tblgb, ">", "$gp_out_tbl" ) or croak "Failed here";
     while (<$fh_REFGENE>) {
 
@@ -2167,6 +2189,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
     }
     close $fh_OUT_tblgb;
     close $fh_REFGENE;
+
     #$gp_out_tbl = $gp_out_tbl;
     return $gp_out_tbl;
 
@@ -2211,34 +2234,33 @@ sub BitScoreGraph {
     return ( $start, $end );
 }    #end BitScoreGraph
 
-
 ## GETKMATRIX FUNCTION (Splice site an Start codon PWMs)
 sub get_K_matrix {
     ## BUG do not relay on  jacknife/branch etc. use some: type ??
     #was my our?
-    my ( $true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset, $matrix_type) = @_;
-    
-    my ($donor, $accept, $ATGx) = (0, 0, 0);
+    my ( $true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset, $matrix_type )
+      = @_;
+
+    my ( $donor, $accept, $ATGx ) = ( 0, 0, 0 );
     ## BUG temp fix
-    my $jacknife = 0; 
-    if ($matrix_type eq 'donor') 
-    { $donor = 1;
+    my $jacknife = 0;
+    if ( $matrix_type eq 'donor' ) {
+        $donor = 1;
     }
-    elsif  ($matrix_type eq 'acceptor')
-    {
-       $accept = 1;
+    elsif ( $matrix_type eq 'acceptor' ) {
+        $accept = 1;
     }
-    elsif  ($matrix_type eq 'ATGx')
-    {
-       $ATGx = 1;
+    elsif ( $matrix_type eq 'ATGx' ) {
+        $ATGx = 1;
     }
-    else{
+    else {
         croak "sub_get_K_matrix: wrong matrix type\n";
     }
+
     #     $matrix_type = 'donor';
     # }
     #$branch, $start, $end, $jacknife
-    
+
     # my $matrix_type = "";
     # if ($donor) {
     #     $matrix_type = 'donor';
@@ -2417,7 +2439,8 @@ sub get_K_matrix {
     my $my_info_thresh = $my_info_thresholds{$matrix_type};
 
     #say "\n matrix sub: $matrix_type, $my_info_thresh \n";
-    my ( $start, $end ) = BitScoreGraph( $tempinfolog, $my_info_thresh, $offset );
+    my ( $start, $end ) =
+      BitScoreGraph( $tempinfolog, $my_info_thresh, $offset );
     print STDERR "\n L2921 got: $start, $end using $tempinfolog \n";
 
     $offset = $offset - $order;
@@ -2607,7 +2630,7 @@ sub OptimizeParameter {
     print STDERR "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
     print {$fh_SOUT}
       "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
-    close $fh_SOUT; 
+    close $fh_SOUT;
 
     for ( $IeWF = $IeWFini ; $IeWF <= $FeWF ; $IeWF += $deWF ) {    #for_#1
         print STDERR "eWF: $IeWF\noWF: ";
@@ -3319,7 +3342,6 @@ sub translate_2_protein {
 
 }
 
-
 sub convert_GFF_2_geneidGFF {
     my ( $my_input_nodots_gff, $species, $type ) = @_;
     say "fake convert_GFF_2_geneidGFF\n";
@@ -3328,8 +3350,8 @@ sub convert_GFF_2_geneidGFF {
     say "$my_command\n";
     run($my_command);
 
-    my  $geneid_sorted_gff_fn = $geneid_gff;
- return $geneid_sorted_gff_fn;
+    my $geneid_sorted_gff_fn = $geneid_gff;
+    return $geneid_sorted_gff_fn;
 }
 ## CONVERT GFF2 TO GENEID GFF
 # sub convert_GFF_2_geneidGFF {
@@ -3515,112 +3537,115 @@ sub create_data_dirs {
     return 1;
 }
 
-sub write_sizes_from_tbl_fn {
-
-    my $input_tbl_fn = $_[0];
-    print "calc size for  $input_tbl_fn \n";
-
-    open( my $fh_input, '<', $input_tbl_fn )
-      or croak "Could not open file $input_tbl_fn' $OS_ERROR";
-
-    while ( my $line = <$fh_input> ) {
-        chomp $line;
-
-        #print $line
-        my @f = split / /, $line;
-        my $name = $f[0];
-
-        #print "$name\t"
-        my $seq       = $f[1];
-        my $lengfasta = length($seq);
-
-        #print "$name = $lengfasta\t"
-        my $tmp_out_fn = "$fastas_dir/$name" . "_len";
-
-        #print  " $tmp_out_fn \t"
-        open( my $fh_out, '>', $tmp_out_fn )
-          or croak "Could not open file '$tmp_out_fn' $OS_ERROR";
-        print {$fh_out} "$name $lengfasta\n";
-        close $fh_out;
-
-    }
-    close $fh_input;
-    return 1;
-}    #end write_sizes_from_tbl_fn
+#sub write_sizes_from_tbl_fn {
+#
+#    my $input_tbl_fn = $_[0];
+#    print "calc size for  $input_tbl_fn \n";
+#
+#    open( my $fh_input, '<', $input_tbl_fn )
+#      or croak "Could not open file $input_tbl_fn' $OS_ERROR";
+#
+#    while ( my $line = <$fh_input> ) {
+#        chomp $line;
+#
+#        #print $line
+#        my @f = split / /, $line;
+#        my $name = $f[0];
+#
+#        #print "$name\t"
+#        my $seq       = $f[1];
+#        my $lengfasta = length($seq);
+#
+#        #print "$name = $lengfasta\t"
+#        my $tmp_out_fn = "$fastas_dir/$name" . "_len";
+#
+#        #print  " $tmp_out_fn \t"
+#        open( my $fh_out, '>', $tmp_out_fn )
+#          or croak "Could not open file '$tmp_out_fn' $OS_ERROR";
+#        print {$fh_out} "$name $lengfasta\n";
+#        close $fh_out;
+#
+#    }
+#    close $fh_input;
+#    return 1;
+#}    #end write_sizes_from_tbl_fn
 
 sub get_background_kmers {
 
     my ( $kmer_len, $input_fas_fn, $tbl, $num_seqs, $background_tbl ) = @_;
     my $bckgrnd_debug_flag;
     $bckgrnd_debug_flag = 1;
-    if ( !$bckgrnd_debug_flag ) {
-
-        #my $input_fas_fn = $f;
-        #my $tbl = "";
-        my $countlines = 0;
-        my $contigs_all_number = num_of_lines_in_file($input_fas_fn);
-
-        #my $totalseqs  = `egrep -c \"^>\" $input_fas_fn`;
-        #chomp $totalseqs;
-
-        open( my $fh_IN, "<", "$tbl" ) or croak "Failed here";
-        my @tabular = ();
-        while (<$fh_IN>) {
-            push @tabular, $_;
-        }
-        close $fh_IN;
-
-        print STDERR
-"\nThe total number of genomic sequences (in $input_fas_fn) is $contigs_all_number\n";
-
-        if ( $contigs_all_number >= 1 ) {
-
-            #print STDERR "in totalseqs if";
-            my $seq    = "";
-            my $sublen = 0;
-            foreach my $line (@tabular) {
-                chomp $line;
-                my @f = split " ", $line;
-                $seq .= $f[1];
-                $sublen += length( $f[1] );
-                $countlines++;
-                if ( $sublen >= ( $num_seqs * $kmer_len + 1 ) ) {
-                    last;
-                }
-            }
-
-            #print STDERR "$seq";
-            my $len = length($seq);
-
-            # chomp $totalseqs;
-            print STDERR
-"The length of the new fasta file is $len\n(concatenation of $countlines fastas (out of $contigs_all_number))\n";
-            open( my $fh_BACKGRND, ">", "$background_tbl" )
-              or croak "Failed here";
-            my $row = 1;
-            print STDERR
-"\nObtain background ($num_seqs seqs) from fasta of $kmer_len nucleotides \n";
-            for ( my $n = 1 ; $n <= $num_seqs ; $n++ ) {
-                my $kmer = "N";
-                while ( $kmer =~ m/[^ACGTacgt]/ ) {
-                    my $rand = int( rand( $len - $kmer_len ) + 1 );
-                    $kmer = substr( $seq, $rand, $kmer_len );
-                }
-
-                #print STDERR  $n."..";
-                print {$fh_BACKGRND} $row++ . "\t$kmer\n";
-            }
-            print STDERR "FINISHED OBTAINING BACKGROUND INFO\n";
-            close $fh_BACKGRND;
-        }
-    }
-    else {
+    if ( $bckgrnd_debug_flag )
+    {
+        ## TODO using python script to generate 1M 60mers to save time
         #just for non-random results
         print "\npremade background\n";
         my $my_command =
-          "zcat ./test_data/pmar_1M_60mers.tbl.gz > $background_tbl";
+            "zcat ./test_data/pmar_1M_60mers.tbl.gz > $background_tbl";
         run($my_command);
     }
+#    else  {
+#
+#        #my $input_fas_fn = $f;
+#        #my $tbl = "";
+#        my $countlines         = 0;
+#        my $contigs_all_number = num_of_lines_in_file($input_fas_fn);
+#
+#        #my $totalseqs  = `egrep -c \"^>\" $input_fas_fn`;
+#        #chomp $totalseqs;
+#
+#        open( my $fh_IN, "<", "$tbl" ) or croak "Failed here";
+#        my @tabular = ();
+#        while (<$fh_IN>) {
+#            push @tabular, $_;
+#        }
+#        close $fh_IN;
+#
+#        print STDERR
+#"\nThe total number of genomic sequences (in $input_fas_fn) is $contigs_all_number\n";
+#
+#        if ( $contigs_all_number >= 1 ) {
+#
+#            #print STDERR "in totalseqs if";
+#            my $seq    = "";
+#            my $sublen = 0;
+#            foreach my $line (@tabular) {
+#                chomp $line;
+#                my @f = split " ", $line;
+#                $seq .= $f[1];
+#                $sublen += length( $f[1] );
+#                $countlines++;
+#                if ( $sublen >= ( $num_seqs * $kmer_len + 1 ) ) {
+#                    last;
+#                }
+#            }
+#
+#            #print STDERR "$seq";
+#            my $len = length($seq);
+#
+#            # chomp $totalseqs;
+#            print STDERR
+#"The length of the new fasta file is $len\n(concatenation of $countlines fastas (out of $contigs_all_number))\n";
+#            open( my $fh_BACKGRND, ">", "$background_tbl" )
+#              or croak "Failed here";
+#            my $row = 1;
+#            print STDERR
+#"\nObtain background ($num_seqs seqs) from fasta of $kmer_len nucleotides \n";
+#            for ( my $n = 1 ; $n <= $num_seqs ; $n++ ) {
+#                my $kmer = "N";
+#                while ( $kmer =~ m/[^ACGTacgt]/ ) {
+#                    my $rand = int( rand( $len - $kmer_len ) + 1 );
+#                    $kmer = substr( $seq, $rand, $kmer_len );
+#                }
+#
+#                #print STDERR  $n."..";
+#                print {$fh_BACKGRND} $row++ . "\t$kmer\n";
+#            }
+#            print STDERR "FINISHED OBTAINING BACKGROUND INFO\n";
+#            close $fh_BACKGRND;
+#        }
+#    }
+#
 
     return 1;
 
@@ -3666,8 +3691,6 @@ sub get_background_kmers {
 #     {
 #         croak "error in setting profile\n";
 #     }
-
-
 
 # #print STDERR "gawk '{print  substr(\$2,($donor_start-3),($prof_len_don+6))}' $out_donor_tbl\n";
 
@@ -3809,46 +3832,49 @@ sub get_background_kmers {
 # #############################################################
 # }
 
-
 sub compute_matrices_4sites {
 ## hacked from compute_sites_pictogram
 ## no pictogram, just values
 
     my ( $my_input_table, $my_site_type ) = @_;
 
-     
     my %types_hash = (
         acceptor => 'Acceptor_profile',
         donor    => 'Donor_profile',
-        ATGx     => 'Start_profile', 
-        tr_stop  => 'Stop_profile', );
+        ATGx     => 'Start_profile',
+        tr_stop  => 'Stop_profile',
+    );
 
-    my $my_order = "0";
-    my $my_offset = $bases_offset;
+    my $my_order    = "0";
+    my $my_offset   = $bases_offset;
     my $numbersites = num_of_lines_in_file($my_input_table);
 
-    if (($my_site_type eq 'acceptor') || ($my_site_type eq 'donor')) {
+    if ( ( $my_site_type eq 'acceptor' ) || ( $my_site_type eq 'donor' ) ) {
         if ( $numbersites > $train_sites_cutoff ) {
             $my_order = "1";
-        }       
-    }
-    elsif ($my_site_type eq 'ATGx'){
-        if ( $numbersites > $train_sites_markov_cutoff ) {
-            $my_order = "2"; 
         }
-    }    
-    else{
+    }
+    elsif ( $my_site_type eq 'ATGx' ) {
+        if ( $numbersites > $train_sites_markov_cutoff ) {
+            $my_order = "2";
+        }
+    }
+    else {
         say "ERROR, unknown site type ";
     }
-    
+
     my (
         $my_site_matrix, $my_site_profile_len, $my_site_offset,
         $my_site_start,  $my_site_end
-      ) = get_K_matrix($my_input_table, $backgrnd_kmers_fn, $my_order, $my_offset, $my_site_type );
-      
-       if (
+      )
+      = get_K_matrix( $my_input_table, $backgrnd_kmers_fn, $my_order,
+        $my_offset, $my_site_type );
+    ## TODO / BUG: possibly 0, 1, 0, 0, 0, 0, denotes a specific type of profile
+    ## check inside the *.pm modules!
+    if (
         !defined @{ $param->isocores }[0]->set_profile(
-            $types_hash{$my_site_type}, $my_site_profile_len, $my_site_offset, $pwm_cutoff,
+            $types_hash{$my_site_type},
+            $my_site_profile_len, $my_site_offset, $pwm_cutoff,
             $my_order, 0, 1, 0, 0, 0, 0, $my_site_matrix
         )
       )
@@ -3856,7 +3882,6 @@ sub compute_matrices_4sites {
         croak "error in setting profile of type: $my_site_type}\n";
     }
 
-     return 
-     $my_site_start,  $my_site_end; 
+    return $my_site_start, $my_site_end;
 
-    }
+}
