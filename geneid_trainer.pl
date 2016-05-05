@@ -201,8 +201,8 @@ my $use_branch_flag     = 0;
 my $run_contig_opt_flag = 0;
 ## my $ext_flg          = 0;
 
-my $tmp_4train_gff      = "";
-my $tmp_4eval_gff       = "";
+my $train_set_gff      = "";
+my $eval_set_gff       = "";
 my $all_contigs_transcr_2cols      = "";
 my $train_contigs_transcr_2cols  = "";
 my $eval_contigs_transcr_2cols = "";
@@ -267,13 +267,13 @@ my $ATGx_tbl                   = "";
 my $tmp_X_geneid_sorted_gff    = "";
 my $train_2cols_seq_locusid_fn = "";
 my $eval_2cols_seq_locusid_fn  = "";
-my $templist_train             = "";
+my $train_transcr_lst_fn             = "";
 
 my $tot_noncanon_accept_intX = "";
 my $tot_noncanon_donors_intX = "";
 my $tot_noncanon_ATGx        = "";
 
-my $total_seqs             = "";
+my $transcripts_all_number             = "";
 my $tot_seqs4training_intX = "";
 
 #############################################################
@@ -435,9 +435,9 @@ sub normal_run {
 
 ## number of gene models TOTAL
     $my_command = " gawk '{print \$2}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
-    $total_seqs = capture($my_command);
+    $transcripts_all_number = capture($my_command);
 
-    chomp $total_seqs;
+    chomp $transcripts_all_number;
 ## number of genomic sequences TOTAL
     $my_command = "gawk '{print \$1}' $all_contigs_transcr_2cols | sort | uniq | wc -l";
     my $total_genomic = capture($my_command);
@@ -445,26 +445,26 @@ sub normal_run {
     chomp $total_genomic;
 
     print STDERR
-"\nThe gff file ($no_dots_gff_fn) contains a total of $total_genomic genomic sequences and $total_seqs gene models\n";
+"\nThe gff file ($no_dots_gff_fn) contains a total of $total_genomic genomic sequences and $transcripts_all_number gene models\n";
 
 ## get a list of genes TOTAL
-    print STDERR "\nObtain list of all genes\n\n";
-    my $list_seqs = "";
+    print STDERR "\nObtain list of all transcripts\n\n";
+
 
     $my_command = "gawk '{print \$9}' $no_dots_gff_fn | sort | uniq ";
-    $list_seqs  = capture($my_command);
+    my $transcripts_list_tmp  = capture($my_command);
 
-    my $templist = $work_dir . $species . "_list_all_seqs";
-    open( $fh_FOUT, ">", "$templist" ) or croak "Failed here";
-    print $fh_FOUT "$list_seqs";
+    my $transcripts_all_list_fn = $work_dir . $species . "_all_seqs.lst";
+    open( $fh_FOUT, ">", "$transcripts_all_list_fn" ) or croak "Failed here";
+    print $fh_FOUT "$transcripts_list_tmp";
     close $fh_FOUT;
 
-    if ( $total_seqs >= $train_loci_cutoff ) {
+    if ( $transcripts_all_number >= $train_loci_cutoff ) {
 
-        $tot_seqs4training_intX = int( $train_fraction * $total_seqs );
+        $tot_seqs4training_intX = int( $train_fraction * $transcripts_all_number );
 
         print STDERR
-"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $total_seqs gene models) was used for training\n";
+"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n";
         ## DEBUG KEEP !!! shuf => random select
         ## head -$tot_seqs4training_intX just the first ones
 #my $my_command =           "shuf --head-count=$tot_seqs4training_intX $all_contigs_transcr_2cols | sort ";
@@ -475,7 +475,7 @@ sub normal_run {
         $locus_id_new = capture($my_command);
 
         $train_contigs_transcr_2cols =
-          $work_dir . $species . "_locus_id_training_setaside80";
+          $work_dir . $species . "_training_setaside80.2cols";
         open( my $fh_FOUT, ">", "$train_contigs_transcr_2cols" ) or croak "Failed here";
         print $fh_FOUT "$locus_id_new";
         close $fh_FOUT;
@@ -502,21 +502,21 @@ sub normal_run {
 "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn";
         $gff4training = capture($my_command);
 
-        $tmp_4train_gff = $work_dir . $species . ".gff_training_setaside80";
-        open( $fh_FOUT, ">", "$tmp_4train_gff" ) or croak "Failed here";
+        $train_set_gff = $work_dir . $species . "_training_setaside80.gff";
+        open( $fh_FOUT, ">", "$train_set_gff" ) or croak "Failed here";
         print $fh_FOUT "$gff4training";
         close $fh_FOUT;
 
         print STDERR "\nObtain list of training genes\n\n";
 
-        my $list_seqs_train = "";
+        #my $train_transcripts_list_tmp = "";
 
-        $my_command      = "gawk '{print \$9}' $tmp_4train_gff | sort | uniq ";
-        $list_seqs_train = capture($my_command);
+        $my_command      = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
+        my $train_transcripts_list_tmp = capture($my_command);
 
-        $templist_train = $work_dir . $species . "_list_train_seqs_setaside80";
-        open( $fh_FOUT, ">", "$templist_train" ) or croak "Failed here";
-        print $fh_FOUT "$list_seqs_train";
+        $train_transcr_lst_fn = $work_dir . $species . "train_setaside80.lst";
+        open( $fh_FOUT, ">", "$train_transcr_lst_fn" ) or croak "Failed here";
+        print $fh_FOUT "$train_transcripts_list_tmp";
         close $fh_FOUT;
 
 #########################
@@ -525,12 +525,12 @@ sub normal_run {
         my $locusideval = "";
 
         $my_command =
-"gawk '{print \$0\"\$\"}' $templist_train | egrep -vwf - $all_contigs_transcr_2cols";
+"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $all_contigs_transcr_2cols";
         $locusideval = capture($my_command);
         chomp $locusideval;
 
         $eval_contigs_transcr_2cols =
-          $work_dir . $species . "_locus_id_evaluation_setaside20";
+          $work_dir . $species . "_evaluation_setaside20.2cols";
         open( $fh_FOUT, ">", "$eval_contigs_transcr_2cols" ) or croak "Failed here";
         print $fh_FOUT "$locusideval";
         close $fh_FOUT;
@@ -553,8 +553,8 @@ sub normal_run {
 "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $no_dots_gff_fn ";
         my $gff4evaluation = capture($my_command);
 
-        $tmp_4eval_gff = $work_dir . $species . ".gff_evaluation_setaside20";
-        open( $fh_FOUT, ">", "$tmp_4eval_gff" ) or croak "Failed here";
+        $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
+        open( $fh_FOUT, ">", "$eval_set_gff" ) or croak "Failed here";
         print $fh_FOUT "$gff4evaluation";
         close $fh_FOUT;
 
@@ -567,8 +567,10 @@ sub normal_run {
     }    # seqs < 500
 
     if ( !$use_allseqs_flag ) {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
-        print STDERR
-          "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
+        print STDERR "NOT_USE_ALL_SEQS \n\n";
+        
+        ## not used
+        #  "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
         ### XXX function name
     }
 ## Convert general gff2 to geneid gff format
@@ -585,7 +587,7 @@ sub normal_run {
 ## BUG => there is no need to convert gff to geneid format each time we run
 
         $train_2cols_seq_locusid_fn =
-          convert_GFF_2_geneidGFF( $tmp_4train_gff, $species, ".train" );
+          convert_GFF_2_geneidGFF( $train_set_gff, $species, ".train" );
         print STDERR
           "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
 
@@ -602,7 +604,7 @@ sub normal_run {
 ## TRAIN
 ## EVAL
         $eval_2cols_seq_locusid_fn =
-          convert_GFF_2_geneidGFF( $tmp_4eval_gff, $species, ".eval" );
+          convert_GFF_2_geneidGFF( $eval_set_gff, $species, ".eval" );
 
         print STDERR
 "L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
@@ -3003,15 +3005,15 @@ sub calculate_stats {
     #print $fh_SOUT "GENE MODEL STATISTICS FOR $species\n\n";
 
     print $fh_SOUT
-"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $total_seqs gene models) was used for training\n\n";
-    my $total_seqs;
+"\nA subset of $tot_seqs4training_intX sequences (randomly chosen from the $transcripts_all_number gene models) was used for training\n\n";
+    my $transcripts_all_number;
     if ( !$use_allseqs_flag ) {
         print $fh_SOUT
 "The user has selected to use $train_transc_used_num gene models (80 % of total) for training and to set aside BUG  was xxgffseqseval annotations (20 % of total) for evaluation\n\n";
     }
     else {
         print $fh_SOUT
-"$total_seqs gene models were used for both training and evaluation\n\n";
+"$transcripts_all_number gene models were used for both training and evaluation\n\n";
     }
 
     if ( !$use_allseqs_flag ) {
@@ -3053,7 +3055,7 @@ sub calculate_stats {
     }
     else {
         print $fh_SOUT
-"The training set includes $singlegenes single-exon genes (out of $total_seqs) gene models\n\n";
+"The training set includes $singlegenes single-exon genes (out of $transcripts_all_number) gene models\n\n";
     }
     print $fh_SOUT "The donor site profile chosen by the user spans "
       . ( $endo - $stdo + 1 )
@@ -3302,104 +3304,116 @@ sub translate_2_protein {
 
 }
 
-## CONVERT GFF2 TO GENEID GFF
+
 sub convert_GFF_2_geneidGFF {
-
     my ( $no_dots_gff_fn, $species, $type ) = @_;
-    my %G;
-    my @G = ();
-
+    say "fake convert_GFF_2_geneidGFF\n";
     my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
-
-    open( my $fh_GFF,    "<", "$no_dots_gff_fn" ) or croak "Failed here";
-    open( my $fh_GFFOUT, ">", "$geneid_gff" )     or croak "Failed here";
-    while (<$fh_GFF>) {
-        my ( $c, @f, $id );
-        $c = ":";
-        $_ =~ s/\|//;
-        chomp;
-        @f  = split(/\s+/o);
-        $id = $f[8];           #seq name i.e. 7000000188934730
-        ( exists( $G{$id} ) ) || do {
-            $c = "#";
-            $G{$id} = [ @f[ 8, 0, 6 ], 0, @f[ 3, 4 ], [] ]
-              ;                # [7000000188934730 1.4 - 0 46549    46680 ]
-        };
-        push @{ $G{$id}[6] }, [ @f[ 3, 4 ] ];
-        $G{$id}[3]++;
-        $G{$id}[4] > $f[3] && ( $G{$id}[4] = $f[3] );
-        $G{$id}[5] < $f[4] && ( $G{$id}[5] = $f[4] );
-    }
-
-    @G =
-      sort { $a->[1] cmp $b->[1] || $a->[4] <=> $b->[4] || $a->[5] <=> $b->[5] }
-      map { $G{$_} } keys %G;
-
-    foreach my $GN (@G) {
-        my (
-            $id,     $ctg, $str, $nex, $go,   $ge, $coords,
-            @coords, $ce,  $CE,  $cur, $feat, $c
-        );
-        ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @{$GN};
-
-       # print STDERR Data::Dumper->Dump([ \@$coords ], [ qw/ *coords / ])."\n";
-        @coords = map { $_->[0], $_->[1] }
-          sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
-          map { $_ } @{$coords};
-
-        # print STDERR Data::Dumper->Dump([ \@coords ], [ qw/ *Coords / ])."\n";
-        #print "# $id $ctg $str $nex $go $ge\n";
-        $ce = 0;
-        $CE = $nex * 2;
-        $c  = 1;
-        while ( $ce < $CE ) {
-
-            # $cur = ($str eq '-' ? $CE - $ce - 2 : $ce);
-            if ( $nex == 1 ) {
-                $feat = "Single";
-            }
-            elsif ( $c == 1 ) {
-                $feat = $str eq '-' ? "Terminal" : "First";
-            }
-            elsif ( $c == $nex ) {
-                $feat = $str eq '-' ? "First" : "Terminal";
-            }
-            else {
-                $feat = "Internal";
-            }
-            print {$fh_GFFOUT} join( "\t",
-                $ctg, "$species", $feat, $coords[$ce], $coords[ ( $ce + 1 ) ],
-                ".", $str, ".", $id )
-              . "\n";
-            $ce += 2;
-            $c++;
-        }
-    }
-    close $fh_GFF;
-    close $fh_GFFOUT;
-
-#~ my $X_geneid_sorted_gff = "";
-#~ open( my $fh_LOCID, "-|", "sort -s -k8,9 -k4,5n $geneid_gff") or croak "Failed here";
-#~ while (<$fh_LOCID>) {
-#~ $X_geneid_sorted_gff .= $_;
-#~ }
-#~ close $fh_LOCID;
-
-####
-    my $geneid_sorted_gff_fn =
-      $work_dir . $species . $type . ".geneid.gff_sorted";
-    my $my_command = "sort -s -k8,9 -k4,5n $geneid_gff > $geneid_sorted_gff_fn";
+    my $my_command = "cp $no_dots_gff_fn $geneid_gff";
+    say "$my_command\n";
     run($my_command);
 
-    #~ open( my $fh_FOUT, ">", "$geneid_sorted_gff_fn" ) or croak "Failed here";
-    #~ print $fh_FOUT "$geneid_sorted_gff_fn";
-    #~ close $fh_FOUT;
-
-    return $geneid_sorted_gff_fn;
-
-    #exit(0);
-
+    my  $geneid_sorted_gff_fn = $geneid_gff;
+ return $geneid_sorted_gff_fn;
 }
+## CONVERT GFF2 TO GENEID GFF
+# sub convert_GFF_2_geneidGFF {
+
+#     my ( $no_dots_gff_fn, $species, $type ) = @_;
+#     my %G;
+#     my @G = ();
+
+#     my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
+
+#     open( my $fh_GFF,    "<", "$no_dots_gff_fn" ) or croak "Failed here";
+#     open( my $fh_GFFOUT, ">", "$geneid_gff" )     or croak "Failed here";
+#     while (<$fh_GFF>) {
+#         my ( $c, @f, $id );
+#         $c = ":";
+#         $_ =~ s/\|//;
+#         chomp;
+#         @f  = split(/\s+/o);
+#         $id = $f[8];           #seq name i.e. 7000000188934730
+#         ( exists( $G{$id} ) ) || do {
+#             $c = "#";
+#             $G{$id} = [ @f[ 8, 0, 6 ], 0, @f[ 3, 4 ], [] ]
+#               ;                # [7000000188934730 1.4 - 0 46549    46680 ]
+#         };
+#         push @{ $G{$id}[6] }, [ @f[ 3, 4 ] ];
+#         $G{$id}[3]++;
+#         $G{$id}[4] > $f[3] && ( $G{$id}[4] = $f[3] );
+#         $G{$id}[5] < $f[4] && ( $G{$id}[5] = $f[4] );
+#     }
+
+#     @G =
+#       sort { $a->[1] cmp $b->[1] || $a->[4] <=> $b->[4] || $a->[5] <=> $b->[5] }
+#       map { $G{$_} } keys %G;
+
+#     foreach my $GN (@G) {
+#         my (
+#             $id,     $ctg, $str, $nex, $go,   $ge, $coords,
+#             @coords, $ce,  $CE,  $cur, $feat, $c
+#         );
+#         ( $id, $ctg, $str, $nex, $go, $ge, $coords ) = @{$GN};
+
+#        # print STDERR Data::Dumper->Dump([ \@$coords ], [ qw/ *coords / ])."\n";
+#         @coords = map { $_->[0], $_->[1] }
+#           sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
+#           map { $_ } @{$coords};
+
+#         # print STDERR Data::Dumper->Dump([ \@coords ], [ qw/ *Coords / ])."\n";
+#         #print "# $id $ctg $str $nex $go $ge\n";
+#         $ce = 0;
+#         $CE = $nex * 2;
+#         $c  = 1;
+#         while ( $ce < $CE ) {
+
+#             # $cur = ($str eq '-' ? $CE - $ce - 2 : $ce);
+#             if ( $nex == 1 ) {
+#                 $feat = "Single";
+#             }
+#             elsif ( $c == 1 ) {
+#                 $feat = $str eq '-' ? "Terminal" : "First";
+#             }
+#             elsif ( $c == $nex ) {
+#                 $feat = $str eq '-' ? "First" : "Terminal";
+#             }
+#             else {
+#                 $feat = "Internal";
+#             }
+#             print {$fh_GFFOUT} join( "\t",
+#                 $ctg, "$species", $feat, $coords[$ce], $coords[ ( $ce + 1 ) ],
+#                 ".", $str, ".", $id )
+#               . "\n";
+#             $ce += 2;
+#             $c++;
+#         }
+#     }
+#     close $fh_GFF;
+#     close $fh_GFFOUT;
+
+# #~ my $X_geneid_sorted_gff = "";
+# #~ open( my $fh_LOCID, "-|", "sort -s -k8,9 -k4,5n $geneid_gff") or croak "Failed here";
+# #~ while (<$fh_LOCID>) {
+# #~ $X_geneid_sorted_gff .= $_;
+# #~ }
+# #~ close $fh_LOCID;
+
+# ####
+#     my $geneid_sorted_gff_fn =
+#       $work_dir . $species . $type . ".geneid.gff_sorted";
+#     my $my_command = "sort -s -k8,9 -k4,5n $geneid_gff > $geneid_sorted_gff_fn";
+#     run($my_command);
+
+#     #~ open( my $fh_FOUT, ">", "$geneid_sorted_gff_fn" ) or croak "Failed here";
+#     #~ print $fh_FOUT "$geneid_sorted_gff_fn";
+#     #~ close $fh_FOUT;
+
+#     return $geneid_sorted_gff_fn;
+
+#     #exit(0);
+
+# }
 
 sub sorteval {
 
@@ -3529,7 +3543,7 @@ sub get_background_kmers {
         #my $input_fas_fn = $f;
         #my $tbl = "";
         my $countlines = 0;
-        my $total_seqs = num_of_lines_in_file($input_fas_fn);
+        my $contigs_all_number = num_of_lines_in_file($input_fas_fn);
 
         #my $totalseqs  = `egrep -c \"^>\" $input_fas_fn`;
         #chomp $totalseqs;
@@ -3542,9 +3556,9 @@ sub get_background_kmers {
         close $fh_IN;
 
         print STDERR
-"\nThe total number of genomic sequences (in $input_fas_fn) is $total_seqs\n";
+"\nThe total number of genomic sequences (in $input_fas_fn) is $contigs_all_number\n";
 
-        if ( $total_seqs >= 1 ) {
+        if ( $contigs_all_number >= 1 ) {
 
             #print STDERR "in totalseqs if";
             my $seq    = "";
@@ -3565,7 +3579,7 @@ sub get_background_kmers {
 
             # chomp $totalseqs;
             print STDERR
-"The length of the new fasta file is $len\n(concatenation of $countlines fastas (out of $total_seqs))\n";
+"The length of the new fasta file is $len\n(concatenation of $countlines fastas (out of $contigs_all_number))\n";
             open( my $fh_BACKGRND, ">", "$background_tbl" )
               or croak "Failed here";
             my $row = 1;
