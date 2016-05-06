@@ -926,17 +926,22 @@ sub normal_run {
 
 sub extractCDSINTRON {
 
-    my ( $my_nodots_gff, $locus_id, $type ) = @_;
+    my ( $my_nodots_gff, $my_contig_transcr_2cols, $type ) = @_;
 
     # #####extract CDS and INTRON SEQUENCES
     #my
     print STDERR "\nEXTRACT CDS and INTRON SEQUENCES from $type set..\n\n";
-    open( my $fh_LOCUS, "<", "$locus_id" ) or croak "Failed here";
-    print STDERR "$locus_id and $my_nodots_gff\n";
+    ## CODE SIMPLE
+    my $out_cds_intron_gff = $work_dir . $species . "_" . $type . ".cds_intron_gff";
+    open( my $fh_LOCUS, "<", "$my_contig_transcr_2cols" ) or croak "Failed here";
+    print STDERR "$my_contig_transcr_2cols and $my_nodots_gff\n";
     my $count = 0;
     while (<$fh_LOCUS>) {
         my ( $genomic_id, $gene_id ) = split;
-        run(" egrep -w '$gene_id\$' $my_nodots_gff > $tmp_dir/$gene_id.gff");
+        my $tmp_single_gene_gff = "$tmp_dir/$gene_id.gff";
+        run(" egrep -w '$gene_id\$' $my_nodots_gff | sort -k4,5n > $tmp_single_gene_gff");
+        ## NEW code simplify
+        run(" egrep -w '$gene_id\$' $my_nodots_gff | sort -k4,5n >> $out_cds_intron_gff");
         ## POTENTIAL BUG, split commands below
 
         #~ my $fh_ssgff_A    = File::Temp->new();
@@ -944,7 +949,7 @@ sub extractCDSINTRON {
         ## CDS
         my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
         my $my_command =
-"./bin/ssgff -cE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff >  $fname_ssgff_A";
+"./bin/ssgff -cE $fastas_dir/$genomic_id $tmp_single_gene_gff >  $fname_ssgff_A";
         run($my_command);
         $my_command =
 "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $cds_dir/${species}${type}.cds.fa ";
@@ -957,7 +962,7 @@ sub extractCDSINTRON {
         #~ my $fname_ssgff_B = $fh_ssgff_B->filename;
         my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
         $my_command =
-"./bin/ssgff -iE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $fname_ssgff_B";
+"./bin/ssgff -iE $fastas_dir/$genomic_id $tmp_single_gene_gff > $fname_ssgff_B";
 
         #say "\n$my_command\n";
         run($my_command);
@@ -983,8 +988,8 @@ sub extractCDSINTRON {
 ## CDS
     my $cds_tmp_fa = $cds_dir . ${species} . "$type" . ".cds.fa";
     print STDERR "$cds_tmp_fa\n\n";
-    my $cds_temp_tbl = $cds_dir . ${species} . "$type" . ".cds.tbl";
-    fasta_2_tbl( $cds_tmp_fa, $cds_temp_tbl );
+    my $cds_tmp_tbl = $cds_dir . ${species} . "$type" . ".cds.tbl";
+    fasta_2_tbl( $cds_tmp_fa, $cds_tmp_tbl );
     print STDERR "cds tabular file created for $type sequences \n";
 
     # ##INTRON
@@ -992,193 +997,197 @@ sub extractCDSINTRON {
     my $intron_tmp_tbl = $introns_dir . ${species} . "$type" . ".intron.tbl";
     fasta_2_tbl( $intron_tmp_fa, $intron_tmp_tbl );
 
-## INTRONS LARGER THAN 0 ONLY
+### INTRONS LARGER THAN 0 ONLY
+#
+#    my $intron_nonzero_tmp = "";
+#    my $my_command =
+#      "gawk '{if(length(\$2)>0){print \$1,\$2}}' $intron_tmp_tbl ";
+#    $intron_nonzero_tmp = capture($my_command);
+#
+#    my $intron_nonzero_tbl =
+#      $work_dir . $species . "$type" . ".intron_positivelength.tbl";
+#
+#    open( my $fh_FOUT, ">", "$intron_nonzero_tbl" ) or croak "Failed here";
+#    print $fh_FOUT "$intron_nonzero_tmp";
+#    close $fh_FOUT;
+#
+#    print STDERR
+#      "intron tabular file created with introns with more than 0 nucleotides\n";
+### GET LIST OF SEQUENCES WITH LENGTH >0 and EXCLUDE FROM CDS/locus_id/gff FILES SEQUENCES WITH INTRONS WITH 0 LENGTH
+#    my $intron_zero = "";
+#    $my_command =
+#"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
+#    $intron_zero = capture($my_command);
+#
+#    my $tempall_intron_zero_list =
+#      $work_dir . $species . "$type" . ".intron_zerolength.list";
+#
+#    open( $fh_FOUT, ">", "$tempall_intron_zero_list" );
+#    print $fh_FOUT "$intron_zero";
+#    close $fh_FOUT;
+#
+#    my $intron_zero2 = "";
+#    $my_command =
+#"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
+#    $intron_zero2 = capture($my_command);
+#
+#    my $tempall_intron_zero_list2 =
+#      $work_dir . $species . "$type" . ".intron_zerolength.list2";
+#
+#    open( $fh_FOUT, ">", "$tempall_intron_zero_list2" );
+#    print {$fh_FOUT} "$intron_zero2";
+#    close $fh_FOUT;
+#
+### FILTER SEQUENCES WITH 0 SIZE INTRONS FROM CDS!
+#
+#    $my_command = "egrep -vf $tempall_intron_zero_list $cds_temp_tbl ";
+#    my $cds_nozero_tbl = capture($my_command);
+#
+#    my $cds_all_nozero_tbl = $work_dir . $species . "$type" . ".cds_nozero.tbl";
+#
+#    open( $fh_FOUT, ">", "$cds_all_nozero_tbl" );
+#    print {$fh_FOUT} "$cds_nozero_tbl";
+#    close $fh_FOUT;
+### ENSURE LOCUSID DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
+#    $my_command = "egrep -vwf $tempall_intron_zero_list2 $locus_id ";
+#    my $locusid_nozero = capture($my_command);
+#
+#    my $templocus_id_nozero =
+#      $work_dir . $species . "$type" . "_locus_id_nozero";
+#    open( $fh_FOUT, ">", "$templocus_id_nozero" );
+#    print {$fh_FOUT} "$locusid_nozero";
+#    close $fh_FOUT;
+### ENSURE GFF DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
+#
+#    my $gffnozero = "";
+#    $my_command = "egrep -vwf $tempall_intron_zero_list2 $my_nodots_gff ";
+#    $gffnozero  = capture($my_command);
+#
+#    my $exCI_temp_nonzero_gff =
+#      $work_dir . $species . "$type" . ".non_zero.gff";
+#
+#    open( $fh_FOUT, ">", "$exCI_temp_nonzero_gff" ) or croak "Failed here";
+#    print {$fh_FOUT} "$gffnozero";
+#    close $fh_FOUT;
+#
+#    #    rmtree([ "$path/cds/" ]);
+#    #    rmtree([ "$path/intron/" ]);
+#
+### Convert sequences to protein format and check for in-frame stops
+#    print STDERR
+#"\nConvert sequences to protein format and check for in-frame stops and for proteins not starting with an M or not ending with a STOP\n\n";
+#
+### SHOWS WHERE GENETIC CODE FILE IS LOCATED AND ITS NAME
+#
+#    my $tempall_protein = $work_dir . $species . "$type" . ".protein";
+#
+## $tempall_protein = translate_2_protein($genetic_code,$tempcds,$tempall_protein);
+#    $tempall_protein =
+#      translate_2_protein( $genetic_code, $cds_all_nozero_tbl,
+#        $tempall_protein );
+#
+#    $my_command =
+#"gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc -l";
+#    ## BUG reports just the number
+#    my $inframestops = capture($my_command);
+#    chomp $inframestops;
+#
+##~ #my $inframe_Xstops =`gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc | gawk '{print \$1}'`;
+##~ chomp $inframe_Xstops;
+#
+#    print STDERR
+#"\n\nWe found $inframestops sequences with in-frame stop signals/not starting with a methionine or not ending with a canonical stop codon \n\n";
+#
+### IF INFRAME
+#    print $tempall_protein;
+#
+#    if ($inframestops) {
+#        my $inframe = "";
+#        my @inframe = ();
+#
+#        ## XXX may not work XXX
+#        $my_command =
+#"gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq ";
+#        @inframe = capture($my_command);
+#
+#        foreach my $line (@inframe) {
+#            my (@frame) = split "_", $line;
+#            my $first = $frame[0];
+#            $inframe .= "$first\n";
+#        }
+#
+#        my $inframe_protein =
+#          $work_dir . $species . "$type" . "_INframe_NoMethionine_NoSTOP";
+#        open( $fh_FOUT, ">", "$inframe_protein" ) or croak "Failed here";
+#        print {$fh_FOUT} "$inframe";
+#        close $fh_FOUT;
+### REMOVE SEQUENCES WITH IN-FRAME STOPS FROM ORIGINAL CDS / INTRON / LOCUS_ID /GFF FILES AND PRINT NEW FILES
+#        print STDERR
+#"\nremove sequences with in-frame stop signals from cds/intron files\n\n";
+#
+#        $my_command =
+#"sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $cds_all_nozero_tbl";
+#        my $cdstbl2 = capture($my_command);
+#
+#        my $tempall_cds2 = $work_dir . $species . "$type" . ".cds_filter1.tbl";
+#
+#        open( $fh_FOUT, ">", "$tempall_cds2" );
+#        print {$fh_FOUT} "$cdstbl2";
+#        close $fh_FOUT;
+#
+#        my $introntbl2 = "";
+#
+#        $my_command =
+#"sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $intron_nonzero_tbl ";
+#        $introntbl2 = capture($my_command);
+#
+#        my $tempall_intron2 =
+#          $work_dir . $species . "$type" . ".intron_filter1.tbl";
+#
+#        open( $fh_FOUT, ">", "$tempall_intron2" );
+#        print {$fh_FOUT} "$introntbl2";
+#        close $fh_FOUT;
+#
+#        $my_command =
+#"sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero ";
+#        my $new_locus_id_filter1 = capture($my_command);
+#
+#        my $templocus_id_new2 =
+#          $work_dir . $species . "$type" . "_locus_id_filter_noinframe";
+#
+#        open( $fh_FOUT, ">", "$templocus_id_new2" );
+#        print {$fh_FOUT} "$new_locus_id_filter1";
+#        close $fh_FOUT;
+#
+#        #my $gffnew = "";
+#        $my_command =
+#"sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $exCI_temp_nonzero_gff ";
+#        my $gffnew = capture($my_command);
+#
+#        my $tempnewgff = $work_dir . $species . "$type" . ".noinframe.gff";
+#
+#        open( $fh_FOUT, ">", "$tempnewgff" ) or croak "Failed here";
+#        print {$fh_FOUT} "$gffnew";
+#        close $fh_FOUT;
+#
+########
+#        return [
+#            $tempall_cds2, $tempall_intron2, $templocus_id_new2,
+#            $tempnewgff,   $inframestops
+#        ];
 
-    my $intron_nonzero_tmp = "";
-    my $my_command =
-      "gawk '{if(length(\$2)>0){print \$1,\$2}}' $intron_tmp_tbl ";
-    $intron_nonzero_tmp = capture($my_command);
-
-    my $intron_nonzero_tbl =
-      $work_dir . $species . "$type" . ".intron_positivelength.tbl";
-
-    open( my $fh_FOUT, ">", "$intron_nonzero_tbl" ) or croak "Failed here";
-    print $fh_FOUT "$intron_nonzero_tmp";
-    close $fh_FOUT;
-
-    print STDERR
-      "intron tabular file created with introns with more than 0 nucleotides\n";
-## GET LIST OF SEQUENCES WITH LENGTH >0 and EXCLUDE FROM CDS/locus_id/gff FILES SEQUENCES WITH INTRONS WITH 0 LENGTH
-    my $intron_zero = "";
-    $my_command =
-"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1\\_/' | sort | uniq ";
-    $intron_zero = capture($my_command);
-
-    my $tempall_intron_zero_list =
-      $work_dir . $species . "$type" . ".intron_zerolength.list";
-
-    open( $fh_FOUT, ">", "$tempall_intron_zero_list" );
-    print $fh_FOUT "$intron_zero";
-    close $fh_FOUT;
-
-    my $intron_zero2 = "";
-    $my_command =
-"gawk '{if(length(\$2)==0){print \$1}}' $intron_tmp_tbl | sed 's/\\(.*\\)\\..*/\\1/' | sort | uniq ";
-    $intron_zero2 = capture($my_command);
-
-    my $tempall_intron_zero_list2 =
-      $work_dir . $species . "$type" . ".intron_zerolength.list2";
-
-    open( $fh_FOUT, ">", "$tempall_intron_zero_list2" );
-    print {$fh_FOUT} "$intron_zero2";
-    close $fh_FOUT;
-
-## FILTER SEQUENCES WITH 0 SIZE INTRONS FROM CDS!
-
-    $my_command = "egrep -vf $tempall_intron_zero_list $cds_temp_tbl ";
-    my $cds_nozero_tbl = capture($my_command);
-
-    my $cds_all_nozero_tbl = $work_dir . $species . "$type" . ".cds_nozero.tbl";
-
-    open( $fh_FOUT, ">", "$cds_all_nozero_tbl" );
-    print {$fh_FOUT} "$cds_nozero_tbl";
-    close $fh_FOUT;
-## ENSURE LOCUSID DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
-    $my_command = "egrep -vwf $tempall_intron_zero_list2 $locus_id ";
-    my $locusid_nozero = capture($my_command);
-
-    my $templocus_id_nozero =
-      $work_dir . $species . "$type" . "_locus_id_nozero";
-    open( $fh_FOUT, ">", "$templocus_id_nozero" );
-    print {$fh_FOUT} "$locusid_nozero";
-    close $fh_FOUT;
-## ENSURE GFF DOES NOT CONTAIN SEQUENCES WITH 0 SIZE INTRONS
-
-    my $gffnozero = "";
-    $my_command = "egrep -vwf $tempall_intron_zero_list2 $my_nodots_gff ";
-    $gffnozero  = capture($my_command);
-
-    my $exCI_temp_nonzero_gff =
-      $work_dir . $species . "$type" . ".non_zero.gff";
-
-    open( $fh_FOUT, ">", "$exCI_temp_nonzero_gff" ) or croak "Failed here";
-    print {$fh_FOUT} "$gffnozero";
-    close $fh_FOUT;
-
-    #    rmtree([ "$path/cds/" ]);
-    #    rmtree([ "$path/intron/" ]);
-
-## Convert sequences to protein format and check for in-frame stops
-    print STDERR
-"\nConvert sequences to protein format and check for in-frame stops and for proteins not starting with an M or not ending with a STOP\n\n";
-
-## SHOWS WHERE GENETIC CODE FILE IS LOCATED AND ITS NAME
-
-    my $tempall_protein = $work_dir . $species . "$type" . ".protein";
-
-# $tempall_protein = translate_2_protein($genetic_code,$tempcds,$tempall_protein);
-    $tempall_protein =
-      translate_2_protein( $genetic_code, $cds_all_nozero_tbl,
-        $tempall_protein );
-
-    $my_command =
-"gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc -l";
-    ## BUG reports just the number
-    my $inframestops = capture($my_command);
-    chomp $inframestops;
-
-#~ #my $inframe_Xstops =`gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]\|^[^M]\|[^\\*] ' | gawk '{print \$2}' | wc | gawk '{print \$1}'`;
-#~ chomp $inframe_Xstops;
-
-    print STDERR
-"\n\nWe found $inframestops sequences with in-frame stop signals/not starting with a methionine or not ending with a canonical stop codon \n\n";
-
-## IF INFRAME
-    print $tempall_protein;
-
-    if ($inframestops) {
-        my $inframe = "";
-        my @inframe = ();
-
-        ## XXX may not work XXX
-        $my_command =
-"gawk '{print \$2,\$1}' $tempall_protein | egrep '[A-Z]\\*[A-Z]|^[^M]|[^\\*]' | gawk '{print \$2}' | sort | uniq ";
-        @inframe = capture($my_command);
-
-        foreach my $line (@inframe) {
-            my (@frame) = split "_", $line;
-            my $first = $frame[0];
-            $inframe .= "$first\n";
-        }
-
-        my $inframe_protein =
-          $work_dir . $species . "$type" . "_INframe_NoMethionine_NoSTOP";
-        open( $fh_FOUT, ">", "$inframe_protein" ) or croak "Failed here";
-        print {$fh_FOUT} "$inframe";
-        close $fh_FOUT;
-## REMOVE SEQUENCES WITH IN-FRAME STOPS FROM ORIGINAL CDS / INTRON / LOCUS_ID /GFF FILES AND PRINT NEW FILES
-        print STDERR
-"\nremove sequences with in-frame stop signals from cds/intron files\n\n";
-
-        $my_command =
-"sed 's/\\(.*\\)/\\1_/g' $inframe_protein | egrep -vf - $cds_all_nozero_tbl";
-        my $cdstbl2 = capture($my_command);
-
-        my $tempall_cds2 = $work_dir . $species . "$type" . ".cds_filter1.tbl";
-
-        open( $fh_FOUT, ">", "$tempall_cds2" );
-        print {$fh_FOUT} "$cdstbl2";
-        close $fh_FOUT;
-
-        my $introntbl2 = "";
-
-        $my_command =
-"sed 's/\\(.*\\)/\\1\.i/g' $inframe_protein | egrep -vf - $intron_nonzero_tbl ";
-        $introntbl2 = capture($my_command);
-
-        my $tempall_intron2 =
-          $work_dir . $species . "$type" . ".intron_filter1.tbl";
-
-        open( $fh_FOUT, ">", "$tempall_intron2" );
-        print {$fh_FOUT} "$introntbl2";
-        close $fh_FOUT;
-
-        $my_command =
-"sed 's/\\(.*\\)/\\1\$/g' $inframe_protein | egrep -vf - $templocus_id_nozero ";
-        my $new_locus_id_filter1 = capture($my_command);
-
-        my $templocus_id_new2 =
-          $work_dir . $species . "$type" . "_locus_id_filter_noinframe";
-
-        open( $fh_FOUT, ">", "$templocus_id_new2" );
-        print {$fh_FOUT} "$new_locus_id_filter1";
-        close $fh_FOUT;
-
-        #my $gffnew = "";
-        $my_command =
-"sed 's/\\(.*\\)_.*/\\1\$/g' $inframe_protein | egrep -vf - $exCI_temp_nonzero_gff ";
-        my $gffnew = capture($my_command);
-
-        my $tempnewgff = $work_dir . $species . "$type" . ".noinframe.gff";
-
-        open( $fh_FOUT, ">", "$tempnewgff" ) or croak "Failed here";
-        print {$fh_FOUT} "$gffnew";
-        close $fh_FOUT;
-
-######
-        return [
-            $tempall_cds2, $tempall_intron2, $templocus_id_new2,
-            $tempnewgff,   $inframestops
-        ];
-
-    }
-    else {    ## ??? END IF THERE ARE INFRAME STOPS
+##    }
+#    else {    ## ??? END IF THERE ARE INFRAME STOPS
+    my $cds_all_nozero_tbl  = $cds_tmp_tbl;
+    my $intron_nonzero_tbl  = $intron_tmp_tbl;
+    my $templocus_id_nozero = $my_contig_transcr_2cols;
+    my $exCI_temp_nonzero_gff = $out_cds_intron_gff;
         return [
             $cds_all_nozero_tbl,  $intron_nonzero_tbl,
             $templocus_id_nozero, $exCI_temp_nonzero_gff,
             0
         ];
-    }    #######END ELSE IF NO SEQS  ARE INFRAME
+#    }    #######END ELSE IF NO SEQS  ARE INFRAME
 
 }    #########sub extractCDSINTRON
 
@@ -3870,6 +3879,12 @@ sub compute_matrices_4sites {
       = get_K_matrix( $my_input_table, $backgrnd_kmers_fn, $my_order,
         $my_offset, $my_site_type );
     ## TODO / BUG: possibly 0, 1, 0, 0, 0, 0, denotes a specific type of profile
+    ## Nope, except branch profile all is fine
+    ## the Stop profile is missing in the original sources
+#    ('Branch_point_profile', $prof_len_bra, $fxdbraoffset, -50, $order,     0, 1, 40, 10, 0, 0,  $branchmatrix)
+#    ('Start_profile',        $prof_len_sta, $fxdstaoffset, $cutoff, $order, 0, 1, 0, 0, 0, 0, $startmatrix)
+#    ('Acceptor_profile',     $prof_len_acc, $fxdaccoffset, $cutoff, $order, 0, 1, 0, 0, 0, 0, $acceptormatrix)
+#    ('Donor_profile',       $prof_len_don, $fxddonoffset, $cutoff, $order,  0, 1, 0, 0, 0, 0, $donormatrix)
     ## check inside the *.pm modules!
     if (
         !defined @{ $param->isocores }[0]->set_profile(
