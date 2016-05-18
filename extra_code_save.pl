@@ -7,7 +7,7 @@ sub jacknife_validate {
 ###################################
 ## SET UP FOR JACKNIFE:
 ###################################
-    #need output from processSequences4Optimization
+    #need output from process_seqs_4opty
     my $list4jkf = "";
 
 # print STDERR "These are the sequences used for Jacknife (cross-validation) accuracy estimation\n";
@@ -468,7 +468,7 @@ sub runJacknife {
 ## CONVERT TO FASTA (EVALUATE SET)
         my $tempgp_fa_eval_jkf =
           $work_dir . $species . ".gp.eval.crossvalidation.fa";
-        TblToFasta( $seqstoevaltbl, $tempgp_fa_eval_jkf );
+        tbl_2_fasta( $seqstoevaltbl, $tempgp_fa_eval_jkf );
 
 ## EXTRACT SEQUENCES FROM JACKNIFE TRAINING SET
 
@@ -636,7 +636,7 @@ sub runJacknife {
         my (
             $markovini,      $markovtrans, $totalcoding,
             $totalnoncoding, $markovmodel
-        ) = @{ deriveCodingPotential( $codingexcept, $noncodingexcept ) };
+        ) = @{ derive_coding_potential( $codingexcept, $noncodingexcept ) };
 
         #add markov matrices to the parameter file
         if ( !defined @{ $paramtemp->isocores }[0]->Markov_order($markovmodel) )
