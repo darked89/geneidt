@@ -768,7 +768,7 @@ sub normal_run {
 
     ## BUG do not remove, misleading name of a function: WriteStatsFile
     ( $intron_short_int, $intron_long_int, $intergenic_min, $intergenic_max ) =
-      calculate_stats(
+      calc_stats(
         $species,                  $sout,
         $introns_clean_tbl_fn,     $cds_all_nozero_tbl,
         $out_gff_X,                $inframe_X,
@@ -1907,7 +1907,7 @@ sub process_seqs_4opty {
 
 ## GETGENES FUNCTION: EXTRACT FLANKED SEQUENCES FROM GENE MODELS FOR LATER OPTIMIZATION
 sub GetGenes {
-    ## BUG last variable is passed empty
+    ## BUG last variable is passed empty?
     my ( $my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir ) = @_;
 
 #print STDERR "IN FUNCTION: $my_fastas_dir : $my_pso_tmp_gp_from_gff : $path : OUT: $gp_out_tbl\n\n";
@@ -2022,7 +2022,10 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
             #    next;
             #  }
 
-            for ( $i = 0 ; $i < $my_exo_countX ; $i++ ) {
+            for ( $i = 0 ; $i < $my_exo_countX ; $i++ ) 
+            ## XXX fixing C style loop XXX
+            ##foreach my $i (0 .. $my_exo_countX) 
+            {
                 my $utr_A   = 0;
                 my $utr_B   = 0;
                 my $utrS    = 0;
@@ -2984,7 +2987,7 @@ sub parameter_evaluate {
 
 }    # evaluate parameter function
 
-sub calculate_stats {
+sub calc_stats {
 ## BUG variable names hard to guess
     my (
         $species,                  $sout,
