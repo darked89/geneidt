@@ -954,14 +954,14 @@ sub extractCDSINTRON {
     print STDERR "$my_contig_transcr_2cols and $my_nodots_gff\n";
     my $count = 0;
     while (<$fh_LOCUS>) {
-        my ( $genomic_id, $gene_id ) = split;
-        my $tmp_single_gene_gff = "$tmp_dir/$gene_id.gff";
+        my ( $id_genomic, $id_gene ) = split;
+        my $tmp_single_gene_gff = "$tmp_dir/$id_gene.gff";
         run(
-" egrep -w '$gene_id\$' $my_nodots_gff | sort -k4,5n > $tmp_single_gene_gff"
+" egrep -w '$id_gene\$' $my_nodots_gff | sort -k4,5n > $tmp_single_gene_gff"
         );
         ## NEW code simplify
         run(
-" egrep -w '$gene_id\$' $my_nodots_gff | sort -k4,5n >> $out_cds_intron_gff"
+" egrep -w '$id_gene\$' $my_nodots_gff | sort -k4,5n >> $out_cds_intron_gff"
         );
         ## POTENTIAL BUG, split commands below
 
@@ -970,20 +970,20 @@ sub extractCDSINTRON {
         ## CDS
         my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
         my $my_command =
-"./bin/ssgff -cE $fastas_dir/$genomic_id $tmp_single_gene_gff >  $fname_ssgff_A";
+"./bin/ssgff -cE $fastas_dir/$id_genomic $tmp_single_gene_gff >  $fname_ssgff_A";
         run($my_command);
         $my_command =
 "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $cds_dir/${species}${type}.cds.fa ";
         run($my_command);
 
-#` ./bin/ssgff -cE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
+#` ./bin/ssgff -cE $work_dir/fastas_$species/$id_genomic $tmp_dir/$id_gene.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
 
         ## INTRONS
         #~ my $fh_ssgff_B    = File::Temp->new();
         #~ my $fname_ssgff_B = $fh_ssgff_B->filename;
         my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
         $my_command =
-"./bin/ssgff -iE $fastas_dir/$genomic_id $tmp_single_gene_gff > $fname_ssgff_B";
+"./bin/ssgff -iE $fastas_dir/$id_genomic $tmp_single_gene_gff > $fname_ssgff_B";
 
         #say "\n$my_command\n";
         run($my_command);
@@ -993,7 +993,7 @@ sub extractCDSINTRON {
         #say "\n$my_command\n";
         run($my_command);
 
-#` ./bin/ssgff -iE $work_dir/fastas_$species/$genomic_id $tmp_dir/$gene_id.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
+#` ./bin/ssgff -iE $work_dir/fastas_$species/$id_genomic $tmp_dir/$id_gene.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
         $count++;
         print STDERR "$count ..";
     }
@@ -1227,26 +1227,26 @@ sub extractprocessSITES {
 
     open( my $fh_LOC_sites, "<", "$locus_id" ) or croak "Failed here";
     while (<$fh_LOC_sites>) {
-        my ( $genomic_id, $gene_id ) = split;
+        my ( $id_genomic, $id_gene ) = split;
 
-        #  print STDERR "$genomic_id,$gene_id\n";
+        #  print STDERR "$id_genomic,$id_gene\n";
         run(
-            "egrep -w '$gene_id\$' $my_input_nodots_gff > $tmp_dir/$gene_id.gff"
+            "egrep -w '$id_gene\$' $my_input_nodots_gff > $tmp_dir/$id_gene.gff"
         );
 
-        #  print STDERR "$gene_id $input_gff_fn $tmp_dir/$gene_id.gff \n\n";
+        #  print STDERR "$id_gene $input_gff_fn $tmp_dir/$id_gene.gff \n\n";
         ## POTENTIAL BUG SPLIT
         my $my_command =
-"./bin/ssgff -dabeE $fastas_dir/$genomic_id $tmp_dir/$gene_id.gff > $tmp_dir/${gene_id}.all_sites";
+"./bin/ssgff -dabeE $fastas_dir/$id_genomic $tmp_dir/$id_gene.gff > $tmp_dir/${id_gene}.all_sites";
         run($my_command);
 
         foreach my $site (qw(Acceptor Donor Stop Start)) {
 
-#    print STDERR "egrep -A 1 $site $tmp_dir/${gene_id}.all_sites $sitesdir/${site}_sites.fa\n";
+#    print STDERR "egrep -A 1 $site $tmp_dir/${id_gene}.all_sites $sitesdir/${site}_sites.fa\n";
 ## POTENTIAL BUG, split command below
 
             run(
-" egrep -A 1 $site $tmp_dir/${gene_id}.all_sites | sed -e '/--/d' -e '/^\$/d' >> $sites_dir/${site}_sites.fa"
+" egrep -A 1 $site $tmp_dir/${id_gene}.all_sites | sed -e '/--/d' -e '/^\$/d' >> $sites_dir/${site}_sites.fa"
             );
         }
         $count++;
@@ -1613,18 +1613,18 @@ sub derive_coding_potential {
     open( my $fh_INTRONS_tbl, "<", "$in_intron_tbl_fn" ) or croak "Failed here";
     my @intron_seqs = ();
     while (<$fh_INTRONS_tbl>) {
-        my @i = split;
+        my @columns_i = split;
 
         #print STDERR "SECOND FIELD $i[2]";
-        push @intron_seqs, $i[1];
+        push @intron_seqs, $columns_i[1];
     }
     close $fh_INTRONS_tbl;
 
     open( my $fh_CDSes_tbl, "<", "$in_cds_tbl_fn" ) or croak "Failed here";
     my @coding_seqs = ();
     while (<$fh_CDSes_tbl>) {
-        my @c = split;
-        push @coding_seqs, $c[1];
+        my @columns = split;
+        push @coding_seqs, $columns[1];
     }
     close $fh_CDSes_tbl;
 
@@ -1668,8 +1668,8 @@ sub derive_coding_potential {
                                 #last if m/^[^ACGTacgt]/;
         next if m/^#/;
         chomp;
-        my @g = split;
-        push @profile_init, \@g;
+        my @columns_profile = split;
+        push @profile_init, \@columns_profile;
     }
     close $fh_PROFILE_1;
 
@@ -1683,8 +1683,8 @@ sub derive_coding_potential {
                                 #last if m/^[^ACGTacgt]/;
         next if m/^#/;
         chomp;
-        my @g = split;
-        push @profile_trans, \@g;
+        my @columns_profile = split;
+        push @profile_trans, \@columns_profile;
     }
     close $fh_PROFILE_2;
 
@@ -1830,8 +1830,8 @@ sub process_seqs_4opty {
         my $seq = "";
         foreach my $line (@gp_tabular) {
             chomp $line;
-            my @f = split " ", $line;
-            $seq .= $f[1];
+            my @columns_f = split " ", $line;
+            $seq .= $columns_f[1];
         }
         my $my_seq_len    = length($seq);
         my $folded_seq_gp = fold4fasta($seq);
@@ -1916,7 +1916,7 @@ sub GetGenes {
     my $only_non_red = 0;
     ## unused
     ## my $prev_gene   = "x";
-    ## my $prev_chro   = "x";
+    ## my $prev_chrom   = "x";
     ## my $trail      = "";
 
     #my %genenames; unused var
@@ -1935,7 +1935,7 @@ sub GetGenes {
 m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([^\n]+)/;
 
         my $name          = $1;
-        my $chro          = $2;
+        my $chrom          = $2;
         my $strand        = $3;
         my $tx_start      = $4;
         my $tx_end        = $5;
@@ -1958,19 +1958,19 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
         #my @tabular = ();
 
         if ( !$only_non_red || ( $only_non_red && !$redundant ) ) {
-            open( my $fh_FLEN, "<", "$my_fastas_dir${chro}_len" )
+            open( my $fh_FLEN, "<", "$my_fastas_dir${chrom}_len" )
               or croak "Failed here";
             my $line = <$fh_FLEN>;
             chomp $line;
             my @le = split " ", $line;
             close $fh_FLEN;
 ###added code
-            my $chro_tbl_tmp = "$tmp_dir/tmp.tbl";
-            $chro_tbl_tmp =
-              fasta_2_tbl( $my_fastas_dir . $chro, $chro_tbl_tmp );
+            my $chrom_tmp_tbl = "$tmp_dir/chrom_tmp.tbl";
+            $chrom_tmp_tbl =
+              fasta_2_tbl( $my_fastas_dir . $chrom, $chrom_tmp_tbl );
 
             #print STDERR "FATOTBL: $my_fastas_dir"."$chro\n";
-            open( my $fh_IN, "<", "$chro_tbl_tmp" ) or croak "Failed here";
+            open( my $fh_IN, "<", "$chrom_tmp_tbl" ) or croak "Failed here";
             my @tabular = ();
             while (<$fh_IN>) {
 
@@ -1987,10 +1987,10 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
             #my $sublen = 0;
             foreach my $line (@tabular) {
                 chomp $line;
-                my @f = split " ", $line;
+                my @columns_f = split " ", $line;
 
                 #print STDERR "$f[0]\n";
-                $sub_seq .= $f[1];
+                $sub_seq .= $columns_f[1];
 
             }
 ## DEBUG added
@@ -2086,12 +2086,12 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 
                             $my_utrsX = lc($my_utrsX);
                             $cds_seq  = $cds_seq
-                              . "$name\t$chro\tUtr\t$iutr\t$utrL\t$my_utrsX\n";
+                              . "$name\t$chrom\tUtr\t$iutr\t$utrL\t$my_utrsX\n";
                         }
 
                         $iex     = $i + 1;
                         $cds_seq = $cds_seq
-                          . "$name\t$chro\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i]\t$exon[$i+$my_exo_countX]\n";
+                          . "$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i]\t$exon[$i+$my_exo_countX]\n";
 
                         if ($utr_A) {
                             my $iutr = $i + 1;
@@ -2100,7 +2100,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 
                             $my_utrsX = lc($my_utrsX);
                             $cds_seq  = $cds_seq
-                              . "$name\t$chro\tUtr\t$iutr\t$utrL\t$my_utrsX\n";
+                              . "$name\t$chrom\tUtr\t$iutr\t$utrL\t$my_utrsX\n";
                         }
 
                     }
@@ -2115,7 +2115,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                             $my_utrsX =~ tr/acgt/tgca/;
                             $my_utrsX = reverse($my_utrsX);
                             $cds_seq =
-                              "$name\t$chro\tUtr\t$iutr\t$utrL\t$my_utrsX\n"
+                              "$name\t$chrom\tUtr\t$iutr\t$utrL\t$my_utrsX\n"
                               . $cds_seq;
                         }
 
@@ -2123,7 +2123,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         $seq =~ tr/acgt/tgca/;
                         $seq = reverse($seq);
                         $cds_seq =
-"$name\t$chro\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i+$my_exo_countX]\t$exon[$i]\n"
+"$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i+$my_exo_countX]\t$exon[$i]\n"
                           . $cds_seq;
 
                         if ($utr_A) {
@@ -2135,7 +2135,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                             $my_utrsX =~ tr/acgt/tgca/;
                             $my_utrsX = reverse($my_utrsX);
                             $cds_seq =
-                              "$name\t$chro\tUtr\t$iutr\t$utrL\t$my_utrsX\n"
+                              "$name\t$chrom\tUtr\t$iutr\t$utrL\t$my_utrsX\n"
                               . $cds_seq;
                         }
 
@@ -2173,14 +2173,14 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                             if ( $strand eq '+' ) {    # forward
                                 $iIn     = $j + 1;
                                 $cds_seq = $cds_seq
-                                  . "$name\t$chro\tIntron\t$iIn\t$inLe\t$seq\n";
+                                  . "$name\t$chrom\tIntron\t$iIn\t$inLe\t$seq\n";
                             }
                             else {
                                 $iIn = $my_exo_countX - $j - 1;
                                 $seq =~ tr/acgt/tgca/;
                                 $seq = reverse($seq);
                                 $cds_seq =
-                                  "$name\t$chro\tIntron\t$iIn\t$inLe\t$seq\n"
+                                  "$name\t$chrom\tIntron\t$iIn\t$inLe\t$seq\n"
                                   . $cds_seq;
                             }
 
@@ -2214,7 +2214,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         $my_utrsX = lc($my_utrsX);
                         $cds_seq =
                           $cds_seq
-                          . "$name\t$chro\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n";
+                          . "$name\t$chrom\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n";
                     }
                     else {                     # reverse
                         my $iutr = $my_exo_countX - $i;
@@ -2223,7 +2223,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         $my_utrsX =~ tr/acgt/tgca/;
                         $my_utrsX = reverse($my_utrsX);
                         $cds_seq =
-                          "$name\t$chro\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n"
+                          "$name\t$chrom\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n"
                           . $cds_seq;
                     }
 
@@ -2353,18 +2353,18 @@ sub get_K_matrix {
     #    print STDERR "$true_kmers_tbl (true)\n";
     open( my $fh_true_seq, "<", "$true_kmers_tbl" ) or croak "Failed here";
     $_ = <$fh_true_seq>;
-    my @t   = split;
-    my $len = length( $t[1] );
+    my @columns_t   = split;
+    my $len = length( $columns_t[1] );
     close $fh_true_seq;
 
 ## Open false (background???) sequences
     #    print STDERR "$backgrnd_kmers_tbl (false)\n";
-    open( my $fh_FALSE_SEQ, "<", "$backgrnd_kmers_tbl" )
+    open( my $fh_backgrnd_SEQ, "<", "$backgrnd_kmers_tbl" )
       or croak "Couldn't open $backgrnd_kmers_tbl: $OS_ERROR \n";
-    $_ = <$fh_FALSE_SEQ>;
-    my @f    = split;
-    my $len2 = length( $f[1] );
-    close $fh_FALSE_SEQ;
+    $_ = <$fh_backgrnd_SEQ>;
+    my @columns_f    = split;
+    my $len2 = length( $columns_f[1] );
+    close $fh_backgrnd_SEQ;
 
     #    die "$len != $len2\n" if $len != $len2;
     my $true_seq_freq_fn = $work_dir . basename($true_seq_name) . ".freq";
@@ -2624,8 +2624,8 @@ sub get_K_matrix {
         last if m/^\s/;
         last if m/^[^\d]/;
         chomp;
-        my @e = split;
-        push @profile_array, \@e;
+        my @columns_e = split;
+        push @profile_array, \@columns_e;
     }
     close $fh_PROF;
 
@@ -3189,29 +3189,30 @@ sub calculate_stats {
 }
 
 sub calc_average {
-    my ($sequences) = @_;
+    my ($input_numbers) = @_;
     my $sum         = 0;
-    my $my_total    = 0;
-    my ( $mean, $st );
+    my $elements_count    = 0;
+    my ( $mean, $stdev );
 
-    foreach my $seq ( @{$sequences} ) {
-        $sum += $seq;
-        $my_total++;
+    foreach my $my_number ( @{$input_numbers} ) {
+        $sum += $my_number;
+        $elements_count++;
     }
 
-    $mean = $sum / $my_total;
+    $mean = $sum / $elements_count;
     $mean = sprintf( "%.3f", $mean );
 
     $sum = 0;
-
-    foreach my $seq ( @{$sequences} ) {
-        $sum += ( $seq - $mean ) * ( $seq - $mean );
-
+    my $tmp_number = 0;
+    foreach my $my_number ( @{$input_numbers} ) {
+		$tmp_number = $my_number - $mean;
+        $sum += $tmp_number * $tmp_number ;
+        #$sum += ( $my_number - $mean ) * ( $my_number - $mean );
     }
-    $st = sqrt( $sum / $my_total );
-    $st = sprintf( "%.3f", $st );
+    $stdev = sqrt( $sum / $elements_count );
+    $stdev = sprintf( "%.3f", $stdev );
 
-    return ( $mean, $st );
+    return ( $mean, $stdev );
 }
 
 sub tbl_2_fasta {
@@ -3223,12 +3224,12 @@ sub tbl_2_fasta {
         chomp;
 
         #~ my ( $n, $s ) = split( /\s+/, $_ );
-        my ( $n, $s ) = split(/\s+/);
-        my ( $i, $e ) = ( 1, length($s) );
-        print {$fh_FOUT} ">$n\n";
-        while ( $i <= $e ) {
-            print {$fh_FOUT} substr( $s, $i - 1, 60 ) . "\n";
-            $i += 60;
+        my ( $seq_name, $seq ) = split(/\s+/);
+        my ( $seq_position, $seq_len ) = ( 1, length($seq) );
+        print {$fh_FOUT} ">$seq_name\n";
+        while ( $seq_position <= $seq_len ) {
+            print {$fh_FOUT} substr( $seq, $seq_position - 1, 60 ) . "\n";
+            $seq_position += 60;
         }
     }
     close $fh_IN;
