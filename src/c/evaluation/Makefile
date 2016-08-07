@@ -3,20 +3,35 @@
 INCLUDE= ./include
 CDIR= ./src
 OBJ = ./objects
+BIN = ./bin
+
 HEADERS = $(INCLUDE)/evaluation.h 
 PROGRAM= evaluation
 PRODUCT= bin/$(PROGRAM)
 CC= gcc 
-OPTS=-I$(INCLUDE) -Wall 
+#OPTS=-I$(INCLUDE) -Wall 
 
 #scan-build make 
 #CC= clang
 #OPTS=-I$(INCLUDE) -Wall -Wextra -gdwarf-2 -g3 -ggdb
-#OPTS=-I$(INCLUDE) -std=c11 -gdwarf-2 -g2 -Wpedantic -Wall -Wextra  -Wshadow -Wstrict-overflow -fno-strict-aliasing  
+OPTS=-I$(INCLUDE) -std=c11 -gdwarf-2 -g2 -Wpedantic -Wall -Wextra  -Wshadow -Wstrict-overflow -fno-strict-aliasing  
 #-Wduplicated-cond 
 
 
 #######
+MKDIR_P = mkdir -p
+
+.PHONY: directories
+
+all: directories ${OBJECTS} ${PRODUCT}
+
+directories: ${OBJ} ${BIN}
+
+${OBJ}:
+	${MKDIR_P} ${OBJ}
+
+${BIN}:
+	${MKDIR_P} ${BIN}
 
 OBJECTS = $(OBJ)/readargv.o $(OBJ)/Output.o\
 	$(OBJ)/ReadExonsGFF.o $(OBJ)/ComputeTPe.o\
@@ -48,6 +63,6 @@ $(OBJ)/ComputeTPg.o : $(CDIR)/ComputeTPg.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ComputeTPg.c -o $(OBJ)/ComputeTPg.o
 
 clean:
-	rm -f $(OBJ)/*.o $(PRODUCT) *~ $(INCLUDE)/*~ $(CDIR)/*~ core
+	rm -f $(OBJ)/*.o $(PRODUCT) *~ $(INCLUDE)/*~ $(CDIR)/*~ core;
 
 
