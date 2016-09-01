@@ -1317,9 +1317,9 @@ sub extractprocessSITES {
 
         foreach my $line (@generic_noncanonical) {
 
-            #   my (@noncan_array)= split (/\.\d+:/, $line);
-            my (@noncan_array) = split( /:/, $line );
-            my $first = $noncan_array[0] . ":";
+            #   my (@noncanonical_array)= split (/\.\d+:/, $line);
+            my (@noncanonical_array) = split( /:/, $line );
+            my $first = $noncanonical_array[0] . ":";
             $generic_noncanonical .= "$first\n";
 
         }
@@ -1417,8 +1417,8 @@ sub extractprocessSITES {
         close $fh_LOCID;
 
         foreach my $line (@generic_noncanonical) {
-            my (@noncan_array) = split( /:/, $line );
-            my $first = $noncan_array[0] . ":";
+            my (@noncanonical_array) = split( /:/, $line );
+            my $first = $noncanonical_array[0] . ":";
             $generic_noncanonical .= "$first\n";
 
         }
@@ -1511,8 +1511,8 @@ sub extractprocessSITES {
         close $fh_LOCID;
 
         foreach my $line (@generic_noncanonical) {
-            my (@noncan_array) = split( /:/, $line );
-            my $first = $noncan_array[0] . ":";
+            my (@noncanonical_array) = split( /:/, $line );
+            my $first = $noncanonical_array[0] . ":";
             $generic_noncanonical .= "$first\n";
 
         }
@@ -2403,7 +2403,7 @@ sub get_K_matrix {
     my $my_True_freq_matrix_fn =
       $work_dir . basename($true_seq_name) . "_" . "$ordname.matrix";
     ## False_True req_matrix_fn
-    my $my_False_freq_matrix_fn =
+    my $my_backgrnd_freq_matrix_fn =
       $work_dir . basename($backgrnd_seq_name) . "_" . "$ordname.matrix";
 
     ## True logratio req_matrix_fn
@@ -2428,12 +2428,12 @@ sub get_K_matrix {
 #~ );
 
         $my_command =
-"gawk -f ./bin/Getkmatrix.awk $order $len2 $backgrnd_kmers_tbl | $sort > $my_False_freq_matrix_fn ";
+"gawk -f ./bin/Getkmatrix.awk $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
         say "\n $my_command \n";
         run($my_command);
 
         $my_command =
-"gawk -f ./bin/logratio_kmatrix.awk $my_False_freq_matrix_fn $my_True_freq_matrix_fn > $my_T_generic_logratio_freq_matrix_fn ";
+"gawk -f ./bin/logratio_kmatrix.awk $my_backgrnd_freq_matrix_fn $my_True_freq_matrix_fn > $my_T_generic_logratio_freq_matrix_fn ";
         say "\n $my_command \n";
         run($my_command);
 
@@ -2752,35 +2752,35 @@ sub parameter_optimize {
             my $my_command =
               "./bin/geneid -GP $temp_geneid_param $gp_fasta > $fname_geneid";
             run($my_command);
-            my $temp0_geneid_pred_gff_fh =
+            my $temp_geneid_pred_gff_fn =
               "$tmp_dir/Predictions." . basename($new_param_fn) . ".gff";
             $my_command =
-"cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $temp0_geneid_pred_gff_fh ";
+"cat $fname_geneid | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $temp_geneid_pred_gff_fn ";
             run($my_command);
 
 #` ./bin/geneid -GP ${newparam}.temp $gp_fasta | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
 ## BUG very complex comand line
 
-            my $temp0_evalout_fn =
+            my $temp_evalout_A_fn =
                 "$tmp_dir/Predictions."
               . basename($new_param_fn)
-              . ".tmp0_eval_out";
+              . ".temp_evalout_A";
             $my_command =
-"./bin/evaluation -sta $temp0_geneid_pred_gff_fh $gp_gff_fn  > $temp0_evalout_fn";
+"./bin/evaluation -sta $temp_geneid_pred_gff_fn $gp_gff_fn  > $temp_evalout_A_fn";
             print "\n$my_command\n";
             run($my_command);
 
-            my $temp1_evalout_fn =
+            my $temp_evalout_B_fn =
                 "$tmp_dir/Predictions."
               . basename($new_param_fn)
-              . ".tmp1_eval_out";
-            $my_command = "tail -2 $temp0_evalout_fn | head -1 |  
-            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp1_evalout_fn ";
+              . ".temp_evalout_B";
+            $my_command = "tail -2 $temp_evalout_A_fn | head -1 |  
+            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
             print "\n$my_command\n";
             run($my_command);
 
             my @evaluation_output;
-            open( my $fh_IN, "<", "$temp1_evalout_fn" ) or croak "Failed here";
+            open( my $fh_IN, "<", "$temp_evalout_B_fn" ) or croak "Failed here";
             while (<$fh_IN>) {
                 @evaluation_output = split " ";
 
@@ -2792,7 +2792,7 @@ sub parameter_optimize {
 
             #~ my @evaluation_output = split " ",
 
-#~ #` ./bin/evaluation -sta $temp0_geneid_pred_gff_fh $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
+#~ #` ./bin/evaluation -sta $temp_geneid_pred_gff_fn $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
 
             push( @evaluation_total, \@evaluation_output );
 
@@ -2956,22 +2956,22 @@ sub parameter_evaluate {
 #` ./bin/geneid -GP ${newparam}.temp $gp_fasta | gawk 'NR>5 {if (\$2==\"Sequence\") print \"\#\$\"; if (substr(\$1,1,1)!=\"\#\") print }' | egrep -wv 'exon' > $tmp_dir/Predictions.${newparam}.gff`;
 ## BUG very complex comand line
 
-    my $tempA_evalout_fn =
-      "$geneid_dir/Predictions." . basename($new_param_fn) . ".tmpA_eval_out";
+    my $temp_evalout_A_fn =
+      "$geneid_dir/Predictions." . basename($new_param_fn) . ".temp_evalout_A";
     $my_command =
-"./bin/evaluation -sta $geneid_test_predict_gff_fn $gp_gff_fn > $tempA_evalout_fn";
+"./bin/evaluation -sta $geneid_test_predict_gff_fn $gp_gff_fn > $temp_evalout_A_fn";
     print "\n$my_command\n";
     run($my_command);
 
-    my $tempB_evalout_fn =
-      "$geneid_dir/Predictions." . basename($new_param_fn) . ".tmpB_eval_out";
-    $my_command = "tail -2 $tempA_evalout_fn | head -1 |  
-            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $tempB_evalout_fn ";
+    my $temp_evalout_B_fn =
+      "$geneid_dir/Predictions." . basename($new_param_fn) . ".temp_evalout_B";
+    $my_command = "tail -2 $temp_evalout_A_fn | head -1 |  
+            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
     print "\n$my_command\n";
     run($my_command);
 
     my @evaluation_test;
-    open( my $fh_IN, "<", "$tempB_evalout_fn" ) or croak "Failed here";
+    open( my $fh_IN, "<", "$temp_evalout_B_fn" ) or croak "Failed here";
     while (<$fh_IN>) {
         @evaluation_test = split " ";
 
