@@ -48,7 +48,7 @@ use Geneid::geneidCEGMA;
 
 ## MAIN VARIABLES
 my $PROGRAM_NAME    = "geneid_trainer";
-my $PROGRAM_VERSION = "2016.08.03a";
+my $PROGRAM_VERSION = "2016.09.01a";
 my $PROGRAM_HOME    = getcwd;
 
 my $exec_path = "$PROGRAM_HOME/bin/";
@@ -208,7 +208,7 @@ my $eval_set_gff                = "";
 my $contigs_all_transcr_2cols   = "";
 my $train_contigs_transcr_2cols = "";
 my $eval_contigs_transcr_2cols  = "";
-my $train_transcr_used_num       = "";
+my $train_transcr_used_num      = "";
 
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
@@ -276,7 +276,7 @@ my $total_noncanon_donors_intX = "";
 my $total_noncanon_ATGx        = "";
 
 my $transcr_all_number = "";
-my $train_transcr_num    = "";
+my $train_transcr_num  = "";
 
 #############################################################
 ## INITIAL CHECKS
@@ -769,18 +769,18 @@ sub normal_run {
     ## BUG do not remove, misleading name of a function: WriteStatsFile
     ( $intron_short_int, $intron_long_int, $intergenic_min, $intergenic_max ) =
       calc_stats(
-        $species,                  $sout,
-        $introns_clean_tbl_fn,     $cds_all_nozero_tbl,
-        $out_gff_X,                $inframe_X,
-        $inframe_X_eval,           $train_transcr_used_num,
+        $species,                    $sout,
+        $introns_clean_tbl_fn,       $cds_all_nozero_tbl,
+        $out_gff_X,                  $inframe_X,
+        $inframe_X_eval,             $train_transcr_used_num,
         $total_noncanon_donors_intX, $total_noncanon_accept_intX,
         $total_noncanon_ATGx,        $markov_model,
-        $total_coding,             $total_noncoding,
-        $donor_start,              $donor_end,
-        $acceptor_start,           $acceptor_end,
-        $ATGx_start,               $ATGx_end,
-        0,                         0,
-        0,                         $use_allseqs_flag
+        $total_coding,               $total_noncoding,
+        $donor_start,                $donor_end,
+        $acceptor_start,             $acceptor_end,
+        $ATGx_start,                 $ATGx_end,
+        0,                           0,
+        0,                           $use_allseqs_flag
       );
 
     print STDERR
@@ -804,7 +804,7 @@ sub normal_run {
 ## BUG we run non interactive here
 ## simplification
     my $optymize_type = "";
-    $optymize_type             = "contig";
+    $optymize_type       = "contig";
     $run_contig_opt_flag = 1;
     $run_jacknife_flag   = 0;
 
@@ -1283,7 +1283,7 @@ sub extractprocessSITES {
 
     #      ##EXTRACT NON CANONICAL DONORS
     #my $noncanonical     = "";
-    my $generic_noncanonical     = "";
+    my $generic_noncanonical       = "";
     my $total_generic_noncanonical = "";
     my $total_generic_canonical    = "";
 
@@ -1297,7 +1297,8 @@ sub extractprocessSITES {
     print {$fh_FOUT} "$noncanonical";
     close $fh_FOUT;
 
-    $total_generic_noncanonical = num_of_lines_in_file($donor_noncanonical_temp);
+    $total_generic_noncanonical =
+      num_of_lines_in_file($donor_noncanonical_temp);
 
     print STDERR
 "\nThere are $total_generic_noncanonical non-canonical donors within the training set:\n";
@@ -1371,8 +1372,8 @@ sub extractprocessSITES {
 
     #      ####
     #      ##EXTRACT NON CANONICAL ACCEPTORS
-    $noncanonical          = "";
-    $generic_noncanonical  = "";
+    $noncanonical            = "";
+    $generic_noncanonical    = "";
     $total_generic_canonical = "";
     my $acceptor_new_tbl = "";
 
@@ -1473,8 +1474,8 @@ sub extractprocessSITES {
     #      ###
     #      ##EXTRACT NON CANONICAL STARTS
 
-    $noncanonical          = "";
-    $generic_noncanonical  = "";
+    $noncanonical            = "";
+    $generic_noncanonical    = "";
     $total_generic_canonical = "";
     my $new_start_tbl = "";
 
@@ -1806,19 +1807,23 @@ sub process_seqs_4opty {
     close $fh_FOUT;
 
     my $pso_gp_eval_gff = "";
-    open( $fh_LOCID, "-|",
-"gawk 'BEGIN{while (getline<ARGV[1]>0){len[\$1]=\$2;};ARGV[1]=\"\";OFS=\"\\t\";}{if (NR==1) {ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"};if (\$1!=ant) {print \"\#\$\";ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"}; print }' $temp_gp_cds_fn $temp_gp_gff "
-    );
-    while (<$fh_LOCID>) {
-        $pso_gp_eval_gff .= $_;
-
-    }
-    close $fh_LOCID;
-
     my $eval_gp_out_gff = $work_dir . $species . $type . ".gp_eval_gff";
-    open( $fh_FOUT, ">", "$eval_gp_out_gff" ) or croak "Failed here";
-    print {$fh_FOUT} "$pso_gp_eval_gff";
-    close $fh_FOUT;
+    $my_command = "./bin/1800p_script.awk $temp_gp_cds_fn $temp_gp_gff > $eval_gp_out_gff";
+    run($my_command);
+    
+    ###open( $fh_LOCID, "-|",
+### "gawk 'BEGIN{while (getline<ARGV[1]>0){len[\$1]=\$2;};ARGV[1]=\"\";OFS=\"\\t\";}{if (NR==1) {ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"};if (\$1!=ant) {print \"\#\$\";ant=\$1;print \$1,\$2,\"Sequence\",1,len[ant],\"\.\",\"\.\",\"\.\",\"\.\"}; print }' $temp_gp_cds_fn $temp_gp_gff "
+###    );
+    ###while (<$fh_LOCID>) {
+    ###    $pso_gp_eval_gff .= $_;
+
+###    }
+###    close $fh_LOCID;
+
+###    my $eval_gp_out_gff = $work_dir . $species . $type . ".gp_eval_gff";
+###    open( $fh_FOUT, ">", "$eval_gp_out_gff" ) or croak "Failed here";
+###    print {$fh_FOUT} "$pso_gp_eval_gff";
+###    close $fh_FOUT;
 
     if ($run_contig_opt_flag) {
 
@@ -1935,7 +1940,7 @@ sub GetGenes {
 m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([^\n]+)/;
 
         my $name          = $1;
-        my $chrom          = $2;
+        my $chrom         = $2;
         my $strand        = $3;
         my $tx_start      = $4;
         my $tx_end        = $5;
@@ -1948,12 +1953,12 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
         my $tx_len     = $tx_end - $tx_start;
         my $cds_offset = $cds_start - $tx_start;
 
-        my $redundant = 0;
-        my $i         = 0;    # exon counter
-        my $j         = 0;
-        my $call      = "";
-        my $sub_seq   = "";
-        my $genomic_tmp_seqX   = "";
+        my $redundant        = 0;
+        my $i                = 0;    # exon counter
+        my $j                = 0;
+        my $call             = "";
+        my $sub_seq          = "";
+        my $genomic_tmp_seqX = "";
 
         #my @tabular = ();
 
@@ -2022,21 +2027,22 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
             #    next;
             #  }
 
-            for ( $i = 0 ; $i < $my_exo_countX ; $i++ ) 
-            ## XXX fixing C style loop XXX
-            ##foreach my $i (0 .. $my_exo_countX) 
+            for ( my $ii = 0 ; $ii < $my_exo_countX ; $ii++ )
+              ## XXX fixing C style loop XXX
+              ##my $ii = 0;
+              ##foreach $ii (0 .. $my_exo_countX)
             {
                 my $utr_A   = 0;
                 my $utr_B   = 0;
                 my $utrS    = 0;
                 my $utrL    = 0;
-                my $exSt    = $exon[$i] - $cds_start;
-                my $ex_lenX = $exon[ $i + $my_exo_countX ] - $exon[$i];
+                my $exSt    = $exon[$ii] - $cds_start;
+                my $ex_lenX = $exon[ $ii + $my_exo_countX ] - $exon[$ii];
                 my $ex_type = "Internal";
 
                 if ( $exSt + $ex_lenX > 0 && $exSt < $cds_len ) {    # cds
 
-                    if ( $exSt <= 0 || $i == 0 ) {
+                    if ( $exSt <= 0 || $ii == 0 ) {
                         if ( $strand eq '+' ) {
                             $ex_type = "First";
                         }
@@ -2046,7 +2052,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                     }
 
                     if (   $exSt + $ex_lenX >= $cds_len
-                        || $i == $my_exo_countX - 1 )
+                        || $ii == $my_exo_countX - 1 )
                     {
                         if ( $strand eq '+' ) {
                             $ex_type = "Terminal";
@@ -2076,30 +2082,33 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                     }
 
                     my $iex;
-                    my $seq = substr( $genomic_tmp_seqX, $exSt + $cds_offset, $ex_lenX );
+                    my $seq = substr( $genomic_tmp_seqX, $exSt + $cds_offset,
+                        $ex_lenX );
 
                     $seq = lc($seq);
 
                     if ( $strand eq '+' ) {    # forward
 
                         if ($utr_B) {
-                            my $iutr = $i + 1;
+                            my $iutr = $ii + 1;
                             my $my_utrsX =
-                              substr( $genomic_tmp_seqX, $utrS + $cds_offset, $utrL );
+                              substr( $genomic_tmp_seqX, $utrS + $cds_offset,
+                                $utrL );
 
                             $my_utrsX = lc($my_utrsX);
                             $cds_seq  = $cds_seq
                               . "$name\t$chrom\tUtr\t$iutr\t$utrL\t$my_utrsX\n";
                         }
 
-                        $iex     = $i + 1;
+                        $iex     = $ii + 1;
                         $cds_seq = $cds_seq
-                          . "$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i]\t$exon[$i+$my_exo_countX]\n";
+                          . "$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$ii]\t$exon[$ii+$my_exo_countX]\n";
 
                         if ($utr_A) {
-                            my $iutr = $i + 1;
+                            my $iutr = $ii + 1;
                             my $my_utrsX =
-                              substr( $genomic_tmp_seqX, $utrS + $cds_offset, $utrL );
+                              substr( $genomic_tmp_seqX, $utrS + $cds_offset,
+                                $utrL );
 
                             $my_utrsX = lc($my_utrsX);
                             $cds_seq  = $cds_seq
@@ -2110,9 +2119,10 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                     else {    # reverse
 
                         if ($utr_B) {
-                            my $iutr = $my_exo_countX - $i;
+                            my $iutr = $my_exo_countX - $ii;
                             my $my_utrsX =
-                              substr( $genomic_tmp_seqX, $utrS + $cds_offset, $utrL );
+                              substr( $genomic_tmp_seqX, $utrS + $cds_offset,
+                                $utrL );
 
                             $my_utrsX = lc($my_utrsX);
                             $my_utrsX =~ tr/acgt/tgca/;
@@ -2122,17 +2132,18 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                               . $cds_seq;
                         }
 
-                        $iex = $my_exo_countX - $i;
+                        $iex = $my_exo_countX - $ii;
                         $seq =~ tr/acgt/tgca/;
                         $seq = reverse($seq);
                         $cds_seq =
-"$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$i+$my_exo_countX]\t$exon[$i]\n"
+"$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$ii+$my_exo_countX]\t$exon[$ii]\n"
                           . $cds_seq;
 
                         if ($utr_A) {
-                            my $iutr = $my_exo_countX - $i;
+                            my $iutr = $my_exo_countX - $ii;
                             my $my_utrsX =
-                              substr( $genomic_tmp_seqX, $utrS + $cds_offset, $utrL );
+                              substr( $genomic_tmp_seqX, $utrS + $cds_offset,
+                                $utrL );
 
                             $my_utrsX = lc($my_utrsX);
                             $my_utrsX =~ tr/acgt/tgca/;
@@ -2151,9 +2162,9 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                       )
                     {
 
-                        my $inSt = $exon[ $i + $my_exo_countX ] - $cds_start;
+                        my $inSt = $exon[ $ii + $my_exo_countX ] - $cds_start;
                         my $inLe =
-                          $exon[ $i + 1 ] - $exon[ $i + $my_exo_countX ];
+                          $exon[ $ii + 1 ] - $exon[ $ii + $my_exo_countX ];
 
                         if ( $inSt + $inLe > 0 && $inSt < $cds_len ) {
 
@@ -2168,7 +2179,8 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                             }
 
                             $seq =
-                              substr( $genomic_tmp_seqX, $inSt + $cds_offset, $inLe );
+                              substr( $genomic_tmp_seqX, $inSt + $cds_offset,
+                                $inLe );
                             $seq = "\L$seq";
 
                             my $iIn;
@@ -2206,13 +2218,13 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                 }
                 else {    # UTRs
 
-                    $exSt    = $exon[$i] - $tx_start;
-                    $ex_lenX = $exon[ $i + $my_exo_countX ] - $exon[$i];
+                    $exSt    = $exon[$ii] - $tx_start;
+                    $ex_lenX = $exon[ $ii + $my_exo_countX ] - $exon[$ii];
 
                     my $my_utrsX = substr( $genomic_tmp_seqX, $exSt, $ex_lenX );
 
                     if ( $strand eq '+' ) {    # forward
-                        my $iutr = $i + 1;
+                        my $iutr = $ii + 1;
 
                         $my_utrsX = lc($my_utrsX);
                         $cds_seq =
@@ -2220,7 +2232,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                           . "$name\t$chrom\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n";
                     }
                     else {                     # reverse
-                        my $iutr = $my_exo_countX - $i;
+                        my $iutr = $my_exo_countX - $ii;
 
                         $my_utrsX = lc($my_utrsX);
                         $my_utrsX =~ tr/acgt/tgca/;
@@ -2332,7 +2344,7 @@ sub get_K_matrix {
 
     #~ }
     my $original_offset = $offset;
-    my @profile_array            = ();
+    my @profile_array   = ();
     my $temp_infolog;
     my @orders  = (qw(order-0 di tri order-4 order-5 order-6 order-7 order-8));
     my $ordname = $orders[$order];
@@ -2342,7 +2354,7 @@ sub get_K_matrix {
     }
 
     #    my @info = ($offset-1,$offset+1);
-    my $profile_len    = 0;
+    my $profile_len = 0;
     my $info_thresh = "";    #bits
 
     ## BUG?
@@ -2356,8 +2368,8 @@ sub get_K_matrix {
     #    print STDERR "$true_kmers_tbl (true)\n";
     open( my $fh_true_seq, "<", "$true_kmers_tbl" ) or croak "Failed here";
     $_ = <$fh_true_seq>;
-    my @columns_t   = split;
-    my $len = length( $columns_t[1] );
+    my @columns_t = split;
+    my $len       = length( $columns_t[1] );
     close $fh_true_seq;
 
 ## Open false (background???) sequences
@@ -2365,8 +2377,8 @@ sub get_K_matrix {
     open( my $fh_backgrnd_SEQ, "<", "$backgrnd_kmers_tbl" )
       or croak "Couldn't open $backgrnd_kmers_tbl: $OS_ERROR \n";
     $_ = <$fh_backgrnd_SEQ>;
-    my @columns_f    = split;
-    my $len2 = length( $columns_f[1] );
+    my @columns_f = split;
+    my $len2      = length( $columns_f[1] );
     close $fh_backgrnd_SEQ;
 
     #    die "$len != $len2\n" if $len != $len2;
@@ -2547,7 +2559,8 @@ sub get_K_matrix {
         my $post_offset = $offset + 4;
 
         #my_True_dimatrixdonor_4param_fn
-        my $exec_A1 = "gawk -f ./bin/submatrix.awk ";
+        #my $exec_A1 = "gawk -f ./bin/submatrix.awk ";
+        my $exec_A1 = "./bin/submatrix.py ";
         my $exec_B1 = "./bin/preparedimatrixdonor4parameter.awk ";
         my $my_command_A =
 "$exec_A1 $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn";
@@ -2570,14 +2583,17 @@ sub get_K_matrix {
         my $new_offset  = $offset;
         my $post_offset = $offset + 1;
 
+## my $my_command_A =
+## "gawk -f ./bin/submatrix.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn";
         my $my_command_A =
-"gawk -f ./bin/submatrix.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn";
-        print STDERR "$my_command_A \n";
+"./bin/submatrix.py $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn";
+
+        print STDERR "my_command_A: \n$my_command_A \n";
         run($my_command_A);
 
         my $my_command_B =
 "./bin/preparedimatrixacceptor4parameter.awk $pre_offset $new_offset $post_offset $my_T_generic_lograt_summatrix_fn > $my_T_generic_matrix_4param_fn";
-        print STDERR "$my_command_B \n";
+        print STDERR "my_command_B: \n$my_command_B \n";
         run($my_command_B);
 
 #~ run(
@@ -2595,10 +2611,13 @@ sub get_K_matrix {
         my $pre_offset  = $offset - 2;
         my $new_offset  = $offset - 1;
         my $post_offset = $offset;
+        $my_command =
+"./bin/submatrix.py $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn";
+        ##run("gawk -f ./bin/submatrix.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn"
+        ##);
+        say $my_command;
+        run($my_command);
 
-        run(
-" gawk -f ./bin/submatrix.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_lograt_summatrix_fn"
-        );
         run(
 " ./bin/preparetrimatrixstart4parameter.awk $pre_offset $new_offset $post_offset $my_T_generic_lograt_summatrix_fn > $my_T_generic_matrix_4param_fn"
         );
@@ -2610,10 +2629,13 @@ sub get_K_matrix {
     else {
 
 # print STDERR "$path/submatrix_order0.awk $start $end $true_seq_name-log.$ordname-matrix\n";
-
-        run(
-" gawk -f ./bin/submatrix_order0.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_matrix_4param_fn"
-        );
+        $my_command =
+"./bin/submatrix_order0.py $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_matrix_4param_fn";
+        say $my_command;
+        run($my_command);
+        ## run(
+##" gawk -f ./bin/submatrix_order0.awk $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_matrix_4param_fn"
+##        );
 
     }
 ## ALL REMAINING CASES END
@@ -2990,18 +3012,18 @@ sub parameter_evaluate {
 sub calc_stats {
 ## BUG variable names hard to guess
     my (
-        $species,                  $sout,
-        $introns_clean_tbl_fn,     $cds_all_nozero_tbl,
-        $out_gff_X,                $inframe_X,
-        $inframe_X_eval,           $train_transcr_used_num,
+        $species,                    $sout,
+        $introns_clean_tbl_fn,       $cds_all_nozero_tbl,
+        $out_gff_X,                  $inframe_X,
+        $inframe_X_eval,             $train_transcr_used_num,
         $total_noncanon_donors_intX, $total_noncanon_accept_intX,
         $total_noncanon_ATGx,        $markov_model,
-        $total_coding,             $total_noncoding,
-        $st_donor,                 $en_donor,
-        $st_accept,                $en_accept,
-        $st_ATGx,                  $en_ATGx,
-        $st_branch,                $en_branch,
-        $branch_switch,            $use_allseqs_flag
+        $total_coding,               $total_noncoding,
+        $st_donor,                   $en_donor,
+        $st_accept,                  $en_accept,
+        $st_ATGx,                    $en_ATGx,
+        $st_branch,                  $en_branch,
+        $branch_switch,              $use_allseqs_flag
     ) = @_;
     my $my_command = "";
 
@@ -3032,9 +3054,9 @@ sub calc_stats {
  #~ $my_command = "sort -k2,2n $introns_clean_tbl_fn";
  #~ my @intronlist = capture($my_command);
 
-    my $total_introns       = scalar(@introns_len_list);
+    my $total_introns     = scalar(@introns_len_list);
     my @intron_lenX_array = ();
-    my $intron_len              = "";
+    my $intron_len        = "";
     for ( my $i = 0 ; $i <= scalar(@introns_len_list) - 1 ; $i++ ) {
 
         $intron_len = $introns_len_list[$i];
@@ -3078,7 +3100,8 @@ sub calc_stats {
     my @intron_GC_content = capture($my_command);
 
     #print STDERR "@intron_GC_content\n";
-    my ( $mean_GC_intron, $stdev_GC_intron ) = calc_average( \@intron_GC_content );
+    my ( $mean_GC_intron, $stdev_GC_intron ) =
+      calc_average( \@intron_GC_content );
 
 #print STDERR "intron: $meangci $stgci\n";
 #BUG?
@@ -3107,7 +3130,8 @@ sub calc_stats {
 #    my @exons_lenghts_list =
 #      ` egrep -v 'Single' $out_gff_X | gawk '{len=\$5-\$4;print len}' - | sort `;
 
-    my ( $avg_exon_len, $stdev_exonX_len ) = calc_average( \@exons_lenghts_list );
+    my ( $avg_exon_len, $stdev_exonX_len ) =
+      calc_average( \@exons_lenghts_list );
 
     $my_command = "egrep -c '(Single)' $out_gff_X";
     my $single_exon_genes = capture($my_command);
@@ -3193,8 +3217,8 @@ sub calc_stats {
 
 sub calc_average {
     my ($input_numbers) = @_;
-    my $sum         = 0;
-    my $elements_count    = 0;
+    my $sum             = 0;
+    my $elements_count  = 0;
     my ( $mean, $stdev );
 
     foreach my $my_number ( @{$input_numbers} ) {
@@ -3208,8 +3232,9 @@ sub calc_average {
     $sum = 0;
     my $tmp_number = 0;
     foreach my $my_number ( @{$input_numbers} ) {
-		$tmp_number = $my_number - $mean;
-        $sum += $tmp_number * $tmp_number ;
+        $tmp_number = $my_number - $mean;
+        $sum += $tmp_number * $tmp_number;
+
         #$sum += ( $my_number - $mean ) * ( $my_number - $mean );
     }
     $stdev = sqrt( $sum / $elements_count );
@@ -3242,7 +3267,7 @@ sub tbl_2_fasta {
 
 sub tbl_2_single_fastas {
 
-    my ($in_tbl_fn,  $out_fas_dir ) = @_;
+    my ( $in_tbl_fn, $out_fas_dir ) = @_;
 
     open( my $fh_IN_tbl, "<", "$in_tbl_fn" ) or croak "Failed here";
 
@@ -3648,7 +3673,8 @@ sub create_data_dirs {
 
 sub get_background_kmers {
 
-    my ( $kmer_len, $input_fas_fn, $contigs_all_tbl, $num_seqs, $backgrnd_tbl ) = @_;
+    my ( $kmer_len, $input_fas_fn, $contigs_all_tbl, $num_seqs, $backgrnd_tbl )
+      = @_;
     my $backgrnd_debug_flag;
     $backgrnd_debug_flag = 1;
     if ($backgrnd_debug_flag) {
