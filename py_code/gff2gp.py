@@ -37,11 +37,13 @@ for line in open(input_fn).readlines():
 
 for gene_name in genes_dict.keys():
 	num_exons = genes_dict[gene_name]['num_exons']
-	gp_string = "%s\t%s\t%s\t" % (gene_name, genes_dict[gene_name]['contig_id'],genes_dict[gene_name]['strand'] )
+	# = "%s\t%s\t%s\t" % (gene_name, genes_dict[gene_name]['contig_id'],genes_dict[gene_name]['strand'] )
+	gp_string = "%s %s %s" % (gene_name, genes_dict[gene_name]['contig_id'],genes_dict[gene_name]['strand'] )
 	 
-	gp_positions = "%s\t%s\t%s\t%s\t%s\t" % (\
+	#gp_positions = "%s\t%s\t%s\t%s\t%s\t" % (\
+	gp_positions = "%s %s %s %s %s" % (\
 	genes_dict[gene_name]['exons'][1][0] - (MARGIN+1), \
-	genes_dict[gene_name]['exons'][num_exons][1] + (MARGIN+1), \
+	genes_dict[gene_name]['exons'][num_exons][1] + (MARGIN), \
 	genes_dict[gene_name]['exons'][1][0] - 1, \
 	genes_dict[gene_name]['exons'][num_exons][1], \
 	num_exons)
@@ -50,15 +52,24 @@ for gene_name in genes_dict.keys():
 	exons_start_positions = ""
 	exons_end_positions   = ""
 	for exon_number  in range(1, num_exons+1):
-		if exon_number == 1:
-			exons_start_positions = genes_dict[gene_name]['exons'][exon_number][0] #- (MARGIN+1)
-			exons_end_positions   = genes_dict[gene_name]['exons'][exon_number][1] 
+		if exon_number == 1: 
+			if num_exons == 1:
+			    exons_start_positions = "%s," % (genes_dict[gene_name]['exons'][exon_number][0]) #- (MARGIN+1)
+			    exons_end_positions   = "%s," % (genes_dict[gene_name]['exons'][exon_number][1])
+			else:
+			    exons_start_positions = "%s" % (genes_dict[gene_name]['exons'][exon_number][0]) 
+			    exons_end_positions   = "%s" % (genes_dict[gene_name]['exons'][exon_number][1])	
 		else:
 			exons_start_positions = "%s,%s"  %  (exons_start_positions, genes_dict[gene_name]['exons'][exon_number][0])
 			exons_end_positions   = "%s,%s"  %  (exons_end_positions,   genes_dict[gene_name]['exons'][exon_number][1])
 	
 	#print gene_name, genes_dict[gene_name]
-	print gp_string, gp_positions, exons_start_positions, exons_end_positions
+	if exons_start_positions[-1] != ',':
+		exons_start_positions += ','
+	if exons_end_positions[-1] != ',':
+		exons_end_positions += ','	
+	gp_string = "%s %s %s %s" % (gp_string, gp_positions, exons_start_positions, exons_end_positions)
+	print gp_string #, gp_positions, exons_start_positions, exons_end_positions
 	
 	
 	

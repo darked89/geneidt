@@ -44,11 +44,11 @@ use Geneid::geneid;
 use Geneid::geneidCEGMA;
 
 ## experimental
-#~ use Inline::Python;
+##use Inline::Python;
 
 ## MAIN VARIABLES
 my $PROGRAM_NAME    = "geneid_trainer";
-my $PROGRAM_VERSION = "2016.09.01a";
+my $PROGRAM_VERSION = "2016.10.06a";
 my $PROGRAM_HOME    = getcwd;
 
 my $exec_path = "$PROGRAM_HOME/bin/";
@@ -138,23 +138,24 @@ Readonly::Scalar my $non_coding_bp_limit_C => 35_000;
 #~ || (   $totalnoncodingbases > 35000
 #~ && $totalcodingbases > ( 25 * $totalnoncodingbases ) )
 
-my %profile_params = (
+Readonly::Hash my %profile_params => (
 ## EXON WEIGHT PARAMETER
-    IeWF => -4.5,
-    deWF => 0.5,
-    FeWF => -2.5,
+    ExWeightParam_ini => -4.5,
+    ExWeightParam_step => 0.5,
+    ExWeightParam_limit => -2.5,
 ## EXON/OLIGO FACTOR PARAMETER
-    IoWF => 0.25,
-    doWF => 0.05,
-    FoWF => 0.50,
+    OligoWeight_ini => 0.25,
+    OligoWeight_step => 0.05,
+    OligoWeight_limit => 0.50,
 ## Minimum Branch Profile Distance
-    iMin => 7,
-    dMin => 2,
-    fMin => 9,
+## unused 20161201
+##    i_BranchProfDist => 7,
+##    d_BranchProfDist => 2,
+##    f_BranchProfDist => 9,
 ## ACCEPTOR CONTEXT
-    iAccCtx => 40,
-    dAccCtx => 10,
-    fAccCtx => 70,
+##    iAccCtx => 40,
+##    dAccCtx => 10,
+##    fAccCtx => 70,
 );
 
 ## end set CONSTANTS
@@ -213,25 +214,25 @@ my $train_transcr_used_num      = "";
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
 my $gp_evalcontig_gff     = "";
-my $gp_evalcontig_len_int = "";
+my $gp_evalcontig_len_int = 0;
 my $gp_evalcontig_tbl     = "";
 my $gp_eval_fa_X          = "";
 my $gp_eval_gff_X         = "";
-my $gp_eval_len_intX      = "";
+my $gp_eval_len_intX      = 0;
 my $gp_eval_tbl_X         = "";
 
 my $gp_traincontig_fa      = "";
 my $gp_traincontig_gff     = "";
-my $gp_traincontig_len_int = "";
+my $gp_traincontig_len_int = 0;
 my $gp_traincontig_tbl     = "";
 my $gp_train_fa_X          = "";
 my $gp_train_gff_X         = "";
-my $gp_train_len_int_X     = "";
+my $gp_train_len_int_X     = 0;
 my $gp_train_tbl_X         = "";
 
 ## Weights for profiles??
-my $best_IeWF = "";
-my $best_IoWF = "";
+my $best_ExWeightParam = "";
+my $best_OlWeight = "";
 my $best_Acc  = "";
 my $best_Min  = "";
 
@@ -248,8 +249,8 @@ my $locus_id            = "";
 my $locus_id_new        = "";
 my $intron_long_int     = 0;
 my $intron_short_int    = 0;
-my $intergenic_max      = "";
-my $intergenic_min      = "";
+my $intergenic_max      = 0;
+my $intergenic_min      = 0;
 
 my $out_acceptor_tbl       = "";
 my $cds_all_nozero_tbl     = "";
@@ -271,9 +272,9 @@ my $train_2cols_seq_locusid_fn = "";
 my $eval_2cols_seq_locusid_fn  = "";
 my $train_transcr_lst_fn       = "";
 
-my $total_noncanon_accept_intX = "";
-my $total_noncanon_donors_intX = "";
-my $total_noncanon_ATGx        = "";
+my $total_noncanon_accept_intX = 0;
+my $total_noncanon_donors_intX = 0;
+my $total_noncanon_ATGx        = 0;
 
 my $transcr_all_number = "";
 my $train_transcr_num  = "";
@@ -503,10 +504,10 @@ sub normal_run {
         $my_command = "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
         $train_transcr_used_num = capture($my_command);
         chomp $train_transcr_used_num;
-        my $t1 = Benchmark->new;
-        my $td = timediff( $t1, $t0 );
-        print "\nTTT the code took t0->t1:", timestr($td), "\n";
-        $last_bench_time = $t1;
+        #~ my $t1 = Benchmark->new;
+        #~ my $td = timediff( $t1, $t0 );
+        #~ print "\nTTT the code took t0->t1:", timestr($td), "\n";
+        #~ $last_bench_time = $t1;
 
 ###################
 ## gff for training subset
@@ -697,10 +698,10 @@ sub normal_run {
 
     }
 
-    my $t3 = Benchmark->new;
-    my $td = timediff( $t3, $last_bench_time );
-    print "\nTTT the code took t2->t3:", timestr($td), "\n";
-    $last_bench_time = $t3;
+    #~ my $t3 = Benchmark->new;
+    #~ my $td = timediff( $t3, $last_bench_time );
+    #~ print "\nTTT the code took t2->t3:", timestr($td), "\n";
+    #~ $last_bench_time = $t3;
 
 ## XXXXXX extracted lines start
 
@@ -812,8 +813,8 @@ sub normal_run {
 
 ## OPTIMIZATION FUNCTION NO BRANCH
     my $array_ref = "";
-    my $IoWF      = $profile_params{'IoWF'};
-    my $IeWF      = $profile_params{'IeWF'};
+    my $OligoWeight_ini      = $profile_params{'OligoWeight_ini'};
+    my $ExWeightParam_ini      = $profile_params{'ExWeightParam_ini'};
 
 ### EXON WEIGHT PARAMETER
     #    my $IeWF = -4.5;
@@ -868,7 +869,7 @@ sub normal_run {
             )
         };
 
-        ( $best_IeWF, $best_IoWF, $best_Acc, $best_Min, $array_ref ) = @{
+        ( $best_ExWeightParam, $best_OlWeight, $best_Acc, $best_Min, $array_ref ) = @{
             BuildOptimizedParameterFile( \@evaluation, $use_branch_flag, 0, 0,
                 0 )
         };
@@ -895,7 +896,7 @@ sub normal_run {
             @evaluation_test = @{
                 parameter_evaluate(
                     $gp_eval_fa_X, $gp_eval_gff_X, $param_opt_fn,
-                    $IoWF,         $IeWF
+                    $OligoWeight_ini,         $ExWeightParam_ini
                 )
             };
 
@@ -906,7 +907,7 @@ sub normal_run {
             @evaluation_test = @{
                 parameter_evaluate(
                     $gp_evalcontig_fa, $gp_evalcontig_gff, $param_opt_fn,
-                    $IoWF,             $IeWF
+                    $OligoWeight_ini,             $ExWeightParam_ini
                 )
             };
         }
@@ -2692,55 +2693,57 @@ sub parameter_optimize {
     #        $fxdbraoffset,
     #        $branch_matrix,
 
-    my $IeWF = $profile_params{'IeWF'};
-    my $deWF = $profile_params{'deWF'};
-    my $FeWF = $profile_params{'FeWF'};
+    my $ExWeightParam_ini = $profile_params{'ExWeightParam_ini'};
+    my $ExWeightParam_step = $profile_params{'ExWeightParam_step'};
+    my $ExWeightParam_limit = $profile_params{'ExWeightParam_limit'};
     ## EXON/OLIGO FACTOR PARAMETER
-    my $IoWF = $profile_params{'IoWF'};
-    my $doWF = $profile_params{'doWF'};
-    my $FoWF = $profile_params{'FoWF'};
+    my $OligoWeight_ini = $profile_params{'OligoWeight_ini'};
+    my $OligoWeight_step = $profile_params{'OligoWeight_step'};
+    my $OligoWeight_limit = $profile_params{'OligoWeight_limit'};
     ## Minimum Branch Profile Distance
-    my $iMin = $profile_params{'iMin'};
-    my $dMin = $profile_params{'dMin'};
-    my $fMin = $profile_params{'fMin'};
+    ## 20161201 unused
+    ## my $i_BranchProfDist = $profile_params{'i_BranchProfDist'};
+    ## my $d_BranchProfDist = $profile_params{'d_BranchProfDist'};
+    ## my $f_BranchProfDist = $profile_params{'f_BranchProfDist'};
 
-    my $iAccCtx = $profile_params{'iAccCtx'};
-    my $dAccCtx = $profile_params{'dAccCtx'};
-    my $fAccCtx = $profile_params{'fAccCtx'};
+    ## my $iAccCtx = $profile_params{'iAccCtx'};
+    ## my $dAccCtx = $profile_params{'dAccCtx'};
+    ## my $fAccCtx = $profile_params{'fAccCtx'};
 
     my @evaluation_total = ();
-    my $IeWFini          = $IeWF;
-    my $IoWFini          = $IoWF;
-    my $iMinini          = $iMin;
-    my $iAccCtxini       = $iAccCtx;
+    my $myExWeightParam_tmp          = $ExWeightParam_ini;
+    my $myOlWeight_tmp          = $OligoWeight_ini;
+    ##unused 20161201
+    ##my $i_BranchProfDistini          = $i_BranchProfDist;
+    ##my $iAccCtxini       = $iAccCtx;
 
     my $fh_SOUT;
 
-    open( $fh_SOUT, ">", "$work_dir/$species.OptimizeParameter.log" )
+    open( $fh_SOUT, ">", "$work_dir/$species##.OptimizeParameter.log" )
       or croak "Failed here";
 
-    print STDERR "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
+    print STDERR "\neWF range : $ExWeightParam_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
     print {$fh_SOUT}
-      "\neWF range : $IeWF to $FeWF\noWF range : $IoWF to $FoWF\n\n";
+      "\neWF range : $ExWeightParam_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
     close $fh_SOUT;
 
-    for ( $IeWF = $IeWFini ; $IeWF <= $FeWF ; $IeWF += $deWF ) {    #for_#1
-        print STDERR "eWF: $IeWF\noWF: ";
+    for (  $myExWeightParam_tmp = $ExWeightParam_ini; $myExWeightParam_tmp <= $ExWeightParam_limit ; $myExWeightParam_tmp += $ExWeightParam_step ) {    #for_#1
+        print STDERR "eWF: $myExWeightParam_tmp\noWF: ";
 
-        for ( $IoWF = $IoWFini ; $IoWF <= $FoWF ; $IoWF += $doWF ) {    #for_#2
-            print STDERR "$IoWF  ";
+        for ( $myOlWeight_tmp = $OligoWeight_ini  ; $myOlWeight_tmp <= $OligoWeight_limit ; $myOlWeight_tmp += $OligoWeight_step ) {    #for_#2
+            print STDERR "$myOlWeight_tmp";
             my $param = Geneid::Param->new();
             $param->readParam("$new_param_fn");
 
             for ( my $i = 0 ; $i < $param->numIsocores ; $i++ ) {       #for_#3
                 if ( !defined @{ $param->isocores }[$i]
-                    ->Exon_weights( [ $IeWF, $IeWF, $IeWF, $IeWF ] ) )
+                    ->Exon_weights( [ $myExWeightParam_tmp, $myExWeightParam_tmp, $myExWeightParam_tmp, $myExWeightParam_tmp ] ) )
                 {
                     croak "error in setting exon weights L3163\n";
                 }
 
                 if ( !defined @{ $param->isocores }[$i]
-                    ->Exon_factor( [ $IoWF, $IoWF, $IoWF, $IoWF ] ) )
+                    ->Exon_factor( [ $myOlWeight_tmp, $myOlWeight_tmp, $myOlWeight_tmp, $myOlWeight_tmp ] ) )
                 {
                     croak "error in setting exon weights\n";
                 }
@@ -2749,7 +2752,7 @@ sub parameter_optimize {
 
                 if (
                     !defined @{ $param->isocores }[$i]->Site_factor(
-                        [ 1 - $IoWF, 1 - $IoWF, 1 - $IoWF, 1 - $IoWF ]
+                        [ 1 - $myOlWeight_tmp, 1 - $myOlWeight_tmp, 1 - $myOlWeight_tmp, 1 - $myOlWeight_tmp ]
                     )
                   )
                 {
@@ -2797,7 +2800,7 @@ sub parameter_optimize {
               . basename($new_param_fn)
               . ".temp_evalout_B";
             $my_command = "tail -2 $temp_evalout_A_fn | head -1 |  
-            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
+            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $myOlWeight_tmp, $myExWeightParam_tmp, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
             print "\n$my_command\n";
             run($my_command);
 
@@ -2814,12 +2817,12 @@ sub parameter_optimize {
 
             #~ my @evaluation_output = split " ",
 
-#~ #` ./bin/evaluation -sta $temp_geneid_pred_gff_fn $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
+#~ #` ./bin/evaluation -sta $temp_geneid_pred_gff_fn $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $I_ExWeight_F, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
 
             push( @evaluation_total, \@evaluation_output );
 
         }    #end for_#2
-        $IoWF = $IoWFini;
+        $myOlWeight_tmp = $OligoWeight_ini;
         print STDERR "\n";
 
     }    #end for_#1
@@ -2837,8 +2840,8 @@ sub BuildOptimizedParameterFile {
     ) = @_;
     my @sorted_eval     = ();
     my @evaluation_init = ();
-    my $best_IoWF       = "";
-    my $best_IeWF       = "";
+    my $best_OlWeight       = "";
+    my $best_ExWeightParam       = "";
     my $best_Min        = "";
     my $best_Acc        = "";
     my $fh_SOUT;
@@ -2858,12 +2861,12 @@ sub BuildOptimizedParameterFile {
         ## BUG ???
         @sorted_eval = sort sorteval @{$eval_array};
 
-        $best_IoWF = $sorted_eval[0][0];    #0.2
-        $best_IeWF = $sorted_eval[0][1];    #-3.5
+        $best_OlWeight = $sorted_eval[0][0];    #0.2
+        $best_ExWeightParam = $sorted_eval[0][1];    #-3.5
 
-        print STDERR "\nBest performance obtained using IoWF: "
+        print STDERR "\nBest performance obtained using I_OlWeight_F: "
           . $sorted_eval[0][0]
-          . " and IeWF: "
+          . " and myExWeightParam_tmp: "
           . $sorted_eval[0][1] . "\n";
         print {$fh_SOUT}
           "\nBest parameter file performance obtained using oWF: "
@@ -2902,7 +2905,7 @@ sub BuildOptimizedParameterFile {
         for ( my $i = 0 ; $i < $param->numIsocores ; $i++ ) {
             if (
                 !defined @{ $param->isocores }[$i]->Exon_weights(
-                    [ $best_IeWF, $best_IeWF, $best_IeWF, $best_IeWF ]
+                    [ $best_ExWeightParam, $best_ExWeightParam, $best_ExWeightParam, $best_ExWeightParam ]
                 )
               )
             {
@@ -2910,7 +2913,7 @@ sub BuildOptimizedParameterFile {
             }
             if (
                 !defined @{ $param->isocores }[$i]->Exon_factor(
-                    [ $best_IoWF, $best_IoWF, $best_IoWF, $best_IoWF ]
+                    [ $best_OlWeight, $best_OlWeight, $best_OlWeight, $best_OlWeight ]
                 )
               )
             {
@@ -2920,10 +2923,10 @@ sub BuildOptimizedParameterFile {
             if (
                 !defined @{ $param->isocores }[$i]->Site_factor(
                     [
-                        1 - $best_IoWF,
-                        1 - $best_IoWF,
-                        1 - $best_IoWF,
-                        1 - $best_IoWF
+                        1 - $best_OlWeight,
+                        1 - $best_OlWeight,
+                        1 - $best_OlWeight,
+                        1 - $best_OlWeight
                     ]
                 )
               )
@@ -2943,7 +2946,7 @@ sub BuildOptimizedParameterFile {
         print $fh_SOUT
 "\n\nNew optimized parameter file named: $species.geneid.optimized.param \n";
 
-        return [ $best_IeWF, $best_IoWF, 0, 0, \@evaluation_init ];
+        return [ $best_ExWeightParam, $best_OlWeight, 0, 0, \@evaluation_init ];
 
     }
     close $fh_SOUT;
@@ -2952,7 +2955,7 @@ sub BuildOptimizedParameterFile {
 
 sub parameter_evaluate {
 
-    my ( $gp_fasta, $gp_gff_fn, $new_param_fn, $IoWF, $IeWF ) = @_;
+    my ( $gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini, $ExWeightParam_ini ) = @_;
     my $my_command;
 
     my $geneid_test_predict_gff_fn =
@@ -2988,7 +2991,7 @@ sub parameter_evaluate {
     my $temp_evalout_B_fn =
       "$geneid_dir/Predictions." . basename($new_param_fn) . ".temp_evalout_B";
     $my_command = "tail -2 $temp_evalout_A_fn | head -1 |  
-            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $IoWF, $IeWF, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
+            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $OligoWeight_ini, $ExWeightParam_ini, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
     print "\n$my_command\n";
     run($my_command);
 
