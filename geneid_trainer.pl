@@ -34,6 +34,8 @@ use Readonly;
 
 use feature 'say';
 use Benchmark qw(:all);
+use YAML qw(Dump Bless);
+use Function::Parameters qw(:strict);
 ## Problem with my 5.18.1 install @CRG
 ## use Devel::Size qw(size total_size);
 
@@ -48,7 +50,7 @@ use Geneid::geneidCEGMA;
 
 ## MAIN VARIABLES
 my $PROGRAM_NAME    = "geneid_trainer";
-my $PROGRAM_VERSION = "2016.10.06a";
+my $PROGRAM_VERSION = "2016.12.10a";
 my $PROGRAM_HOME    = getcwd;
 
 my $exec_path = "$PROGRAM_HOME/bin/";
@@ -318,13 +320,13 @@ sub extract_ATGx {
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
 ## PYTHON INLINE START
-# use Inline Python => << 'PYEND';
-# from pygeneid import check_fasta
+#~ use Inline Python => << 'PYEND';
+#~ from pygeneid import check_fasta
 
-# PYEND
+#~ PYEND
 
-# my $headers_fasta_seq;
-# $headers_fasta_seq  = check_fasta($input_fas_fn);
+#~ my $headers_fasta_seq;
+#~ $headers_fasta_seq  = check_fasta($input_fas_fn);
 
 # print STDERR "\n PYTHON The user has provided $headers_fasta_seq  genomic sequences\n";
 
@@ -501,9 +503,10 @@ sub normal_run {
         close $fh_FOUT;
 
 ## ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
-        $my_command = "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
-        $train_transcr_used_num = capture($my_command);
-        chomp $train_transcr_used_num;
+        ## 2016.12.10 $my_command = "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
+        ## 2016.12.10  $train_transcr_used_num = capture($my_command);
+        ## 2016.12.10 chomp $train_transcr_used_num;
+        $train_transcr_used_num = $train_transcr_num;
         #~ my $t1 = Benchmark->new;
         #~ my $td = timediff( $t1, $t0 );
         #~ print "\nTTT the code took t0->t1:", timestr($td), "\n";
@@ -544,7 +547,9 @@ sub normal_run {
         my $locus_id_eval = "";
 
         $my_command =
-"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
+#"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
+"grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
+ 
         $locus_id_eval = capture($my_command);
         chomp $locus_id_eval;
 
@@ -632,6 +637,7 @@ sub normal_run {
 
         print STDERR
 "L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
+ ## 2016.12.10 not used??
         (
             $cds_eval_nonzero_tbl, $out_intron_eval_X, $out_locus_id_X_eval,
             $out_eval_gff_X,       $inframe_X_eval
@@ -1713,7 +1719,9 @@ sub process_seqs_4opty {
     #my $work_dir;
 
     open( my $fh_LOCID, "-|",
+        ##"./bin/gff2gp.py $my_input_nodots_gff | sort -k 1 " );
         "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 " );
+        
     while (<$fh_LOCID>) {
 
         $gp_from_gff .= $_;
@@ -1935,20 +1943,48 @@ sub GetGenes {
 
     open( my $fh_REFGENE, "<", "$my_pso_tmp_gp_from_gff" )
       or croak "Failed here";
+      say "WWW reading $my_pso_tmp_gp_from_gff";
     open( my $fh_OUT_tblgb, ">", "$gp_out_tbl" ) or croak "Failed here";
-    while (<$fh_REFGENE>) {
+    while(<$fh_REFGENE>){
+    #my $line = <$fh_REFGENE>;
+    #chomp $line;
+    my @tmp_cols = split " ", $_;
+    print Dump @tmp_cols;
+    my (
+        $name          ,
+        $chrom         ,
+        $strand        ,
+        $tx_start      ,
+        $tx_end        , 
+        $cds_start     ,
+        $cds_end       ,
+        $exon_count_int ,
+        $tmp_exons_starts,
+        $tmp_exons_ends  ) = @tmp_cols;
+        #= split " ", $line;
+        
+        my @exon         = split ",", $tmp_exons_starts;
+        my @exons_ends   = split ",", $tmp_exons_ends;
+        
+        ##( $tmp_exon =~ m/(\d+)/g );
+        push @exon, @exons_ends;
+        #say         @tmp_cols;
+        #say @exon;
+        print Dump @exon;
+    ##= split " ", $line;
+    ##while (<$fh_REFGENE>) {
+    #~ ##split
+#~ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([^\n]+)/;
 
-m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([^\n]+)/;
-
-        my $name          = $1;
-        my $chrom         = $2;
-        my $strand        = $3;
-        my $tx_start      = $4;
-        my $tx_end        = $5;
-        my $cds_start     = $6;
-        my $cds_end       = $7;
-        my $my_exo_countX = $8;
-        my @exon          = ( $9 =~ m/(\d+)/g );
+        #~ my $name          = $1;
+        #~ my $chrom         = $2;
+        #~ my $strand        = $3;
+        #~ my $tx_start      = $4;
+        #~ my $tx_end        = $5;
+        #~ my $cds_start     = $6;
+        #~ my $cds_end       = $7;
+        #~ my $exon_count_int = $8;
+        #~ my @exon          = ( $9 =~ m/(\d+)/g );
 
         my $cds_len    = $cds_end - $cds_start;
         my $tx_len     = $tx_end - $tx_start;
@@ -2028,20 +2064,20 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
             #    next;
             #  }
 
-            for ( my $ii = 0 ; $ii < $my_exo_countX ; $ii++ )
+            for ( my $ii = 0 ; $ii < $exon_count_int ; $ii++ )
               ## XXX fixing C style loop XXX
               ##my $ii = 0;
-              ##foreach $ii (0 .. $my_exo_countX)
+              ##foreach $ii (0 .. $exon_count_int)
             {
                 my $utr_A   = 0;
                 my $utr_B   = 0;
                 my $utrS    = 0;
                 my $utrL    = 0;
                 my $exSt    = $exon[$ii] - $cds_start;
-                my $ex_lenX = $exon[ $ii + $my_exo_countX ] - $exon[$ii];
+                my $exon_length_int = $exon[ $ii + $exon_count_int ] - $exon[$ii];
                 my $ex_type = "Internal";
 
-                if ( $exSt + $ex_lenX > 0 && $exSt < $cds_len ) {    # cds
+                if ( $exSt + $exon_length_int > 0 && $exSt < $cds_len ) {    # cds
 
                     if ( $exSt <= 0 || $ii == 0 ) {
                         if ( $strand eq '+' ) {
@@ -2052,8 +2088,8 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         }
                     }
 
-                    if (   $exSt + $ex_lenX >= $cds_len
-                        || $ii == $my_exo_countX - 1 )
+                    if (   $exSt + $exon_length_int >= $cds_len
+                        || $ii == $exon_count_int - 1 )
                     {
                         if ( $strand eq '+' ) {
                             $ex_type = "Terminal";
@@ -2063,7 +2099,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         }
                     }
 
-                    if ( $exSt <= 0 && $exSt + $ex_lenX >= $cds_len ) {
+                    if ( $exSt <= 0 && $exSt + $exon_length_int >= $cds_len ) {
                         $ex_type = "Single";
                     }
 
@@ -2071,20 +2107,20 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         $utr_B   = 1;
                         $utrS    = $exSt;
                         $utrL    = abs($exSt);
-                        $ex_lenX = $ex_lenX - abs($exSt);
+                        $exon_length_int = $exon_length_int - abs($exSt);
                         $exSt    = 0;
                     }
 
-                    if ( $exSt + $ex_lenX > $cds_len ) {
+                    if ( $exSt + $exon_length_int > $cds_len ) {
                         $utr_A   = 1;
                         $utrS    = $cds_len;
-                        $utrL    = $ex_lenX - ( $cds_len - $exSt );
-                        $ex_lenX = $cds_len - $exSt;
+                        $utrL    = $exon_length_int - ( $cds_len - $exSt );
+                        $exon_length_int = $cds_len - $exSt;
                     }
 
                     my $iex;
                     my $seq = substr( $genomic_tmp_seqX, $exSt + $cds_offset,
-                        $ex_lenX );
+                        $exon_length_int );
 
                     $seq = lc($seq);
 
@@ -2103,7 +2139,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
 
                         $iex     = $ii + 1;
                         $cds_seq = $cds_seq
-                          . "$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$ii]\t$exon[$ii+$my_exo_countX]\n";
+                          . "$name\t$chrom\t$ex_type\t$iex\t$exon_length_int\t$seq\t$exon[$ii]\t$exon[$ii+$exon_count_int]\n";
 
                         if ($utr_A) {
                             my $iutr = $ii + 1;
@@ -2120,7 +2156,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                     else {    # reverse
 
                         if ($utr_B) {
-                            my $iutr = $my_exo_countX - $ii;
+                            my $iutr = $exon_count_int - $ii;
                             my $my_utrsX =
                               substr( $genomic_tmp_seqX, $utrS + $cds_offset,
                                 $utrL );
@@ -2133,15 +2169,15 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                               . $cds_seq;
                         }
 
-                        $iex = $my_exo_countX - $ii;
+                        $iex = $exon_count_int - $ii;
                         $seq =~ tr/acgt/tgca/;
                         $seq = reverse($seq);
                         $cds_seq =
-"$name\t$chrom\t$ex_type\t$iex\t$ex_lenX\t$seq\t$exon[$ii+$my_exo_countX]\t$exon[$ii]\n"
+"$name\t$chrom\t$ex_type\t$iex\t$exon_length_int\t$seq\t$exon[$ii+$exon_count_int]\t$exon[$ii]\n"
                           . $cds_seq;
 
                         if ($utr_A) {
-                            my $iutr = $my_exo_countX - $ii;
+                            my $iutr = $exon_count_int - $ii;
                             my $my_utrsX =
                               substr( $genomic_tmp_seqX, $utrS + $cds_offset,
                                 $utrL );
@@ -2163,9 +2199,9 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                       )
                     {
 
-                        my $inSt = $exon[ $ii + $my_exo_countX ] - $cds_start;
+                        my $inSt = $exon[ $ii + $exon_count_int ] - $cds_start;
                         my $inLe =
-                          $exon[ $ii + 1 ] - $exon[ $ii + $my_exo_countX ];
+                          $exon[ $ii + 1 ] - $exon[ $ii + $exon_count_int ];
 
                         if ( $inSt + $inLe > 0 && $inSt < $cds_len ) {
 
@@ -2192,7 +2228,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                                   . "$name\t$chrom\tIntron\t$iIn\t$inLe\t$seq\n";
                             }
                             else {
-                                $iIn = $my_exo_countX - $j - 1;
+                                $iIn = $exon_count_int - $j - 1;
                                 $seq =~ tr/acgt/tgca/;
                                 $seq = reverse($seq);
                                 $cds_seq =
@@ -2220,9 +2256,10 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                 else {    # UTRs
 
                     $exSt    = $exon[$ii] - $tx_start;
-                    $ex_lenX = $exon[ $ii + $my_exo_countX ] - $exon[$ii];
+                    say $ii, " RRR ", $exon_count_int, " MMM ", $exon[$ii];
+                    $exon_length_int = $exon[ $ii + $exon_count_int ] - $exon[$ii];
 
-                    my $my_utrsX = substr( $genomic_tmp_seqX, $exSt, $ex_lenX );
+                    my $my_utrsX = substr( $genomic_tmp_seqX, $exSt, $exon_length_int );
 
                     if ( $strand eq '+' ) {    # forward
                         my $iutr = $ii + 1;
@@ -2230,16 +2267,16 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
                         $my_utrsX = lc($my_utrsX);
                         $cds_seq =
                           $cds_seq
-                          . "$name\t$chrom\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n";
+                          . "$name\t$chrom\tUtr\t$iutr\t$exon_length_int\t$my_utrsX\n";
                     }
                     else {                     # reverse
-                        my $iutr = $my_exo_countX - $ii;
+                        my $iutr = $exon_count_int - $ii;
 
                         $my_utrsX = lc($my_utrsX);
                         $my_utrsX =~ tr/acgt/tgca/;
                         $my_utrsX = reverse($my_utrsX);
                         $cds_seq =
-                          "$name\t$chrom\tUtr\t$iutr\t$ex_lenX\t$my_utrsX\n"
+                          "$name\t$chrom\tUtr\t$iutr\t$exon_length_int\t$my_utrsX\n"
                           . $cds_seq;
                     }
 
@@ -2254,6 +2291,7 @@ m/([\w\-\.:]+)\s+([\w\.\-:]+)\s+([\+\-])\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
         }
 
     }
+    
     close $fh_OUT_tblgb;
     close $fh_REFGENE;
 
@@ -2433,6 +2471,7 @@ sub get_K_matrix {
     else {
         $my_command =
 "gawk -f ./bin/Getkmatrix.awk $order $len $true_kmers_tbl | $sort > $my_True_freq_matrix_fn";
+##"./py_code/Getkmatrix.py $order $len $true_kmers_tbl | $sort > $my_True_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 

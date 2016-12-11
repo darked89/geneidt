@@ -16,7 +16,7 @@ https://bitbucket.org/james_taylor/bx-python/wiki/Home
 
 import sys, os
 import re
-import yaml
+#import yaml
 
 from pyfaidx import Fasta
 
