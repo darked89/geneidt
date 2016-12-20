@@ -1,1 +1,0 @@
-../awk_code/submatrix.awk

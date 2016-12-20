@@ -1,1 +1,0 @@
-../awk_code/logratio_zero_order.awk
