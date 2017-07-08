@@ -381,8 +381,8 @@ my $train_transcr_num  = 0;
 
 #~ from pygeneid import check_fasta
 
-#~ def JAxH(x): 
-    #~ return "Just Another %s Hacker" % x
+#~ def JAxH(x):
+#~ return "Just Another %s Hacker" % x
 
 #~ ENDPY
 
@@ -1788,7 +1788,8 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
         || (   $total_codingbases > $coding_bp_limit_B
             && $total_noncodingbases > $non_coding_bp_limit_B)
         || (   $total_noncodingbases > $non_coding_bp_limit_C
-            && $total_codingbases > ($multi_total_noncodingbases * $total_noncodingbases))
+            && $total_codingbases >
+            ($multi_total_noncodingbases * $total_noncodingbases))
        )
     {
         $markov_mod_A = 5;
@@ -2320,9 +2321,9 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
             #  }
 
             ##for (my $ii = 0 ; $ii < $exon_count_int ; $ii++)
-              ## XXX fixing C style loop XXX
-              ##my $ii = 0;
-              for my $ii (0 .. $exon_count_int-1)
+            ## XXX fixing C style loop XXX
+            ##my $ii = 0;
+            for my $ii (0 .. $exon_count_int - 1)
             {
                 my $utr_A           = 0;
                 my $utr_B           = 0;
@@ -2592,7 +2593,7 @@ sub bit_score_graph ($info_output, $info_thresh, $offset)
     print {*STDERR}
       "bitscoregraph input:  $info_output, $info_thresh, $offset\n";
     my @info = ();    ##($offset - 1, $offset + 1);
-    Readonly::Scalar my $equal_sign_multi   => 30; 
+    Readonly::Scalar my $equal_sign_multi => 30;
     ## 2016.12.14a
     ## my @fields;
 
@@ -2612,13 +2613,14 @@ sub bit_score_graph ($info_output, $info_thresh, $offset)
         #~ printf {*STDERR} "%2s %2.2f %s",
         #~ ($fields[0], $fields[1], "=" x int($fields[1] * 30));
         #~ printf {*STDERR} "%2s %2.2f %s",
-          #~ ($matrix_position, $info_score, "=" x int($info_score * 30));
-        
+        #~ ($matrix_position, $info_score, "=" x int($info_score * 30));
+
         printf {*STDERR} "%2s %2.2f %s",
-          ($matrix_position, $info_score, "=" x int($info_score * $equal_sign_multi));
-         
-          
-         
+          (
+            $matrix_position, $info_score,
+            "=" x int($info_score * $equal_sign_multi)
+          );
+
         if ($info_score > $info_thresh)
         {
             push(@info, $matrix_position);
@@ -2770,12 +2772,13 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     #    print {*STDERR} "$backgrnd_kmers_tbl (false)\n";
     #2017.07.07 skipping: precompute base freqs DK
     #~ open(my $FH_BACKGRND_SEQ, "<", "$backgrnd_kmers_tbl")
-      #~ or croak "Couldn't open $backgrnd_kmers_tbl: $OS_ERROR \n";
+    #~ or croak "Couldn't open $backgrnd_kmers_tbl: $OS_ERROR \n";
     #~ $_ = <$FH_BACKGRND_SEQ>;
     #~ my @columns_f = split;
     #~ my $len2      = length($columns_f[1]);
     #~ close $FH_BACKGRND_SEQ;
-    my $len2      = 60;
+    my $len2 = 60;
+
     #    die "$len != $len2\n" if $len != $len2;
     my $true_seq_freq_fn = $work_dir . basename($true_seq_name) . ".freq";
     my $backgrnd_seq_freq_fn =
@@ -2789,9 +2792,8 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
       . ".information";
 
     run("./bin/frequency.py 1 $true_kmers_tbl  >  $true_seq_freq_fn");
-    
-    
-    ### [<now>] not running background freq again at <file>[<line>]... 
+
+    ### [<now>] not running background freq again at <file>[<line>]...
     ## run("./bin/frequency.py 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn");
 
     my $my_command_A =
@@ -3369,7 +3371,7 @@ sub get_opt_paramfile ( $eval_array )
     ## FOUR BEST PERFORMANCE RESULTS AFTER OPTIMIZATION
     ## BUG??? 0, 1, 3 is just 3 results ??
     ##for (my $i = 0 ; $i <= 2 ; $i++)
-    for my $ij (0 ..2) 
+    for my $ij (0 .. 2)
     {
         print {*STDERR} join("\t", @{$sorted_eval[$ij]}), "\n";
     }
@@ -3381,7 +3383,7 @@ sub get_opt_paramfile ( $eval_array )
     $param->readParam("$new_param_fn");
 
     for (my $kk = 0 ; $kk < $param->numIsocores ; $kk++)
-    ##for my $kk (0 .. $param->numIsocores )
+      ##for my $kk (0 .. $param->numIsocores )
     {
         if (
             !defined @{$param->isocores}[$kk]->Exon_weights(
@@ -4241,8 +4243,10 @@ sub get_background_kmers ($kmer_len, $input_fas_fn, $contigs_all_tbl,
         my $my_command =
           "zcat ./test_data/pmar_1M_60mers.tbl.gz > $backgrnd_kmers_tbl";
         run($my_command);
-        my $backgrnd_seq_freq_fn = "/tmp/workdir_00_gtrain/pmar01_background.freq";
-        run("./bin/frequency.py 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn");
+        my $backgrnd_seq_freq_fn =
+          "/tmp/workdir_00_gtrain/pmar01_background.freq";
+        run("./bin/frequency.py 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn"
+        );
     }
 
     #    else  {
