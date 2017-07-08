@@ -39,9 +39,9 @@ def read_4_cols(input_fn):
     tmp_frequency_dict = {}
     for line in open(input_fn).readlines():
         sl = line.split()
-        position  = int(sl[1])
-        base      = sl[0]
-        frequency = float(sl[3])
+        position  = int(sl[0])
+        base      = sl[1]
+        frequency = float(sl[2])
         if position not in tmp_frequency_dict.keys():
             tmp_frequency_dict[position] = {}
         tmp_frequency_dict[position][base] = frequency

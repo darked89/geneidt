@@ -4,7 +4,7 @@ bin/SSgff
 bin/ssgff
 bin/pictogram
 bin/evaluation
-bin/geneid
+bin/geneid*
 
 #C programs sourcecode
 src/c/*/objects/*
@@ -12,7 +12,7 @@ src/c/*/bin/*
 src/c/pictogram/pictogram
 
 #dir to temp store debug/fixes/etc.
-#./my_scratch/*
+my_scratch/*
 
 #editor_dirs
 .idea/
