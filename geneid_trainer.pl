@@ -78,7 +78,7 @@ my $genetic_code = "./etc/genetic.code";
 ### $genetic_code geneticcode at <file>[<line>]
 
 ## no need to run anything if this fails
-check_external_progs();
+##check_external_progs();
 
 ## Move parts necessary for getting comand line args here
 my $species      = "";
@@ -332,90 +332,6 @@ my $train_noncanon_ATGx_int   = 0;
 my $transcr_all_number = 0;
 my $train_transcr_num  = 0;
 
-#
-## INITIAL CHECKS
-#
-## TODO  fasta / gff file accessible?
-#~ sub validate_input_fasta
-#~ {
-#~ return 1;
-#~ }
-#~ sub validate_input_gff
-#~ {
-#~ return 1;
-#~ }
-#~ sub select_test_eval
-#~ {
-#~ return 1;
-#~ }
-#~ sub extract_CDS
-#~ {
-#~ return 1;
-#~ }
-#~ sub extract_introns
-#~ {
-#~ return 1;
-#~ }
-
-#~ sub extract_donors
-#~ {
-#~ return 1;
-#~ }
-#~ sub extract_acceptors
-#~ {
-#~ return 1;
-#~ }
-#~ sub extract_ATGx
-#~ {
-#~ return 1;
-#~ }
-## TODO 2. limits:
-## 2a. >= 500 genes in gff
-## PYTHON INLINE START
-
-#~ use Inline Python => <<END;
-
-#~ def Foo():
-#~ class Bar:
-#~ def __init__(self):
-#~ print( "new Bar()")
-#~ def tank(self):
-#~ return 10
-#~ return Bar()
-
-#~ END
-
-#~ use Inline Python => <<'ENDPY';
-
-#~ from pygeneid import check_fasta
-
-#~ def JAxH(x):
-#~ return "Just Another %s Hacker" % x
-
-#~ ENDPY
-
-#~ print JAxH('Inline'), "\n";
-
-#~ my $o = Foo();
-#~ print $o->tank(), "\n";
-#~ die;
-#~ use Inline Python => << 'PYEND';
-#~ from pygeneid import check_fasta
-
-#~ ##print("from python1")
-#~ PYEND
-
-#~ my $headers_fasta_seq;
-#~ $headers_fasta_seq  = check_fasta($input_fas_fn);
-
-#~ print {*STDERR} "\n PYTHON The user has provided $headers_fasta_seq  genomic sequences\n";
-
-#~ die;
-#~ ## PYTHON INLINE END
-#
-## Common tasks
-#
-## sanity check
 
 ## CREATE BLANK PARAMETER FILE##
 ### [<now>] template parameter file at <file>[<line>]
@@ -432,11 +348,6 @@ normal_run();
 
 sub normal_run
 {
-    ## BUG, simplification needed
-    ## simplification
-    #    my $optymize_type = "";
-    #    $optymize_type       = "contig";
-    #    $contig_opt_flag = 1;
 
     $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
     my $my_command =
@@ -449,94 +360,16 @@ sub normal_run
 
     run("sort -o $genome_all_contigs_tbl $genome_all_contigs_tbl");
 
-    #tbl_2_single_fastas( $genome_all_contigs_tbl, $fastas_dir);
-    #write_sizes_from_tbl_fn($genome_all_contigs_tbl);
     $my_command = "cp $input_gff_fn $input_nodots_gff";
     say "$my_command";
     run($my_command);
 
-    #~ my $old_option = 0;
-
-    #~ ## Convert fasta to tabular format
-    #~ ## Fasta process to sub later
-    #~ ## my $t0 = Benchmark->new;
-
-    #~ if ($old_option)
-    #~ {
-    #~ print "not yet\n";
-    #~ }
-
-    #     print {*STDERR}
-    #       "\nConverting genomics fasta file ($input_fas_fn) to tabular format\n";
-
-    #     my $genomic_temp_tbl = $work_dir . $species . ".genomic.tmp.tbl";
-    #     fasta_2_tbl( $input_fas_fn, $genomic_temp_tbl );
-    #     run("sort -o $genomic_temp_tbl $genomic_temp_tbl");
-
-    #     print {*STDERR} "actg to ACTG conversion of input fasta \n";
-    #     my $tblcaps = "";
-
-    #     open(
-    #         my $FH_LOCID,
-    #         "-|",
-    # "gawk '{gsub(/_/,\"\",\$1);gsub(/\\./,\"\",\$1);print \$1, toupper(\$2)}' $genomic_temp_tbl "
-    #     ) or croak "Failed here";
-    #     while (<$FH_LOCID>) {
-    #         $tblcaps .= $_;
-    #     }
-    #     close $FH_LOCID;
-
-    #     chomp $tblcaps;
-    #     $genome_all_contigs_tbl = $work_dir . $species . ".genomic.tbl";
-    #     open( my $FH_FOUT_caps, ">", "$genome_all_contigs_tbl" )
-    #       or croak "Failed here";
-    #     print {$FH_FOUT_caps} "$tblcaps";
-    #     close $FH_FOUT_caps;
-
-    # ## place genomic sequences in "fastas_$species" directory
-    #     print {*STDERR} "move genomic sequences into \"$fastas_dir\" directory\n";
-    #     print {*STDERR} "(also transfer genomic fasta length info)\n\n";
-    # ## do not create fastas in diretory if they are already created and their number corresponds to the number of sequences in thr array
-    # ## CONVERT GENOMICS FASTA TO MULTI FASTA AND PLACE THEM IN APPROPRIATE DIRECTORY
-
-    #     print {*STDERR}
-    # "Convert $genome_all_contigs_tbl to multiple genomic fastas and place them in $fastas_dir:\n";
-
-    #     tbl_2_single_fastas( $genome_all_contigs_tbl, $fastas_dir );
-    #     print {*STDERR}
-    # "\n\nConversion of $genome_all_contigs_tbl to multiple genomic fastas completed..\n\nAdd fasta sequence length information to same directory\n\n";
-    #     write_sizes_from_tbl_fn($genome_all_contigs_tbl);
-
-    # #
-
-    ## get locus_id file only first time pipeline is run for a given species #ALL GENE MODELS
-    ##  ## Q_FRANCISCO: can we assume some sane GFF/GFT format as an input?  Why _ and "."?
-
-    #     if ($old_option) {
-    #         print {*STDERR}
-    #           "\nEliminate undesirable (_ and .) characters from $input_gff_fn\n";
-
-    #         my $filtergff = "";
-
-    #         $my_command =
-    # "gawk '{OFS=\"\\t\"}{gsub(/\\./,\"\",\$1);gsub(/\\./,\"\",\$9);gsub(/_/,\"\",\$0);print}' $input_gff_fn";
-    #         $filtergff = capture($my_command);
-
-    #         open( my $FH_FOUT, ">", "$input_nodots_gff" ) or croak "Failed here";
-    #         print {$FH_FOUT} "$filtergff";
-    #         close $FH_FOUT;
-
-    #     }
-    #     else {
-    #         $input_nodots_gff = $input_gff_fn;
-    #     }
     ### Obtain list of genomic sequences at <file>[<line>]...
-
     $my_command = "gawk '{print \$1,\$9}' $input_nodots_gff | sort | uniq ";
     $locus_id   = capture($my_command);
 
     # my $FH_FOUT;
-    say "\n TTT got here TTT\n";
+
     $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
     open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
     print {$FH_FOUT} "$locus_id";
@@ -592,18 +425,7 @@ sub normal_run
         print {$FH_FOUT} "$locus_id_new";
         close $FH_FOUT;
 
-        ## ASSUMING USER SELECTED TO SET ASIDE SEQUENCES FOR EVALUATION (20%)
-        ## 2016.12.10 $my_command = "gawk '{print \$2}' $train_contigs_transcr_2cols | wc -l";
-        ## 2016.12.10  $train_transcr_used_num = capture($my_command);
-        ## 2016.12.10 chomp $train_transcr_used_num;
         $train_transcr_used_int = $train_transcr_num;
-
-        #~ my $t1 = Benchmark->new;
-        #~ my $td = timediff( $t1, $t0 );
-        #~ print "\nTTT the code took t0->t1:", timestr($td), "\n";
-        #~ $last_bench_time = $t1;
-
-        #
         ## gff for training subset
         ##
         my $gff_4_training = "";
@@ -676,7 +498,6 @@ sub normal_run
         close $FH_FOUT;
 
     }    # seqs > 500
-    ##LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
 
     else
     {    # seqs < $train_loci_cutoff
@@ -684,26 +505,6 @@ sub normal_run
         croak "we do not have >= $train_loci_cutoff sequences, quitting now";
     }    # seqs < 500
 
-    #~ if (!$use_allseqs_flag)
-    #~ {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
-
-    ### Not using all genes for training <file>[<line>]...
-
-    #~ ## not used
-    #~ #  "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
-    #~ # XXX function name
-    #~ }
-    ## Convert general gff2 to geneid gff format
-    ## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
-    ## TRAIN
-    #~ my $t1 = Benchmark->new;
-    #~ my $td = timediff($t1, $t0);
-    #~ print "\nTTT the code took t0->t1:",timestr($td),"\n";
-    #~ $last_bench_time = $t1;
-
-    ## XXXXXX extracted lines start
-    #
-    ## CREATE FASTAS CDS; INTRON, SITES DIRs WITHIN PATH (ONLY FIRST TIME)
     {
         ## BUG => there is no need to convert gff to geneid format each time we run
 
@@ -725,7 +526,6 @@ sub normal_run
                                )
              };
 
-        #  print {*STDERR} " OUTSIDE EXTRACTCDSINTRON outgff: $train_filtered_gff\noutlocus_id: $out_locus_id_X\n";
         ## TRAIN
         ## EVAL
         $eval_2cols_seq_locusid_fn =
@@ -785,20 +585,6 @@ sub normal_run
     )
       = @{process_seqs_4opty($train_filtered_gff, ".train", 1)};
 
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (training set for later optimization -400-nt flanked sequences)\n";
-    #~ ($gp_train_gff, $gp_train_fa, $gp_train_tbl, $gp_train_len_int) =
-    #~ @{process_seqs_4opty($train_filtered_gff, ".train", 0)};
-    #~ print {*STDERR} "$gp_train_gff";
-
-    ## prepare test set for evaluation of newly developed parameter file (EVAL)
-
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (400-nt flanking)(test set for evaluation of new parameter file)\n";
-    #~ ($gp_eval_gff, $gp_eval_fa, $gp_eval_tbl, $gp_eval_len_int) =
-    #~ @{process_seqs_4opty($eval_filtered_gff, ".eval", 0)};
-    #~ print {*STDERR} "DONE\n";
-
     ### [<now>] at <file>[<line>]...
 
     (
@@ -807,10 +593,6 @@ sub normal_run
     )
       = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
 
-    #~ my $t3 = Benchmark->new;
-    #~ my $td = timediff( $t3, $last_bench_time );
-    #~ print "\nTTT the code took t2->t3:", timestr($td), "\n";
-    #~ $last_bench_time = $t3;
 
     # my (
     #     $donor_start,  $donor_end,  $acceptor_start,
@@ -824,17 +606,6 @@ sub normal_run
     my ($ATGx_start, $ATGx_end) =
       compute_matrices_4sites($train_ATGx_tbl, 'ATGx');
 
-    #~ ## DEBUG MEM
-
-    #~ {
-    #~ #no scrict 'refs';
-    #~ my $size = 0;
-    #~ for my $var (keys %{'main::'}) {
-    #~ $size = size("A string");
-    #~ print "$var = $size \n";
-    #~ }
-    #~ }
-    #~ ## DEBUG MEM END
 
     ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -881,10 +652,6 @@ sub normal_run
         $acceptor_start,             $acceptor_end,
         $ATGx_start,                 $ATGx_end,
 
-        #~ 0,
-        #~ 0,
-        #~ 0,
-        #~ #$use_allseqs_flag
       );
 
     ### [<now>] Intron/intergenic clculations <file>[<line>]...
@@ -913,36 +680,7 @@ sub normal_run
     my $OligoWeight_ini   = $profile_params{'OligoWeight_ini'};
     my $ExWeightParam_ini = $profile_params{'ExWeightParam_ini'};
 
-    ## OPTIMIZATION FUNCTIONS
-    #
-    #    if (!$contig_opt_flag)
-    #    {
-    #        print {*STDERR} "\n DEBUG: NOT CONTIG OPT\n";
-    #        croak "bad bug!\n";
-    #    }    #end if
-    #~ if ( !$contig_opt_flag ) {
-    #~ print {*STDERR} "\n DEBUG: NOT CONTIG OPT\n";
-    #~ @evaluation = @{
-    #~ parameter_optimize( $gp_train_fa, $gp_train_gff, $new_param_fn, 0,
-    #~ 0, 0, 0,
-    #~ $IeWF, $deWF, $FeWF, $IoWF, $doWF, $FoWF, 0, 0, 0, 0, 0, 0 )
-    #~ };
-
-    #~ ( $best_IeWF, $best_IoWF, $best_Acc, $best_Min, $array_ref ) = @{
-    #~ BuildOptimizedParameterFile( \@evaluation, $use_branch_flag, 0, 0,
-    #~ 0 )
-    #~ };
-
-    #~ }
-    ## elsif ($contig_opt_flag)
-
     ### [<now>] contig optimisation...
-    ## too many parameters in old code
-    #        @evaluation = @{
-    #            parameter_optimize( $gp_traincontig_fa, $gp_traincontig_gff,
-    #                $new_param_fn, 0, 0, 0, 0, $IeWF, $deWF, $FeWF, $IoWF, $doWF,
-    #                $FoWF, 0, 0, 0, 0, 0, 0 )
-    #        };
 
     @evaluation = @{
         parameter_optimize(
@@ -955,7 +693,6 @@ sub normal_run
 
     ($best_ExWeightParam, $best_OlWeight, $best_Acc, $best_Min, $array_ref) = @{
         get_opt_paramfile(\@evaluation)
-          ##, $use_branch_flag, 0, 0, 0 )
     };
 
     my @evaluation_init = @{$array_ref};
@@ -967,27 +704,8 @@ sub normal_run
 
     my $param_opt_fn = "$species.geneid.optimized.param";
 
-    #~ if (!$use_allseqs_flag)
-    #~     {
-    ##my $FH_SOUT;
     open(my $FH_SOUT, ">", "$work_dir/$species.use_NOT_allseqs.log");
 
-    #print {*STDERR} "CHECK EVALUATE: $gp_eval_fa, $gp_eval_gff, $param_opt_fn\n";
-    #
-    #    if (!$contig_opt_flag)
-    #    {
-    #
-    #        @evaluation_test = @{
-    #            parameter_evaluate(
-    #                $gp_eval_fa,      $gp_eval_gff, $param_opt_fn,
-    #                $OligoWeight_ini, $ExWeightParam_ini
-    #            )
-    #            };
-    #
-    #    }    #end if !$contig_opt_flag
-
-    ##elsif ($contig_opt_flag)
-    ##{
 
     @evaluation_test = @{
         parameter_evaluate(
@@ -995,31 +713,17 @@ sub normal_run
                            $OligoWeight_ini,  $ExWeightParam_ini
                           )
                         };
-    ##}
-
-    ##~ if (!$use_branch_flag)
-    #~ {
 
     print {*STDERR}
       "\nPerformance of new optimized parameter file on test set:\n\n"
       . join("\t", @evaluation_init[2 .. $#evaluation_init]), "\n";
 
-    #~ }
-    #~ elsif ($use_branch_flag)
-    #~ {
-
-    #~ print {*STDERR}
-    #~ "\nPerformance of new optimized parameter file on test set:\n\n"
-    #~ . join("\t", @evaluation_init[4 .. $#evaluation_init]), "\n";
-
-    #~ }
 
     print {*STDERR} join("\t", @evaluation_test), "\n\n";
 
     print {$FH_SOUT} join("\t", @evaluation_test), "\n\n";
     close $FH_SOUT;
 
-    #~ }    # if NOT using all seqs for training
 
     return 1;
 } ## end normal run
