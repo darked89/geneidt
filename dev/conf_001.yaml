@@ -1,9 +1,9 @@
 ---
 #input files
-genome_fasta : pmarinus4training.fa
+genome_fasta : pmar4_nodots.fa
 
 gff:
-    genes_fn    : pmarinus4training.gff
+    genes_fn    : pmar4_nodots.gff
     col3_vals    : [First, Internal, Single, Terminal]
     col9_transc_id    : True
     int_values : [start, end]

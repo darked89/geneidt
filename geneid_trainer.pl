@@ -39,14 +39,16 @@ use Readonly;
 
 use feature 'say';
 ## 2016.12.11 use Benchmark qw(:all);
-use YAML qw(Dump Bless);
+##use YAML qw(Dump Bless);
+use YAML::XS qw(LoadFile);
 use Smart::Comments;
 
-use Function::Parameters qw(:strict);
+##use Function::Parameters qw(:strict);
 ## Problem with my 5.18.1 install @CRG
-## use Devel::Size qw(size total_size);
+## use Devel::Size qw(size total_size)
 
 ## geneid_trained modules
+use lib '.';
 use Geneid::Param;
 use Geneid::Isocore;
 use Geneid::geneid;
@@ -64,6 +66,12 @@ my $exec_path = "$PROGRAM_HOME/bin/";
 
 local $ENV;
 $ENV{'PATH'} = $exec_path . ":" . $ENV{'PATH'};
+
+## TODO: use YAML to get results from Python pre-processor script
+#~ my $config = LoadFile('./dev/conf_001.yaml');
+#~ print Dumper($config);
+#~ say $config->{genome_fasta};
+#~ die("checking YAML");
 
 my $genetic_code = "./etc/genetic.code";
 
@@ -1912,9 +1920,10 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     open(
          my $FH_LOCID, "-|",
-         ##"./bin/gff2gp.py $my_input_nodots_gff | sort -k 1 " );
-         "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 "
-        );
+         "./bin/gff2gp.pypy $my_input_nodots_gff | sort -k 1 " );
+         ## 2017.07.11
+         ##"./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 "
+        ##);
 
     while (<$FH_LOCID>)
     {
@@ -2678,8 +2687,8 @@ sub get_pre_matrix ($kmers_tbl, $order)
     close $FH_KMERS;
 
     my $frequency_fn = $work_dir . basename($kmers_tbl) . ".freq";
-    my $my_command   = ("./bin/frequency.py 1 $kmers_tbl  >  $frequency_fn");
-    run($my_command);    ### [<now>] Running frequency.py at <file>[<line>]...
+    my $my_command   = ("./bin/frequency.pypy 1 $kmers_tbl  >  $frequency_fn");
+    run($my_command);    ### [<now>] Running frequency.pypy at <file>[<line>]...
     ### [<now>] Finished get_pre_matrix...
 }
 
@@ -2791,13 +2800,13 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
       . basename($backgrnd_seq_name)
       . ".information";
 
-    run("./bin/frequency.py 1 $true_kmers_tbl  >  $true_seq_freq_fn");
+    run("./bin/frequency.pypy 1 $true_kmers_tbl  >  $true_seq_freq_fn");
 
     ### [<now>] not running background freq again at <file>[<line>]...
-    ## run("./bin/frequency.py 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn");
+    ## run("./bin/frequency.pypy 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn");
 
     my $my_command_A =
-      "./bin/information.py  $true_seq_freq_fn $backgrnd_seq_freq_fn ";
+      "./bin/information.pypy  $true_seq_freq_fn $backgrnd_seq_freq_fn ";
 
     #~ my $my_command_B =
     #~ "| gawk 'NF==2 && \$1<=$my_freq_field_limit_1 && \$1>=$my_freq_field_limit_2'";
@@ -2826,7 +2835,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     {
         $my_command =
           ##"gawk -f ./bin/logratio_zero_order.awk $backgrnd_seq_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
-          "./bin/logratio_zero_order.py $backgrnd_seq_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
+          "./bin/logratio_zero_order.pypy $backgrnd_seq_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 
@@ -2835,7 +2844,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     {
         $my_command =
           ##"gawk -f ./bin/Getkmatrix.awk $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
-          "./bin/get_k_matrix.py $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
+          "./bin/get_k_matrix.pypy $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 
@@ -2845,7 +2854,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
 
         $my_command =
           ##"gawk -f ./bin/Getkmatrix.awk $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
-          "./bin/get_k_matrix.py $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
+          "./bin/get_k_matrix.pypy $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
         say "\n $my_command \n";
         run($my_command);
 
@@ -4245,7 +4254,7 @@ sub get_background_kmers ($kmer_len, $input_fas_fn, $contigs_all_tbl,
         run($my_command);
         my $backgrnd_seq_freq_fn =
           "/tmp/workdir_00_gtrain/pmar01_background.freq";
-        run("./bin/frequency.py 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn"
+        run("./bin/frequency.pypy 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn"
         );
     }
 
