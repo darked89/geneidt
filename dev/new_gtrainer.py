@@ -439,17 +439,24 @@ def extract_introns(*transcript_list):
                     introns_positions_list.append([intron_start, intron_end])
                     intron_start = current_record[dict_exon_num]['end'] + 1
             ##print "INTR:",     introns_positions_list
-            for intron_pos in introns_positions_list:
+            for index in range(0, len(introns_positions_list)):
+                intron_pos = introns_positions_list[index]
                 start, end = intron_pos
-                seq = genome_fas[chrom][start-1:end]
-                intron_len = len(seq)
-                print "INTR_LEN:", intron_len
+                intron_seq_name = "%s_intron_%s__%s_%s" % (transcript_id, index+1, start, end)
+                intron_seq = genome_fas[chrom][start-1:end]
+                if strand == '-':
+                    tmp_seq =  Seq('%s' % intron_seq)
+                    intron_seq = "%s" % (tmp_seq.reverse_complement())
+                print "%s\t%s" % (intron_seq_name, intron_seq)
+                intron_len = len(intron_seq)
+                #print "INTR_LEN:", intron_len
                 intron_sizes_list.append(intron_len)
                 ##DEBUG
-                introns_seq = '%s\n%s' % (introns_seq, seq)
+                
+                ##introns_seq = '%s\n%s' % (introns_seq, seq)
                 ##introns_seq = '%s%s' % (introns_seq, seq)
-            print ">%s_introns_%s__%s_%s_%s" % (transcript_id, num_of_exons, current_record[0]['end'] +1, current_record[-1]['start'] -1, strand)
-            print introns_seq
+            ##print ">%s_introns_%s__%s_%s_%s" % (transcript_id, num_of_exons, current_record[0]['end'] +1, current_record[-1]['start'] -1, strand)
+            ##print introns_seq
                 #print seq
         else:
             pass
