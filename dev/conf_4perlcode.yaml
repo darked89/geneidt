@@ -1,0 +1,39 @@
+---
+## prefix
+species : pmar01
+
+#input files
+genome_fasta : dev/pmar4_nodots.fa
+input_gff : dev/pmar4_nodots.gff
+genetic_code : ./etc/genetic.code
+
+all_cont_transc : dev/all_cont_transc.2col
+train_cont_transc : dev/train_cont_transc.2col
+eval_cont_transc : dev/eval_cont_transc.2col
+
+train_gff : dev/train.gff
+eval_gff  : dev/eval.gff
+
+all_transc_int  : 765
+all_contigs_int : 765
+
+#training eval sets
+all_transc   : ./tmp/pmar_all_transcr.ids  
+eval_transc  : ./tmp/pmar_eval_transcr.ids  
+train_transc : ./tmp/pmar_train_transcr.ids
+
+all_gff_contigs : ./tmp/pmar_all_gff_contigs.ids
+eval_gff_contigs : ./tmp/pmar_eval_contig.ids
+train_gff_contigs : ./tmp/pmar_train_contig.ids
+
+train_acc_tbl : dev/acc_sites.tab
+train_donor_tbl : dev/don_sites.tab
+train_ATG_tbl : dev/start_sites.tab
+train_stop_tbl : dev/stop_sites.tab
+train_cds_fas : dev/cds_seqs.fa
+train_cds_tbl : dev/cds_seqs.tab
+train_intron_tbl : dev/pmar_train_introns.tbl
+
+
+
+
