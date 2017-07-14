@@ -3,12 +3,13 @@
 genome_fasta : pmar4_nodots.fa
 
 gff:
-    genes_fn    : pmar4_nodots.gff
+    genes_fn    : test_rev.gff
+    #pmar4_nodots.gff
     col3_vals    : [First, Internal, Single, Terminal]
     col9_transc_id    : True
     int_values : [start, end]
 
-foo : 1
+
 GTF_HEADER  : [seqname, source, feature, start, end, score, strand, frame, transcript_id]
 
 #genetic_code
@@ -48,4 +49,4 @@ SPLICE_DONOR : GT
 SPLICE_ACCPT : AG
 start_codon  : ATG
 stop_codons  : [TAG,TAA,TGA]
-...
+

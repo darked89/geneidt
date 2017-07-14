@@ -1,4 +1,6 @@
-#!/usr/bin/env pypy
+#!/usr/bin/env pypy3
+
+#pypy
 
 """
 replacement for frequency.awk
@@ -8,7 +10,7 @@ line to run orig:
 gawk -f $path/frequency.awk 1 $true_seqs  > $true_seq_name.freq`;
 
 """
-from __future__ import division
+#from __future__ import division
 
 import sys
 
@@ -69,7 +71,7 @@ for position in freq_dict.keys():
         base_frequency   = base_count / total_base_count
         #print "%s\t%s\t%s\t%.4f\t%s" % (base, position+1, freq_dict[position][base], freq_dict[position][base]/freq_dict[position]['ACGTsum'], freq_dict[position]['ACGTsum'])
         #print "%s\t%s\t%s\t%.4f" % (base, position, freq_dict[position][base], freq_dict[position][base]/freq_dict[position]['ACGTsum'])
-        print "%s\t%s\t%s\t%.4f" % (position+1, base, base_frequency, base_count)
+        print("%s\t%s\t%s\t%.4f" % (position+1, base, base_frequency, base_count))
 
     #
     #print key, freq_dict[key]    

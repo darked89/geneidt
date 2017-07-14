@@ -187,7 +187,8 @@ my $input_nodots_gff = "$work_dir/input_gff_no_dots.gff";
 #~ say "\nXXX $input_nodots_gff \n";
 
 my $genome_all_contigs_tbl = "";
-my $backgrnd_kmers_fn      = "";
+
+#~ my $backgrnd_kmers_fn      = "";
 ## my $tblseq      = "";
 
 my @evaluation = ();
@@ -198,6 +199,8 @@ my $contigs_all_transcr_2cols   = "";
 my $train_contigs_transcr_2cols = "";
 my $eval_contigs_transcr_2cols  = "";
 my $train_transcr_used_int      = 0;
+my $backgrnd_freq_fn            = $conf->{backgrn_freq};
+my $backgrnd_kmers_tbl          = $conf->{backgrn_tbl};
 
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
@@ -254,15 +257,11 @@ my $train_noncanon_ATGx_int   = 0;
 
 my $transcr_all_number = 0;
 my $train_transcr_num  = 0;
-
+my $eval_transcr_num   = 0;
 ## CREATE BLANK PARAMETER FILE##
 ### [<now>] template parameter file at <file>[<line>]
 my $param        = Geneid::Param->new($species);
 my $new_param_fn = "$work_dir/$species.geneid.param";
-
-#set isochores to 1
-$param->numIsocores(1);
-$param->isocores([Geneid::Isocore->new()]);
 
 ## END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
 
@@ -271,176 +270,108 @@ normal_run();
 sub normal_run
 {
     our $conf;
-
-    $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
-    my $my_command =
-      "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
-
-    # $fastas_dir";
-    run($my_command);
-
-    #fasta_2_tbl( $input_fas_fn, $genome_all_contigs_tbl );
-
-    run("sort -o $genome_all_contigs_tbl $genome_all_contigs_tbl");
-
-    $my_command = "cp $input_gff_fn $input_nodots_gff";
-    say "$my_command";
-    run($my_command);
-
-    ### Obtain list of genomic sequences at <file>[<line>]...
-    $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
-    $my_command = "cp '$conf->{all_cont_transc}' $contigs_all_transcr_2cols";
-
-    say $my_command;
-    run($my_command);
-
     my $FH_FOUT;
+    my $my_command = "";
 
-    ## number of gene models TOTAL
-    $transcr_all_number = $conf->{all_transc_int};
+    ### PARAM INIT
+    #set isochores to 1
+    $param->numIsocores(1);
+    $param->isocores([Geneid::Isocore->new()]);
+
+    ### get data from upstream Python/YAML ###
+    ## preserve input GFF file...
+    $my_command = "cp $input_gff_fn $input_nodots_gff";
+    run($my_command);
 
     ## number of genomic sequences TOTAL
     my $total_genomic = $conf->{all_contigs_int};
 
-    print {*STDERR}
-      "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
+    ## number of gene models TOTAL
+    $transcr_all_number = $conf->{all_transc_int};
 
-    ## get a list of genes TOTAL
-    ### Obtain list of all transcripts at <file>[<line>]...
-
+    ## transcript ids all fn
     my $transcr_all_ids_fn = $work_dir . $species . "_all_seqs.lst";
     $my_command = "cp '$conf->{all_transc}' $transcr_all_ids_fn";
+
+    ### Obtain 2cols for all transcripts at <file>[<line>]...
+    $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
+    $my_command = "cp '$conf->{all_cont_transc}' $contigs_all_transcr_2cols";
+    run($my_command);
 
     ## TOFIX -> move to outside Python
     ##assert $transcr_all_number >= $train_loci_cutoff)
 
-    #~ $train_transcr_num = int($train_fraction * $transcr_all_number);
-    $train_transcr_num = $conf->{all_transc_int};
-    print {*STDERR}
-      "\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n";
-    ## DEBUG KEEP !!! shuf => random select
-    ## head -$train_transcr_num just the first ones
-    #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
+    ### TRAIN/EVAL sets from upstream
+    $train_transcr_num = $conf->{train_transc_int};
+    $eval_transcr_num  = $conf->{eval_transc_int};
 
-    #~ $my_command =
-    #~ "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
+    $train_transcr_used_int = $train_transcr_num;   ## no filtration inside Perl
 
-    #~ $locus_id_new = capture($my_command);
-
+    ### TRAIN
+    ## 2cols
     $train_contigs_transcr_2cols =
       $work_dir . $species . "_train_setaside80.2cols";
     $my_command =
       "cp '$conf->{train_cont_transc}' $train_contigs_transcr_2cols";
     run($my_command);
 
-    $train_transcr_used_int = $train_transcr_num;
-    ## gff for training subset
-    ##
+    ### gff
     my $gff_4_training = "";
-
-    print {*STDERR}
-      "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
-
     $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
     $my_command    = "cp '$conf->{train_gff}' $train_set_gff";
     run($my_command);
 
-    print {*STDERR} "\nObtain list of training genes\n\n";
-
-    #my $train_transcr_list_tmp = "";
-
-    #~ $my_command = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
-    #~ my $train_transcr_list_tmp = capture($my_command);
-
+    ### IDS
     $train_transcr_ids_fn = $work_dir . $species . "train_setaside80.ids";
     $my_command           = "cp '$conf->{train_transc}' $train_transcr_ids_fn";
     run($my_command);
 
+    ### EVAL inputs
+    ## 2cols
     $eval_contigs_transcr_2cols =
       $work_dir . $species . "_evaluation_setaside20.2cols";
     $my_command = "cp '$conf->{eval_cont_transc}' $eval_contigs_transcr_2cols";
     run($my_command);
 
-    ##
-    ## gff for evaluation test set
-    #
-
+    ## gff
     $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
     $my_command   = "cp '$conf->{eval_gff}' $eval_set_gff";
     run($my_command);
 
-    # seqs > 500
+    ### Not filtering preade inputs
+    $train_cds_filtered_tbl       = $conf->{train_cds_tbl};
+    $train_introns_filtered_tbl   = $conf->{train_intron_tbl};
+    $train_inframestop_int        = 0;
+    $train_locusid_filtered_2cols = $train_2cols_seq_locusid_fn;
+    $train_filtered_gff           = $train_set_gff;
 
-    {
+    #~ ### compability OLD, FIXME
+    #~ $train_2cols_seq_locusid_fn = $train_set_gff;
+    #~ gff_2_geneidgff_mock($train_set_gff, $species, ".train");
+    #~ $eval_2cols_seq_locusid_fn = $eval_set_gff;
+    #~ gff_2_geneidgff_mock($eval_set_gff, $species, ".eval");
 
-        $train_2cols_seq_locusid_fn =
-          gff_2_geneidgff_mock($train_set_gff, $species, ".train");
-        ### [<now>] at <file>[<line>]...
-        ### $train_2cols_seq_locusid_fn
+    ### OLD FAS/TBL
+    $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
+    my $my_command =
+      "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
+    run($my_command);
+    ## BUG?
+    run("sort -o $genome_all_contigs_tbl $genome_all_contigs_tbl");
 
-        $train_cds_filtered_tbl       = $conf->{train_cds_tbl};
-        $train_introns_filtered_tbl   = $conf->{train_intron_tbl};
-        $train_inframestop_int        = 0;
-        $train_locusid_filtered_2cols = $train_2cols_seq_locusid_fn;
-        $train_filtered_gff           = $train_set_gff;
+    ### [<now>] Getting premade sites tables/freq  <file>[<line>]...
 
-        ## TRAIN
-        ## EVAL
-        $eval_2cols_seq_locusid_fn =
-          gff_2_geneidgff_mock($eval_set_gff, $species, ".eval");
+    ### [<now>] Get background kmers freq premade  <file>[<line>]...
+    #~ my $backgrnd_freq_fn = $conf->{backgrn_freq}; ## ERRORS...
 
-        ### [<now>] at <file>[<line>]...
+    ### [<now>] Donor/Acc/ATG tables at <file>[<line>]...
 
-    }
-
-    #
-    ### [<now>] Get background kmers next <file>[<line>]...
-    ### $backgrnd_kmer_num
-    ### $backgrnd_kmer_size
-
-    $backgrnd_kmers_fn = $work_dir . $species . "_background.tbl";
-    get_background_kmers(
-                         $backgrnd_kmer_size,     $input_fas_fn,
-                         $genome_all_contigs_tbl, $backgrnd_kmer_num,
-                         $backgrnd_kmers_fn
-                        );
-    ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
-    ### [<now>] at <file>[<line>]...
-    ### $train_filtered_gff
-    ### $train_locusid_filtered_2cols
-    ##(
     $train_donor_tbl           = $conf->{train_donor_tbl};
     $train_noncanon_donors_int = 0;
     $train_acceptor_tbl        = $conf->{train_acc_tbl};
     $train_noncanon_accept_int = 0;
     $train_ATGx_tbl            = $conf->{train_ATG_tbl};
     $train_noncanon_ATGx_int   = 0;
-    ##)
-
-    ## prepare sequences for optimization of newly developed parameter file (TRAIN)
-
-    #~ ### [<now>] Convert gff to gp (golden-path-like)format <file>[<line>]...
-    #~ ### artificial contig - concatenated sequences - approx. 800bp linkers...
-
-    #~ (
-    #~ $gp_traincontig_gff, $gp_traincontig_fa,
-    #~ $gp_traincontig_tbl, $gp_traincontig_len_int
-    #~ )
-    #~ = @{process_seqs_4opty($train_filtered_gff, ".train", 1)};
-
-    #~ ### [<now>] at <file>[<line>]...
-
-    #~ $eval_filtered_gff = $conf->{eval_gff};
-    #~ (
-    #~ $gp_evalcontig_gff, $gp_evalcontig_fa,
-    #~ $gp_evalcontig_tbl, $gp_evalcontig_len_int
-    #~ )
-    #~ = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
-
-    # my (
-    #     $donor_start,  $donor_end,  $acceptor_start,
-    #     $acceptor_end, $ATGx_start, $ATGx_end
-    # ) = compute_sites_pictogram();
 
     my ($donor_start, $donor_end) =
       compute_matrices_4sites($train_donor_tbl, 'donor');
@@ -462,6 +393,7 @@ sub normal_run
                                )
          };
 
+    ### PARAM settings
     #add markov matrices to the parameter file
     if (!defined @{$param->isocores}[0]->Markov_order($markov_model))
     {
@@ -479,9 +411,10 @@ sub normal_run
     }
     ## DEBUG FIXME
     ###########################################
-
+    ##MOVE UP???
     $param->geneModel(Geneid::GeneModel->new());
     $param->geneModel->useDefault;
+    ###########################################
 
     my $sd_intron                  = "";
     my $train_introns_filtered_tbl = $conf->{train_intron_tbl};
@@ -526,38 +459,17 @@ sub normal_run
     ## $intron_short_int = 21;
     ## $intron_long_int  = 6384;
     ## => getting worse parameter
+
     my $intergenic_min = 200;
     my $intergenic_max = 'Infinity';
 
+    ### PARAM INTRONS / INTERGEN
+    ## MOVE UP?
     ## use shortest and longest intron lengths in gene model of parameter file
     $param->geneModel->intronRange($intron_short_int, $intron_long_int);
     $param->geneModel->intergenicRange($intergenic_min, $intergenic_max);
-    #
+    ####################################################################
 
-    ###########################################
-    #~ ## BUG do not remove, misleading name of a function: WriteStatsFile
-    #~ ($intron_short_int, $intron_long_int, $intergenic_min, $intergenic_max) =
-    #~ calc_stats(
-
-    #~ $train_introns_filtered_tbl, $train_cds_filtered_tbl,
-    #~ $train_filtered_gff,         $train_inframestop_int,
-    #~ $eval_inframestop_int,       $train_transcr_used_int,
-    #~ $train_noncanon_donors_int,  $train_noncanon_accept_int,
-    #~ $train_noncanon_ATGx_int,    $markov_model,
-    #~ $total_coding,               $total_noncoding,
-    #~ $donor_start,                $donor_end,
-    #~ $acceptor_start,             $acceptor_end,
-    #~ $ATGx_start,                 $ATGx_end,
-
-    #~ );
-
-    ### [<now>] Intron/intergenic clculations <file>[<line>]...
-    ### $intron_short_int
-    ### $intron_long_int
-    ### $intergenic_min
-    ### $intergenic_max
-
-    ##
     ### [<now>] Write preliminary non-optimized parameter file at <file>[<line>]...
 
     $new_param_fn = "$work_dir/$species.geneid.param";
@@ -636,70 +548,6 @@ sub normal_run
 #
 ## END OF MAIN PORTION OF SCRIPT
 #
-
-## LAST CHANGE
-#sub extract_cds_introns ($conf, $my_nodots_gff, $my_contig_transcr_2cols, $type)
-#{XXX
-#print Dumper($conf);
-
-#~ ## our $conf
-#~ #### [<now>] Running extract_cds_introns at <file>[<line>]...
-#~ #### Got: $type
-#~ #### $my_contig_transcr_2cols
-#~ #### $my_nodots_gff
-#~ #my $out_cds_intron_gff =
-#~ #$work_dir . $species . "_" . $type . ".cds_intron_gff";
-
-##~ my $FH_ssgff_A    = File::Temp->new();
-##~ my $fname_ssgff_A = $FH_ssgff_A->filename;
-
-##~ ## INTRONS
-##~ my $FH_ssgff_B    = File::Temp->new();
-##~ my $fname_ssgff_B = $FH_ssgff_B->filename;
-
-#### [<now>] Finished extracting introns/CDS...
-
-#### [<now>] Create tabular format of CDS and intron sequences at <file>[<line>]...
-#my $cds_tmp_fa = $cds_dir . ${species} . "$type" . ".cds.fa";
-
-#~ #### $cds_tmp_fa
-##    print {*STDERR} "$cds_tmp_fa\n\n";
-
-#~ #### [<now>] cds fasta_2_tbl at <file>[<line>]...
-#my $cds_tmp_tbl = $cds_dir . ${species} . "$type" . ".cds.tbl";
-### TRY HERE
-### fasta_2_tbl($cds_tmp_fa, $cds_tmp_tbl);
-
-### TOFIX???
-##~ if $type == 'train'
-##~ {
-##~ $my_command = "cp '$conf->{train_cds_tab}' $cds_tmp_tbl";
-##~ }
-##~ else
-##~ {   ##TODO !!!
-##~ $my_command = "cp '$conf->{train_cds_tab}' $cds_tmp_tbl";
-##~ }
-
-##~ say($my_command);
-###run($my_command);
-## ##INTRON
-#my $intron_tmp_fa  = $introns_dir . ${species} . "$type" . ".intron.fa";
-#my $intron_tmp_tbl = $introns_dir . ${species} . "$type" . ".intron.tbl";
-#### [<now>] intron fasta_2_tbl at <file>[<line>]...
-#fasta_2_tbl($intron_tmp_fa, $intron_tmp_tbl);
-
-#my $my_cds_filtered_tbl     = $cds_tmp_tbl;
-#my $my_intron_filtered_tbl  = $intron_tmp_tbl;
-#my $my_locusid_filtered_tbl = $my_contig_transcr_2cols;
-#my $my_filtered_gff         = $out_cds_intron_gff;
-#### [<now>] Finished extract_cds_introns...
-#return [
-#$my_cds_filtered_tbl,     $my_intron_filtered_tbl,
-#$my_locusid_filtered_tbl, $my_filtered_gff,
-#0
-#];
-
-#XXX}    #sub extract_cds_introns
 
 ## FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
 sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
@@ -1145,9 +993,6 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
                 my @columns_f = split;
                 $sub_seq .= $columns_f[1];
 
-                #chomp;
-                #print {*STDERR} "$_";
-                #                push @tabular, "$_";
             }
             close $FH_IN;
 
@@ -1432,8 +1277,6 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
 
 }    #getgenes
 
-## GET BACKGROUND SEQUENCES (ex. 62 Kmer) used to compute log likelihoods
-
 sub bit_score_graph ($info_output, $info_thresh, $offset)
 {
     ### [<now>] Running bit_score_graph at <file>[<line>]...
@@ -1481,13 +1324,6 @@ sub bit_score_graph ($info_output, $info_thresh, $offset)
         $end = $offset + 1;
     }
 
-    #~ if ($start < 1)
-    #~ {
-    #~ ## 2016.12.14a
-    #~ ## strange check for positions. this should never happen...
-    #~ $start = 1;
-    #~ }
-
     print {*STDERR} "\nbit_score_graph out: $start, $end\n";
     ### [<now>] Finished bit_score_graph
     return ($start, $end);
@@ -1512,7 +1348,7 @@ sub get_pre_matrix ($kmers_tbl, $order)
 }
 
 ## GETKMATRIX FUNCTION (Splice sites and Start ATG codon PWMs)
-sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
+sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
                   $matrix_type)
 {
 
@@ -1554,14 +1390,10 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     ## 2016.12.15a
     ## my $info_thresh = "";    #bits
 
-    ## BUG?
+    #~ ## BUG?
     my $true_seq_name = $true_kmers_tbl;
     $true_seq_name =~ s/\.tbl$//;
     say "true_seq_name\t", $true_seq_name;
-    my $backgrnd_seq_name = $backgrnd_kmers_tbl;
-    $backgrnd_seq_name =~ s/\.tbl$//;
-    ### true_seq_name: $true_seq_name
-    ### backgrnd_seq_name: $backgrnd_seq_name
 
     ## Open true sequences
     #    print {*STDERR} "$true_kmers_tbl (true)\n";
@@ -1572,38 +1404,21 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     close $FH_TRUE_SEQ;
 
     ## Open false (background???) sequences
-    #    print {*STDERR} "$backgrnd_kmers_tbl (false)\n";
-    #2017.07.07 skipping: precompute base freqs DK
-    #~ open(my $FH_BACKGRND_SEQ, "<", "$backgrnd_kmers_tbl")
-    #~ or croak "Couldn't open $backgrnd_kmers_tbl: $OS_ERROR \n";
-    #~ $_ = <$FH_BACKGRND_SEQ>;
-    #~ my @columns_f = split;
-    #~ my $len2      = length($columns_f[1]);
-    #~ close $FH_BACKGRND_SEQ;
     my $len2 = 60;
 
     #    die "$len != $len2\n" if $len != $len2;
     my $true_seq_freq_fn = $work_dir . basename($true_seq_name) . ".freq";
-    my $backgrnd_seq_freq_fn =
-      $work_dir . basename($backgrnd_seq_name) . ".freq";
 
     #my $subtracted_true_false_freq_fn = $work_dir . basename($true_seq_name) . "_" . basename($backgrnd_seq_name).freq_subtr";
     my $my_freq_subtract_fn =
-        $work_dir
-      . basename($true_seq_name) . "_"
-      . basename($backgrnd_seq_name)
-      . ".information";
+      $work_dir . basename($true_seq_name) . "_" . "backgrnd" . ".information";
 
     run("./bin/frequency.pypy 1 $true_kmers_tbl  >  $true_seq_freq_fn");
 
     ### [<now>] not running background freq again at <file>[<line>]...
-    ## run("./bin/frequency.pypy 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn");
 
     my $my_command_A =
-      "./bin/information.pypy  $true_seq_freq_fn $backgrnd_seq_freq_fn ";
-
-    #~ my $my_command_B =
-    #~ "| gawk 'NF==2 && \$1<=$my_freq_field_limit_1 && \$1>=$my_freq_field_limit_2'";
+      "./bin/information.pypy  $true_seq_freq_fn $backgrnd_freq_fn ";
 
     my $my_command_C = " > $my_freq_subtract_fn ";
 
@@ -1619,7 +1434,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
       $work_dir . basename($true_seq_name) . "_" . "$ordname.matrix";
     ## False_True req_matrix_fn
     my $my_backgrnd_freq_matrix_fn =
-      $work_dir . basename($backgrnd_seq_name) . "_" . "$ordname.matrix";
+      $work_dir . "backgrnd" . "_" . "$ordname.matrix";
 
     ## True logratio req_matrix_fn
     my $my_T_generic_logratio_freq_matrix_fn =
@@ -1628,8 +1443,8 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     if (!$order)
     {
         $my_command =
-          ##"gawk -f ./bin/logratio_zero_order.awk $backgrnd_seq_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
-          "./bin/logratio_zero_order.pypy $backgrnd_seq_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
+          ##"gawk -f ./bin/logratio_zero_order.awk $backgrnd_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
+          "./bin/logratio_zero_order.pypy $backgrnd_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 
@@ -1637,21 +1452,18 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     else
     {
         $my_command =
-          ##"gawk -f ./bin/Getkmatrix.awk $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
           "./bin/get_k_matrix.pypy $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 
         $my_command =
-          ##"gawk -f ./bin/Getkmatrix.awk $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
+
           "./bin/get_k_matrix.pypy $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
         say "\n $my_command \n";
         run($my_command);
 
         $my_command =
-          ## "gawk -f ./bin/logratio_kmatrix.awk $my_backgrnd_freq_matrix_fn $my_true_freq_matrix_fn > $my_T_generic_logratio_freq_matrix_fn ";
           "./bin/logratio_kmatrix.py $my_backgrnd_freq_matrix_fn $my_true_freq_matrix_fn > $my_T_generic_logratio_freq_matrix_fn ";
-
         say "\n $my_command \n";
         run($my_command);
 
@@ -1981,6 +1793,7 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
             print "\n$my_command\n";
             run($my_command);
 
+            run("cat $temp_evalout_B_fn");
             my @evaluation_output;
             open(my $FH_IN, "<", "$temp_evalout_B_fn") or croak "Failed here";
             while (<$FH_IN>)
@@ -1992,7 +1805,8 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
             }
             close $FH_IN;
 
-            #
+            #~ print Dump @evaluation_output;
+            #~ #
 
             #~ my @evaluation_output = split " ",
 
@@ -2002,7 +1816,7 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
 
         }    #end for_#2
         $myOlWeight_tmp = $OligoWeight_ini;
-        print {*STDERR} "\n";
+        ###print {*STDERR} "\n";
 
     }    #end for_#1
 
@@ -2197,193 +2011,6 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 
 }    # evaluate parameter function
 
-#sub calc_stats
-#{XXXX
-### BUG variable names hard to guess
-#my (
-### 2016.12.15 unused
-### $species,
-
-#$train_introns_filtered_tbl, $train_cds_filtered_tbl,
-#$train_filtered_gff,         $train_inframestop_int,
-#$eval_inframestop_int,       $train_transcr_used_int,
-#$train_noncanon_donors_int,  $train_noncanon_accept_int,
-#$train_noncanon_ATGx_int,    $markov_model,
-#$total_coding,               $total_noncoding,
-#$st_donor,                   $en_donor,
-#$st_accept,                  $en_accept,
-#$st_ATGx,                    $en_ATGx,
-
-#) = @_;
-#my $my_command = "";
-
-#### [<now>] Running calc_stats...
-### OBTAIN GENE MODEL SET STATISTICS
-### Open gene model object
-
-##~ $param->geneModel(Geneid::GeneModel->new());
-##~ $param->geneModel->useDefault;
-##~ #
-##~ ##my $FH_SOUT;
-##~ open(my $FH_SOUT, ">", "$work_dir/test.WriteStatsFileLog.txt")
-##~ or croak "Failed here";
-
-##~ ## my $avg_intron = "";
-##~ my $sd_intron = "";
-
-##~ #my @intronlength = ` gawk '{print length(\$2)}' $introns_clean_tbl_fn `;
-
-##~ #print {*STDERR} "INTRON: $mean, $st\n";
-##~ $my_command =
-##~ "gawk '{print length(\$2)}' $train_introns_filtered_tbl | sort -n";
-##~ my @introns_len_list = capture($my_command);
-##~ my ($mean, $st) = calc_average(\@introns_len_list);
-##~ print {*STDERR} "INTRONS mean, ST: $mean, $st\n";
-
-### BUG wrong command?
-
-##$my_command = "gawk '{print length(\$2)}' $introns_clean_tbl_fn | sort -n";
-#$my_command = "sort -k2,2n $introns_clean_tbl_fn";
-#my @intronlist = capture($my_command);
-
-##~ ## my $total_introns     = scalar(@introns_len_list);
-##~ my @intron_lenX_array = ();
-##~ my $intron_len        = "";
-##~ for (my $i = 0 ; $i <= scalar(@introns_len_list) - 1 ; $i++)
-##~ {
-
-##~ $intron_len = $introns_len_list[$i];
-##~ chomp $intron_len;
-##~ push(@intron_lenX_array, $intron_len);
-##~ }
-
-##~ my @slice1 = @intron_lenX_array[0 .. 5];
-##~ my @slice2 =
-##~ @intron_lenX_array[(scalar(@intron_lenX_array) - 5)
-##~ .. (scalar(@intron_lenX_array) - 1)];
-##~ ##@intron_lenX_array[ ( scalar(@intron_lenX_array) - 5 ) .. ( scalar(@intron_lenX_array) - 1 ) ]
-##~ ## BUG 2857
-##~ my $intron_short_int = $introns_len_list[0] - $introns_len_list[0] * (0.25);
-##~ chomp $intron_short_int;
-##~ if ($intron_short_int > 40) { $intron_short_int = 40; }
-
-##~ #my $intron_long_int =  $intronlist[$total_introns - 1];
-##~ my $intron_long_int =
-##~ $mean + ($st * 3) > 100_000 ? 100_000 : $mean + ($st * 3);
-##~ chomp $intron_long_int;
-##~ ### HACK using intron sizes from python script
-##~ ## $intron_short_int = 21;
-##~ ## $intron_long_int  = 6384;
-##~ ## => getting worse parameter
-##~ my $intergenic_min = 200;
-##~ my $intergenic_max = 'Infinity';
-
-##~ ## use shortest and longest intron lengths in gene model of parameter file
-##~ $param->geneModel->intronRange($intron_short_int, $intron_long_int);
-##~ $param->geneModel->intergenicRange($intergenic_min, $intergenic_max);
-##~ #
-
-#$my_command =
-#"gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)}' $train_cds_filtered_tbl";
-#my @cds_GC_content = capture($my_command);
-
-##print {*STDERR} "@cds_GC_content\n";
-#my ($mean_GC_CDS, $stdev_GC_CDS) = calc_average(\@cds_GC_content);
-
-##print {*STDERR} "CDS: $meangc $stgc $introns_clean_tbl_fn\n";
-#$my_command =
-#"gawk '{print gsub(/[GC]/,\".\",\$2)/length(\$2)}' $train_introns_filtered_tbl ";
-#my @intron_GC_content = capture($my_command);
-
-##print {*STDERR} "@intron_GC_content\n";
-#my ($mean_GC_intron, $stdev_GC_intron) = calc_average(\@intron_GC_content);
-
-##print {*STDERR} "intron: $meangci $stgci\n";
-##BUG?
-##my $total_exons = ` gawk '{print \$9}' $train_filtered_gff | wc -l | gawk '{print \$1}' `;
-#$my_command = "gawk '{print \$9}' $train_filtered_gff | wc -l ";
-#my $total_exons = capture($my_command);
-
-#chomp $total_exons;
-#$total_exons = int($total_exons);
-#my @exons_per_gene;
-#$my_command =
-#"gawk '{print \$9}' $train_filtered_gff | sort | uniq -c | gawk '{print \$1}'";
-#@exons_per_gene = capture($my_command);
-
-#my ($avg_ex, $stdevX_ex) = calc_average(\@exons_per_gene);
-
-#$my_command =
-#"egrep -v 'Single' $train_filtered_gff | gawk '{len=\$5-\$4;print len}' - | sort ";
-#my @exons_lenghts_list = capture($my_command);
-
-#my ($avg_exon_len, $stdev_exonX_len) = calc_average(\@exons_lenghts_list);
-
-#$my_command = "egrep -c '(Single)' $train_filtered_gff";
-#my $single_exon_genes = capture($my_command);
-
-##my $single_exon_genes = `egrep -c '(Single)' $train_filtered_gff `;
-#chomp $single_exon_genes;
-
-##print {$FH_SOUT} "GENE MODEL STATISTICS FOR $species\n\n";
-
-#print {$FH_SOUT}
-#"\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n\n";
-### my $transcr_all_number;
-
-##~ if (!$use_allseqs_flag)
-##~ {
-##~ print {$FH_SOUT}
-##~ "The user has selected to use $train_transcr_used_int gene models (80 % of total) for training and to set aside BUG  was xxgffseqseval annotations (20 % of total) for evaluation\n\n";
-
-##~ print {$FH_SOUT}
-##~ "$train_inframestop_int of the gene models translate into proteins with in-frame stops within the training set and $eval_inframestop_int in the evaluation set (seqs removed).\n\n";
-
-##~ print {$FH_SOUT}
-##~ "There are $train_noncanon_donors_int non-canonical donors as part of the training set\n\n";
-##~ print {$FH_SOUT}
-##~ "There are $train_noncanon_accept_int non-canonical acceptors as part of the training set\n\n";
-##~ print {$FH_SOUT}
-##~ "There are $train_noncanon_ATGx_int non-canonical start sites as part of the training set\n\n";
-##~ print {$FH_SOUT}
-##~ "These gene models correspond to $total_coding coding bases and $total_noncoding non-coding bases\n\n";
-##~ print {$FH_SOUT}
-##~ "Deriving a markov model for the coding potential of order $markov_model\n\n";
-##~ print {$FH_SOUT}
-##~ "The intronic sequences extracted from the gene models have an average length of $mean, with $st of SD\n";
-##~ print {$FH_SOUT}
-##~ "Geneid can predict gene models having introns with a minimum length of $intron_short_int nucleotides and a maximum of $intron_long_int bases (boundaries used in gene model) \n\n";
-##~ print {$FH_SOUT}
-##~ "The minimum (user selected) intergenic distance was set to $intergenic_min nucleotides whereas the maximum was set to $intergenic_max (boundaries used in gene model) \n\n";
-##~ print {$FH_SOUT}
-##~ "The GC content of the exonic (XXX bug ??? XXX) and intronic sequences is $mean_GC_CDS (SD $stdev_GC_CDS) and $mean_GC_intron (SD $stdev_GC_intron) respectively \n\n";
-##~ print {$FH_SOUT}
-##~ "The gene models used for training contain $total_exons exons \n\n";
-##~ print {$FH_SOUT}
-##~ "The gene models average $avg_ex exons per gene (SD $stdevX_ex)\n\n";
-##~ print {$FH_SOUT}
-##~ "The average length of the exons (non-single) in the training set gene models is $avg_exon_len (SD $stdev_exonX_len)\n\n";
-
-##~ print {$FH_SOUT}
-##~ "The training set includes $single_exon_genes single-exon genes (out of $train_transcr_used_int ) gene models\n\n";
-
-##~ print {$FH_SOUT} "The donor site profile chosen by the user spans "
-##~ . ($en_donor - $st_donor + 1)
-##~ . " nucleotides: position $st_donor to $en_donor\n";
-##~ print {$FH_SOUT} "The acceptor site profile chosen by the user spans "
-##~ . ($en_accept - $st_accept + 1)
-##~ . " nucleotides: position $st_accept to $en_accept\n";
-##~ print {$FH_SOUT} "The start site profile chosen by the user spans "
-##~ . ($en_ATGx - $st_ATGx + 1)
-##~ . " nucleotides: position $st_ATGx to $en_ATGx\n";
-
-##~ close $FH_SOUT;
-##~ ### [<now>] Finished calc_stats...
-#return ($intron_short_int, $intron_long_int, $intergenic_min,
-#$intergenic_max);
-
-#XXX}
-
 sub calc_average ($input_numbers)
 {
     ### [<now>] Running calc_average...
@@ -2513,72 +2140,71 @@ sub fasta_2_tbl ($in_fa, $out_tbl_fn)
     return $out_tbl_fn;
 }
 
-sub translate_2_protein ($genetic_code_fn, $cds_fn, $translated_tbl_fn)
-{
-    ### [<now>] Running translate_2_protein...
-    ### $cds_fn
-    ## 2016.12.12 my ($genetic_code_fn, $cds_fn, $translated_tbl_fn) = @_;
+#~ sub translate_2_protein ($genetic_code_fn, $cds_fn, $translated_tbl_fn)
+#~ {
+#~ ### [<now>] Running translate_2_protein...
+#~ ### $cds_fn
+#~ ## 2016.12.12 my ($genetic_code_fn, $cds_fn, $translated_tbl_fn) = @_;
 
-    my $frame    = 0;
-    my %gencodeh = ();
+#~ my $frame    = 0;
+#~ my %gencodeh = ();
 
-    open(my $FH_GENETIC_CODE, "<", "$genetic_code_fn")
-      or croak "Can't open  $genetic_code_fn";
-    while (<$FH_GENETIC_CODE>)
-    {
-        my ($aa, $codon) = split;
-        $gencodeh{$codon} = $aa;
-    }
-    close $FH_GENETIC_CODE;
+#~ open(my $FH_GENETIC_CODE, "<", "$genetic_code_fn")
+#~ or croak "Can't open  $genetic_code_fn";
+#~ while (<$FH_GENETIC_CODE>)
+#~ {
+#~ my ($aa, $codon) = split;
+#~ $gencodeh{$codon} = $aa;
+#~ }
+#~ close $FH_GENETIC_CODE;
 
-    open(my $FH_CDS_IN, "<", "$cds_fn")            or croak "err:  $cds_fn";
-    open(my $FH_POUT,   ">", "$translated_tbl_fn") or croak "Failed here";
+#~ open(my $FH_CDS_IN, "<", "$cds_fn")            or croak "err:  $cds_fn";
+#~ open(my $FH_POUT,   ">", "$translated_tbl_fn") or croak "Failed here";
 
-    #    print {*STDERR} "translating: $cds_fn \n";
+#~ #    print {*STDERR} "translating: $cds_fn \n";
 
-    while (<$FH_CDS_IN>)
-    {
-        my ($name, $seq) = split;
-        my $cds_seq_len = length($seq);
+#~ while (<$FH_CDS_IN>)
+#~ {
+#~ my ($name, $seq) = split;
+#~ my $cds_seq_len = length($seq);
 
-        print {$FH_POUT} "$name ";
+#~ print {$FH_POUT} "$name ";
 
-        for (my $i = $frame ; $i < $cds_seq_len - 1 ; $i += 3)
-        {
-            my $triplet = substr($seq, $i, 3);
-            if ($gencodeh{$triplet})
-            {
-                print {$FH_POUT} "$gencodeh{$triplet}";
-            }
-            else
-            {
-                print {$FH_POUT} "X";
-            }
+#~ for (my $i = $frame ; $i < $cds_seq_len - 1 ; $i += 3)
+#~ {
+#~ my $triplet = substr($seq, $i, 3);
+#~ if ($gencodeh{$triplet})
+#~ {
+#~ print {$FH_POUT} "$gencodeh{$triplet}";
+#~ }
+#~ else
+#~ {
+#~ print {$FH_POUT} "X";
+#~ }
 
-        }    #for
-        print {$FH_POUT} "\n";
-    }
+#~ }    #for
+#~ print {$FH_POUT} "\n";
+#~ }
 
-    close $FH_CDS_IN;
-    close $FH_POUT;
-    ### translated_tbl_fn : $translated_tbl_fn
-    ### [<now>] Finished translate_2_protein...
-    return $translated_tbl_fn;
+#~ close $FH_CDS_IN;
+#~ close $FH_POUT;
+#~ ### translated_tbl_fn : $translated_tbl_fn
+#~ ### [<now>] Finished translate_2_protein...
+#~ return $translated_tbl_fn;
 
-}
+#~ }
 
-sub gff_2_geneidgff_mock ($my_input_nodots_gff, $species, $type)
-{
-    ## 2016.12.12 my ($my_input_nodots_gff, $species, $type) = @_;
-    say "fake gff_2_geneidgff_mock\n";
-    my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
-    my $my_command = "cp $my_input_nodots_gff $geneid_gff";
-    say "$my_command\n";
-    run($my_command);
+#~ sub gff_2_geneidgff_mock ($my_input_nodots_gff, $species, $type)
+#~ {
+#~ say "fake gff_2_geneidgff_mock\n";
+#~ my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
+#~ my $my_command = "cp $my_input_nodots_gff $geneid_gff";
+#~ say "$my_command\n";
+#~ run($my_command);
 
-    my $geneid_sorted_gff_fn = $geneid_gff;
-    return $geneid_sorted_gff_fn;
-}
+#~ my $geneid_sorted_gff_fn = $geneid_gff;
+#~ return $geneid_sorted_gff_fn;
+#~ }
 
 sub sorteval
 {
@@ -2595,8 +2221,6 @@ sub sorteval
 #DK_subs
 sub num_of_lines_in_file ($input_fn)
 {
-    ### [<now>] Running num_of_lines_in_file...
-    ## 2016.12.11 my $input_fn = $_[0];
     my $my_num_lines;
     $my_num_lines = capture("cat $input_fn | wc -l ");
 
@@ -2606,44 +2230,44 @@ sub num_of_lines_in_file ($input_fn)
     return $my_num_lines;
 }
 
-sub check_external_progs()
-{
-    ## Checking if the external programs are in the path.
-    ## C, awk, python programs
-    #my $prog_name;
-    my $my_command;
-    my @progs_2_check = (
-        qw(bash
-          gawk
-          egrep
-          sed
-          geneid
-          ssgff
-          shuf
-          pictogram
-          gff2gp.awk
-          cds2gff.awk
-          frequency.py
-          information.py
-          submatrix.py
-          submatrix_order0.py
-          get_k_matrix.py
-          multiple_annot2one.awk
-          logratio_kmatrix.py
-          logratio_zero_order.py
-          preparetrimatrixstart4parameter.awk)
+#~ sub check_external_progs()
+#~ {
+#~ ## Checking if the external programs are in the path.
+#~ ## C, awk, python programs
+#~ #my $prog_name;
+#~ my $my_command;
+#~ my @progs_2_check = (
+#~ qw(bash
+#~ gawk
+#~ egrep
+#~ sed
+#~ geneid
+#~ ssgff
+#~ shuf
+#~ pictogram
+#~ gff2gp.awk
+#~ cds2gff.awk
+#~ frequency.py
+#~ information.py
+#~ submatrix.py
+#~ submatrix_order0.py
+#~ get_k_matrix.py
+#~ multiple_annot2one.awk
+#~ logratio_kmatrix.py
+#~ logratio_zero_order.py
+#~ preparetrimatrixstart4parameter.awk)
 
-    );
+#~ );
 
-    for my $prog_name (@progs_2_check)
-    {
-        $my_command = "which $prog_name > /dev/null";
-        run($my_command);
+#~ for my $prog_name (@progs_2_check)
+#~ {
+#~ $my_command = "which $prog_name > /dev/null";
+#~ run($my_command);
 
-        #or croak "\n $prog_name not available\n";
-    }
-    return 1;
-}
+#~ #or croak "\n $prog_name not available\n";
+#~ }
+#~ return 1;
+#~ }
 
 sub create_data_dirs (@data_dirs)
 {
@@ -2666,33 +2290,6 @@ sub create_data_dirs (@data_dirs)
     }
     return 1;
 }
-
-sub get_background_kmers ($kmer_len, $input_fas_fn, $contigs_all_tbl,
-                          $num_seqs, $backgrnd_kmers_tbl)
-{
-    ## 206.12.13a {
-
-    #~ my ($kmer_len, $input_fas_fn, $contigs_all_tbl, $num_seqs, $backgrnd_tbl) =
-    #~ @_;
-    my $backgrnd_debug_flag;
-    $backgrnd_debug_flag = 1;
-    if ($backgrnd_debug_flag)
-    {
-        ## TODO using python script to generate 1M 60mers to save time
-        #just for non-random results
-        print "\npremade background\n";
-        my $my_command =
-          "zcat ./test_data/pmar_1M_60mers.tbl.gz > $backgrnd_kmers_tbl";
-        run($my_command);
-        my $backgrnd_seq_freq_fn =
-          "/tmp/workdir_00_gtrain/pmar01_background.freq";
-        run("./bin/frequency.pypy 1 $backgrnd_kmers_tbl >  $backgrnd_seq_freq_fn"
-           );
-    }
-
-    return 1;
-
-}    # END get_background_kmers function
 
 # sub compute_sites_pictogram {
 # #
@@ -2877,11 +2474,6 @@ sub get_background_kmers ($kmer_len, $input_fas_fn, $contigs_all_tbl,
 
 sub compute_matrices_4sites ($my_input_table, $my_site_type)
 {
-    ## 2016.12.13a{
-    ## hacked from compute_sites_pictogram
-    ## no pictogram, just values
-
-    ## my ($my_input_table, $my_site_type) = @_;
 
     my %types_hash = (
                       acceptor => 'Acceptor_profile',
@@ -2917,7 +2509,7 @@ sub compute_matrices_4sites ($my_input_table, $my_site_type)
         $my_site_matrix, $my_site_profile_len, $my_site_offset,
         $my_site_start,  $my_site_end
        )
-      = get_K_matrix($my_input_table, $backgrnd_kmers_fn, $my_order,
+      = get_K_matrix($my_input_table, $backgrnd_freq_fn, $my_order,
                      $my_offset, $my_site_type);
     if (
         !defined @{$param->isocores}[0]->set_profile(

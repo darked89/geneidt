@@ -13,7 +13,7 @@ from __future__ import division
 import sys
 
 #kmer_len = sys.argv[1] is ever used something else?
-kmer_len = 1 #hack at the moment
+
 
 
 seq_dict   = {}
