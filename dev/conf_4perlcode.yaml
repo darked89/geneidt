@@ -6,6 +6,8 @@ species : pmar01
 genome_fasta : dev/pmar4_nodots.fa
 input_gff : dev/pmar4_nodots.gff
 genetic_code : ./etc/genetic.code
+backgrn_tbl  : tmp/backgrnd.tab
+backgrn_freq : tmp/backgrnd.freq
 
 all_cont_transc : dev/all_cont_transc.2col
 train_cont_transc : dev/train_cont_transc.2col
@@ -16,6 +18,8 @@ eval_gff  : dev/eval.gff
 
 all_transc_int  : 765
 all_contigs_int : 765
+eval_transc_int : 153
+train_transc_int : 612
 
 #training eval sets
 all_transc   : ./tmp/pmar_all_transcr.ids  
@@ -26,13 +30,14 @@ all_gff_contigs : ./tmp/pmar_all_gff_contigs.ids
 eval_gff_contigs : ./tmp/pmar_eval_contig.ids
 train_gff_contigs : ./tmp/pmar_train_contig.ids
 
-train_acc_tbl : dev/acc_sites.tab
-train_donor_tbl : dev/don_sites.tab
-train_ATG_tbl : dev/start_sites.tab
-train_stop_tbl : dev/stop_sites.tab
-train_cds_fas : dev/cds_seqs.fa
-train_cds_tbl : dev/cds_seqs.tab
-train_intron_tbl : dev/pmar_train_introns.tbl
+train_acc_tbl : tmp/acc_sites.tab
+train_donor_tbl : tmp/don_sites.tab
+train_ATG_tbl   : tmp/start_sites.tab
+train_stop_tbl  : tmp/stop_sites.tab
+
+train_cds_fas   : tmp/cds_seqs.fa
+train_cds_tbl   : tmp/cds_seqs.tab
+train_intron_tbl : tmp/train_introns.tab
 
 
 
