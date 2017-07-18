@@ -8,6 +8,7 @@ input_gff : dev/pmar4_nodots.gff
 genetic_code : ./etc/genetic.code
 backgrn_tbl  : tmp/backgrnd.tab
 backgrn_freq : tmp/backgrnd.freq
+backgrnd_hmm2_matrix : tmp/backgrnd_hmm_2.matrix
 
 all_cont_transc : dev/all_cont_transc.2col
 train_cont_transc : dev/train_cont_transc.2col

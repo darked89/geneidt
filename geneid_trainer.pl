@@ -47,9 +47,33 @@ use Geneid::Isocore;
 use Geneid::geneid;
 use Geneid::geneidCEGMA;
 
-## experimental
-## use Inline::Python;
+use Geneid::foo;
 
+#~ #Geneid::GeneModel->new());
+#~ Geneid::foo::baba();
+#~ say "OK";
+#~ die("test");
+
+## experimental
+#~ ## use Inline::Python;
+
+#~ print "9 + 16 = ", add(9, 16), "\n";
+#~ print "9 - 16 = ", subtract(9, 16), "\n";
+
+#~ use Inline Python => <<'END_OF_PYTHON_CODE1';
+#~ def add(x,y):
+#~ return x + y
+
+#~ END_OF_PYTHON_CODE1
+
+#~ use Inline Python => <<'END_OF_PYTHON_CODE2';
+
+#~ def subtract(x,y):
+#~ return x - y
+
+#~ END_OF_PYTHON_CODE2
+
+#~ die("XXX");
 ## MAIN VARIABLES
 ## my $PROGRAM_NAME    = "geneid_trainer";
 ## my $PROGRAM_VERSION = "2016.12.15a";
@@ -120,6 +144,7 @@ Readonly::Scalar my $intron_param_X => 10;
 
 Readonly::Hash my %profile_params => (
     ## EXON WEIGHT PARAMETER
+    #~ ExWeightParam_ini   => -5.0,
     ExWeightParam_ini   => -4.5,
     ExWeightParam_step  => 0.5,
     ExWeightParam_limit => -2.5,
@@ -273,10 +298,15 @@ sub normal_run
     my $FH_FOUT;
     my $my_command = "";
 
+    ###########################################
     ### PARAM INIT
     #set isochores to 1
     $param->numIsocores(1);
     $param->isocores([Geneid::Isocore->new()]);
+
+    $param->geneModel(Geneid::GeneModel->new());
+    $param->geneModel->useDefault;
+    ###########################################
 
     ### get data from upstream Python/YAML ###
     ## preserve input GFF file...
@@ -338,7 +368,7 @@ sub normal_run
     $my_command   = "cp '$conf->{eval_gff}' $eval_set_gff";
     run($my_command);
 
-    ### Not filtering preade inputs
+    ### Not filtering premade inputs
     $train_cds_filtered_tbl       = $conf->{train_cds_tbl};
     $train_introns_filtered_tbl   = $conf->{train_intron_tbl};
     $train_inframestop_int        = 0;
@@ -353,7 +383,7 @@ sub normal_run
 
     ### OLD FAS/TBL
     $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
-    my $my_command =
+    $my_command =
       "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
     run($my_command);
     ## BUG?
@@ -409,12 +439,13 @@ sub normal_run
     {
         croak "error in setting Markov_Transition_probability_matrix\n";
     }
-    ## DEBUG FIXME
-    ###########################################
-    ##MOVE UP???
-    $param->geneModel(Geneid::GeneModel->new());
-    $param->geneModel->useDefault;
-    ###########################################
+
+    #~ ## DEBUG FIXME
+    #~ ###########################################
+    #~ ##MOVE UP???
+    #~ $param->geneModel(Geneid::GeneModel->new());
+    #~ $param->geneModel->useDefault;
+    #~ ###########################################
 
     my $sd_intron                  = "";
     my $train_introns_filtered_tbl = $conf->{train_intron_tbl};
@@ -589,6 +620,7 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
 
     }
     else
+      ## BUG: independent of condition markov_mod_A&B always = 5 & 4
     {
         $markov_mod_A = 5;
         $markov_mod_B = 4;
@@ -721,12 +753,10 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     say "XXX 822";
     my $gp_Xgetgenes_tmp_pre_tbl =
       get_genes($fastas_dir, $pso_tmp_gp_from_gff, $work_dir);
-    say "XXX 825";
+    say "XXX 730";
     ### [<now>] After get_genes at <file>[<line>]...
-    print {*STDERR} "PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl \n";
-
-    print {*STDERR}
-      "\nGet sequences of 400-nt flanked sequences in tabular and gff formats\n";
+    ### PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl
+    ### Get sequences of 400-nt flanked sequences in tabular and gff formats\n";
 
     open(
         $FH_LOCID,
@@ -781,7 +811,11 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     my $gp_seqs_lengths = capture($my_command);
 
     my $opt_type_cds_contigs_total_bp =
-      $work_dir . $species . $opt_type . $contig_opt_flag . ".gp_cds_length";
+        $work_dir
+      . $species
+      . $opt_type
+      . $contig_opt_flag
+      . ".gp_gene400flank_length";
     open($FH_FOUT, ">", "$opt_type_cds_contigs_total_bp")
       or croak "Failed here";
     print {$FH_FOUT} "$gp_seqs_lengths";
@@ -982,6 +1016,8 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
             ### [<now>] chrom fasta_2_tbl at <file>[<line>]...
             $chrom_tmp_tbl =
               fasta_2_tbl($my_fastas_dir . $chrom, $chrom_tmp_tbl);
+
+            #~ die("after first f2t run...");
 
             #print {*STDERR} "FATOTBL: $my_fastas_dir"."$chro\n";
             open(my $FH_IN, "<", "$chrom_tmp_tbl") or croak "Failed here";
@@ -1277,82 +1313,52 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
 
 }    #getgenes
 
-sub bit_score_graph ($info_output, $info_thresh, $offset)
-{
-    ### [<now>] Running bit_score_graph at <file>[<line>]...
-    print {*STDERR}
-      "bitscoregraph input:  $info_output, $info_thresh, $offset\n";
-    my @info = ();    ##($offset - 1, $offset + 1);
-    Readonly::Scalar my $equal_sign_multi => 30;
-    ## 2016.12.14a
-    ## my @fields;
+#~ sub bit_score_graph ($info_output, $info_thresh, $offset)
+#~ {
+### [<now>] Running bit_score_graph at <file>[<line>]...
+#~ ### bitscoregraph input:  $info_output, $info_thresh, $offset
+#~ my ($start , $end) = matrix_info_select($info_output, $info_thresh, $offset);
 
-    open(my $FH_INFO, "<", "$info_output") or croak "Failed here";
-    while (<$FH_INFO>)
-    {    ## 2016.12.14a: these information files do not haveanythyng but numbers
+use Inline Python => <<'END_OF_PYTHON_CODE3';
 
-        my ($matrix_position, $info_score) = split;
+def bit_score_graph(info_fn, info_thresh, offset):
+    line_counter = 0
+    accepted_positions = []
+    if info_thresh  in [ 0.15, 0.04, 0.15]:
+        #all ok
+        for line in open(info_fn).readlines():
+            line_counter += 1
+            sl = line.split()
+            matrix_position = int(sl[0])
+            info_score      = float(sl[1]) 
+            if info_score > info_thresh:
+                accepted_positions.append(matrix_position)
+        accepted_positions.sort()    
+        start = accepted_positions[0]
+        end   = accepted_positions[-1]
+        if (start > offset - 1):
+            start = offset - 1
+        
+        ## BUG??
+        ## it should be one base after the GT/AG/ATG etc 2fix???
+        if (end < offset + 1):
+            end = offset + 1
+        
+    return start, end
 
-        printf {*STDERR} "%2s %2.2f %s",
-          (
-            $matrix_position, $info_score,
-            "=" x int($info_score * $equal_sign_multi)
-          );
+END_OF_PYTHON_CODE3
 
-        if ($info_score > $info_thresh)
-        {
-            push(@info, $matrix_position);
-        }
-        print {*STDERR} "\n";
-    }
-    close $FH_INFO;
-
-    my $start = (shift @info);
-    my $end   = pop @info;
-    ## 2016.12.15a
-    ## hack: thresholds may be too strict in some cases???
-    ## make sure that at least one position bordering the site is included
-    if ($start > $offset - 1)
-    {
-        $start = $offset - 1;
-    }
-    ## 2016.12.15a
-    ## BUG??
-    ## it should be one base after the GT/AG/ATG etc 2fix???
-    if ($end < $offset + 1)
-    {
-        $end = $offset + 1;
-    }
-
-    print {*STDERR} "\nbit_score_graph out: $start, $end\n";
-    ### [<now>] Finished bit_score_graph
-    return ($start, $end);
-}    #end BitScoreGraph
-
-sub get_pre_matrix ($kmers_tbl, $order)
-{
-    ### [<now>] Running get_pre_matrix...
-    my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
-    my $ordname = $orders[$order];
-    my $FH_KMERS;
-    open($FH_KMERS, "<", "$kmers_tbl") or croak "Failed here";
-    my $first_line = <$FH_KMERS>;
-    my ($seq_name, $seq) = split $first_line;
-    my $seq_len = length($seq);
-    close $FH_KMERS;
-
-    my $frequency_fn = $work_dir . basename($kmers_tbl) . ".freq";
-    my $my_command   = ("./bin/frequency.pypy 1 $kmers_tbl  >  $frequency_fn");
-    run($my_command);    ### [<now>] Running frequency.pypy at <file>[<line>]...
-    ### [<now>] Finished get_pre_matrix...
-}
+#~ return ($start, $end);
+#~ }    #end BitScoreGraph
 
 ## GETKMATRIX FUNCTION (Splice sites and Start ATG codon PWMs)
 sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
                   $matrix_type)
 {
 
-    ### [<now>] Running get_K_matrix at <file>[<line>]......
+    ### [<now>] Running get_K_matrix at <file>[<line>]...
+    ### [<now>] gKm1 $true_kmers_tbl, $backgrnd_freq_fn
+    ### [<now>] gKm2  $order, $offset, $matrix_type
     ## my $original_offset = $offset;
     my @profile_array = ();
     ## $temp_infolog;
@@ -1403,7 +1409,8 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     my $len       = length($columns_t[1]);
     close $FH_TRUE_SEQ;
 
-    ## Open false (background???) sequences
+    ## Open background sequences
+    ## mock
     my $len2 = 60;
 
     #    die "$len != $len2\n" if $len != $len2;
@@ -1442,6 +1449,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 
     if (!$order)
     {
+        ### HMM generic (no order?)
         $my_command =
           ##"gawk -f ./bin/logratio_zero_order.awk $backgrnd_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
           "./bin/logratio_zero_order.pypy $backgrnd_freq_fn $true_seq_freq_fn > $my_T_generic_logratio_freq_matrix_fn";
@@ -1449,16 +1457,50 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
         run($my_command);
 
     }
-    else
+    elsif ($order == 1)
     {
+        ### HMM $order 1
         $my_command =
           "./bin/get_k_matrix.pypy $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
+
+        #~ "./py_code/get_k_matrix_2+kmers.py $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
         say "\n $my_command \n";
         run($my_command);
 
         $my_command =
 
           "./bin/get_k_matrix.pypy $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
+
+        #~ "./py_code/get_k_matrix_2+kmers.py $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn";
+
+        say "\n $my_command \n";
+        run($my_command);
+
+        ##$my_backgrnd_freq_matrix_fn = $conf->{backgrnd_hmm2_matrix};
+
+        $my_command =
+          "./bin/logratio_kmatrix.py $my_backgrnd_freq_matrix_fn $my_true_freq_matrix_fn > $my_T_generic_logratio_freq_matrix_fn ";
+        say "\n $my_command \n";
+        run($my_command);
+
+    }
+    else
+    {
+        ### HMM_2+ $order >
+        $my_command =
+          "bin/get_k_matrix.pypy $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
+
+        #~ "./py_code/get_k_matrix_2+kmers.py $order $len $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
+
+        say "\n $my_command \n";
+        run($my_command);
+
+        $my_command =
+
+          "./bin/get_k_matrix.pypy $order $len2 $backgrnd_kmers_tbl | $sort > $my_backgrnd_freq_matrix_fn ";
+
+        #~ "./py_code/get_k_matrix_2+kmers.py $order $len2 $true_kmers_tbl | $sort > $my_true_freq_matrix_fn";
+
         say "\n $my_command \n";
         run($my_command);
 
@@ -1643,28 +1685,6 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 }    ##END GETKMATRIX FUNCTION (Splice site an Start codon PWMs)
 
 ## sub numerically { $a <=> $b }
-
-sub fold4fasta ($seq)
-{
-    ## 2016.12.13a {
-    ## my $seq        = shift;
-    my $folded_seq = "";
-
-    #my $column_limit = 60;
-    Readonly::Scalar my $column_limit => 60;
-
-    #my $s = "";
-    my $position_in_seq = 0;
-    my $seq_len         = length($seq);
-
-    while ($position_in_seq < $seq_len)
-    {
-        my $out_seq = substr($seq, $position_in_seq, $column_limit);
-        $folded_seq = $folded_seq . $out_seq . "\n";
-        $position_in_seq += $column_limit;
-    }
-    return $folded_seq;
-}
 
 #Optimize parameter file
 sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
@@ -2011,6 +2031,192 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 
 }    # evaluate parameter function
 
+#~ sub translate_2_protein ($genetic_code_fn, $cds_fn, $translated_tbl_fn)
+#~ {
+#~ ### [<now>] Running translate_2_protein...
+#~ ### $cds_fn
+#~ ## 2016.12.12 my ($genetic_code_fn, $cds_fn, $translated_tbl_fn) = @_;
+
+#~ my $frame    = 0;
+#~ my %gencodeh = ();
+
+#~ open(my $FH_GENETIC_CODE, "<", "$genetic_code_fn")
+#~ or croak "Can't open  $genetic_code_fn";
+#~ while (<$FH_GENETIC_CODE>)
+#~ {
+#~ my ($aa, $codon) = split;
+#~ $gencodeh{$codon} = $aa;
+#~ }
+#~ close $FH_GENETIC_CODE;
+
+#~ open(my $FH_CDS_IN, "<", "$cds_fn")            or croak "err:  $cds_fn";
+#~ open(my $FH_POUT,   ">", "$translated_tbl_fn") or croak "Failed here";
+
+#~ #    print {*STDERR} "translating: $cds_fn \n";
+
+#~ while (<$FH_CDS_IN>)
+#~ {
+#~ my ($name, $seq) = split;
+#~ my $cds_seq_len = length($seq);
+
+#~ print {$FH_POUT} "$name ";
+
+#~ for (my $i = $frame ; $i < $cds_seq_len - 1 ; $i += 3)
+#~ {
+#~ my $triplet = substr($seq, $i, 3);
+#~ if ($gencodeh{$triplet})
+#~ {
+#~ print {$FH_POUT} "$gencodeh{$triplet}";
+#~ }
+#~ else
+#~ {
+#~ print {$FH_POUT} "X";
+#~ }
+
+#~ }    #for
+#~ print {$FH_POUT} "\n";
+#~ }
+
+#~ close $FH_CDS_IN;
+#~ close $FH_POUT;
+#~ ### translated_tbl_fn : $translated_tbl_fn
+#~ ### [<now>] Finished translate_2_protein...
+#~ return $translated_tbl_fn;
+
+#~ }
+
+#~ sub gff_2_geneidgff_mock ($my_input_nodots_gff, $species, $type)
+#~ {
+#~ say "fake gff_2_geneidgff_mock\n";
+#~ my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
+#~ my $my_command = "cp $my_input_nodots_gff $geneid_gff";
+#~ say "$my_command\n";
+#~ run($my_command);
+
+#~ my $geneid_sorted_gff_fn = $geneid_gff;
+#~ return $geneid_sorted_gff_fn;
+#~ }
+
+#DK_subs
+
+#~ sub check_external_progs()
+#~ {
+#~ ## Checking if the external programs are in the path.
+#~ ## C, awk, python programs
+#~ #my $prog_name;
+#~ my $my_command;
+#~ my @progs_2_check = (
+#~ qw(bash
+#~ gawk
+#~ egrep
+#~ sed
+#~ geneid
+#~ ssgff
+#~ shuf
+#~ pictogram
+#~ gff2gp.awk
+#~ cds2gff.awk
+#~ frequency.py
+#~ information.py
+#~ submatrix.py
+#~ submatrix_order0.py
+#~ get_k_matrix.py
+#~ multiple_annot2one.awk
+#~ logratio_kmatrix.py
+#~ logratio_zero_order.py
+#~ preparetrimatrixstart4parameter.awk)
+
+#~ );
+
+#~ for my $prog_name (@progs_2_check)
+#~ {
+#~ $my_command = "which $prog_name > /dev/null";
+#~ run($my_command);
+
+#~ #or croak "\n $prog_name not available\n";
+#~ }
+#~ return 1;
+#~ }
+
+sub compute_matrices_4sites ($my_input_table, $my_site_type)
+{
+    ### [<now>] running compute_matrices_4sites
+    my %types_hash = (
+                      acceptor => 'Acceptor_profile',
+                      donor    => 'Donor_profile',
+                      ATGx     => 'Start_profile',
+                      tr_stop  => 'Stop_profile',
+                     );
+
+    my $my_order     = "0";
+    my $my_offset    = $bases_offset;
+    my $sites_number = num_of_lines_in_file($my_input_table);
+    say('sites_number:', $sites_number);
+
+    if (($my_site_type eq 'acceptor') || ($my_site_type eq 'donor'))
+    {
+        #~ if ($sites_number > 3000)
+        if ($sites_number > $train_sites_cutoff)
+        {
+            $my_order = "1";    ### [<now>] $my_order Acc/Don site...
+        }
+
+        #~ else ## not in orig script, testing only
+        #~ {
+        #~ $my_order = "2";
+        #~ }
+    }
+    elsif ($my_site_type eq 'ATGx')
+    {
+        if ($sites_number > $train_sites_markov_cutoff)
+        {
+            ### ATGx order2 L2529
+            $my_order = "2";    ### [<now>] $my_order ATGx site...
+        }
+    }
+    else
+    {
+        say "ERROR, unknown site type ";
+    }
+
+    say('L2175', $my_input_table, $my_order, $my_offset, $my_site_type);
+
+    my (
+        $my_site_matrix, $my_site_profile_len, $my_site_offset,
+        $my_site_start,  $my_site_end
+       )
+      = get_K_matrix($my_input_table, $backgrnd_freq_fn, $my_order,
+                     $my_offset, $my_site_type);
+    if (
+        !defined @{$param->isocores}[0]->set_profile(
+                             $types_hash{$my_site_type},
+                             $my_site_profile_len, $my_site_offset, $pwm_cutoff,
+                             $my_order, 0, 1, 0, 0, 0, 0, $my_site_matrix
+        )
+       )
+    {
+        croak "error in setting profile of type: $my_site_type}\n";
+    }
+
+    return $my_site_start, $my_site_end;
+
+}
+
+# back to simple subs
+#
+
+sub sorteval
+{
+    ## descending numerical
+    $b->[7] <=> $a->[7]    ## reverse numerical
+      || $b->[10] <=> $a->[10]
+      || $b->[4] <=> $a->[4]
+      ## ascending numerical
+      || $a->[11] <=> $b->[11]
+      || $a->[12] <=> $b->[12]
+
+}
+
 sub calc_average ($input_numbers)
 {
     ### [<now>] Running calc_average...
@@ -2040,6 +2246,39 @@ sub calc_average ($input_numbers)
     $stdev = sprintf("%.3f", $stdev);
     ### [<now>] Finished calc_average...
     return ($mean, $stdev);
+}
+
+sub create_data_dirs (@data_dirs)
+{
+    say "\ninside create_data_dirs function\n";
+    ## check if not a bug XXX
+    foreach my $dir_name (@data_dirs)
+    {
+        say "Creating $dir_name directory\n";
+        if (-d $dir_name)
+        {
+            say "$dir_name exists. Purge and recreate\n";
+            rmtree(["dir_name"]);
+        }
+        else
+        {
+            #say "$dir_name does not exist!\n";
+            my $my_command = "mkdir -p $dir_name";
+            run($my_command);
+        }
+    }
+    return 1;
+}
+
+sub num_of_lines_in_file ($input_fn)
+{
+    my $my_num_lines;
+    $my_num_lines = capture("cat $input_fn | wc -l ");
+
+    #assert No such file or directory #
+    chomp $my_num_lines;
+    $my_num_lines = int($my_num_lines);
+    return $my_num_lines;
 }
 
 sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
@@ -2140,388 +2379,25 @@ sub fasta_2_tbl ($in_fa, $out_tbl_fn)
     return $out_tbl_fn;
 }
 
-#~ sub translate_2_protein ($genetic_code_fn, $cds_fn, $translated_tbl_fn)
-#~ {
-#~ ### [<now>] Running translate_2_protein...
-#~ ### $cds_fn
-#~ ## 2016.12.12 my ($genetic_code_fn, $cds_fn, $translated_tbl_fn) = @_;
-
-#~ my $frame    = 0;
-#~ my %gencodeh = ();
-
-#~ open(my $FH_GENETIC_CODE, "<", "$genetic_code_fn")
-#~ or croak "Can't open  $genetic_code_fn";
-#~ while (<$FH_GENETIC_CODE>)
-#~ {
-#~ my ($aa, $codon) = split;
-#~ $gencodeh{$codon} = $aa;
-#~ }
-#~ close $FH_GENETIC_CODE;
-
-#~ open(my $FH_CDS_IN, "<", "$cds_fn")            or croak "err:  $cds_fn";
-#~ open(my $FH_POUT,   ">", "$translated_tbl_fn") or croak "Failed here";
-
-#~ #    print {*STDERR} "translating: $cds_fn \n";
-
-#~ while (<$FH_CDS_IN>)
-#~ {
-#~ my ($name, $seq) = split;
-#~ my $cds_seq_len = length($seq);
-
-#~ print {$FH_POUT} "$name ";
-
-#~ for (my $i = $frame ; $i < $cds_seq_len - 1 ; $i += 3)
-#~ {
-#~ my $triplet = substr($seq, $i, 3);
-#~ if ($gencodeh{$triplet})
-#~ {
-#~ print {$FH_POUT} "$gencodeh{$triplet}";
-#~ }
-#~ else
-#~ {
-#~ print {$FH_POUT} "X";
-#~ }
-
-#~ }    #for
-#~ print {$FH_POUT} "\n";
-#~ }
-
-#~ close $FH_CDS_IN;
-#~ close $FH_POUT;
-#~ ### translated_tbl_fn : $translated_tbl_fn
-#~ ### [<now>] Finished translate_2_protein...
-#~ return $translated_tbl_fn;
-
-#~ }
-
-#~ sub gff_2_geneidgff_mock ($my_input_nodots_gff, $species, $type)
-#~ {
-#~ say "fake gff_2_geneidgff_mock\n";
-#~ my $geneid_gff = $work_dir . $species . ${type} . ".geneid_gff";
-#~ my $my_command = "cp $my_input_nodots_gff $geneid_gff";
-#~ say "$my_command\n";
-#~ run($my_command);
-
-#~ my $geneid_sorted_gff_fn = $geneid_gff;
-#~ return $geneid_sorted_gff_fn;
-#~ }
-
-sub sorteval
+sub fold4fasta ($seq)
 {
-    ## descending numerical
-    $b->[7] <=> $a->[7]    ## reverse numerical
-      || $b->[10] <=> $a->[10]
-      || $b->[4] <=> $a->[4]
-      ## ascending numerical
-      || $a->[11] <=> $b->[11]
-      || $a->[12] <=> $b->[12]
+    ## 2016.12.13a {
+    ## my $seq        = shift;
+    my $folded_seq = "";
 
+    #my $column_limit = 60;
+    Readonly::Scalar my $column_limit => 60;
+
+    #my $s = "";
+    my $position_in_seq = 0;
+    my $seq_len         = length($seq);
+
+    while ($position_in_seq < $seq_len)
+    {
+        my $out_seq = substr($seq, $position_in_seq, $column_limit);
+        $folded_seq = $folded_seq . $out_seq . "\n";
+        $position_in_seq += $column_limit;
+    }
+    return $folded_seq;
 }
 
-#DK_subs
-sub num_of_lines_in_file ($input_fn)
-{
-    my $my_num_lines;
-    $my_num_lines = capture("cat $input_fn | wc -l ");
-
-    #assert No such file or directory #
-    chomp $my_num_lines;
-    $my_num_lines = int($my_num_lines);
-    return $my_num_lines;
-}
-
-#~ sub check_external_progs()
-#~ {
-#~ ## Checking if the external programs are in the path.
-#~ ## C, awk, python programs
-#~ #my $prog_name;
-#~ my $my_command;
-#~ my @progs_2_check = (
-#~ qw(bash
-#~ gawk
-#~ egrep
-#~ sed
-#~ geneid
-#~ ssgff
-#~ shuf
-#~ pictogram
-#~ gff2gp.awk
-#~ cds2gff.awk
-#~ frequency.py
-#~ information.py
-#~ submatrix.py
-#~ submatrix_order0.py
-#~ get_k_matrix.py
-#~ multiple_annot2one.awk
-#~ logratio_kmatrix.py
-#~ logratio_zero_order.py
-#~ preparetrimatrixstart4parameter.awk)
-
-#~ );
-
-#~ for my $prog_name (@progs_2_check)
-#~ {
-#~ $my_command = "which $prog_name > /dev/null";
-#~ run($my_command);
-
-#~ #or croak "\n $prog_name not available\n";
-#~ }
-#~ return 1;
-#~ }
-
-sub create_data_dirs (@data_dirs)
-{
-    say "\ninside create_data_dirs function\n";
-    ## check if not a bug XXX
-    foreach my $dir_name (@data_dirs)
-    {
-        say "Creating $dir_name directory\n";
-        if (-d $dir_name)
-        {
-            say "$dir_name exists. Purge and recreate\n";
-            rmtree(["dir_name"]);
-        }
-        else
-        {
-            #say "$dir_name does not exist!\n";
-            my $my_command = "mkdir -p $dir_name";
-            run($my_command);
-        }
-    }
-    return 1;
-}
-
-# sub compute_sites_pictogram {
-# #
-
-#     my $my_command;
-#     my $FH_FOUT;
-# #
-# ## get donor site statistics
-# #
-#     my $order = "0";
-#     my $sites_number;
-#     $sites_number = num_of_lines_in_file($out_donor_tbl);
-
-#     my $don_offset =
-#       $bases_offset;   #position before intron (last of exon (31) -1 for offset)
-
-#     if ( $sites_number > $train_sites_cutoff ) {
-#         $order = "1";
-#     }
-#     elsif ( $sites_number <= $train_sites_cutoff ) {
-#         $order = "0";
-#     }
-
-#     print {*STDERR}
-# "\nThere are $sites_number donor sites, enough for a matrix of order $order, prior offset: $don_offset $out_donor_tbl \n";
-
-#     my (
-#         $donor_matrix, $prof_len_don, $fxd_don_offset,
-#         $donor_start,  $donor_end
-#       )
-#       = get_K_matrix( $out_donor_tbl, $backgrnd_kmers_fn, $order, $don_offset,
-#         1, 0, 0, 0, 0, 0, 0 );
-#     if (
-#         !defined @{ $param->isocores }[0]->set_profile(
-#             'Donor_profile', $prof_len_don, $fxd_don_offset, $pwm_cutoff,
-#             $order, 0, 1, 0, 0, 0, 0, $donor_matrix
-#         )
-#       )
-#     {
-#         croak "error in setting profile\n";
-#     }
-
-# #print {*STDERR} "gawk '{print  substr(\$2,($donor_start-3),($prof_len_don+6))}' $out_donor_tbl\n";
-
-#     $my_command =
-# "gawk '{print  substr(\$2,($donor_start-3),($prof_len_don+6))}' $out_donor_tbl ";
-#     my $donsub = capture($my_command);
-
-#     my $donors_subprofile = $work_dir . $species . ".don.sub.profile";
-#     open( $FH_FOUT, ">", "$donors_subprofile" ) or croak "Failed here";
-#     print {$FH_FOUT} "$donsub";
-#     close $FH_FOUT;
-
-# # BUG pictogram
-# #~ $my_command = "./bin/pictogram $donors_subprofile $plots_dir/donor_profile.pictogram -bits -land";
-# #~ print "\n$my_command\n";
-# #~ run($my_command);
-
-# #
-# # get acceptor site statistics
-# #
-
-#     $order = "0";
-
-#     $sites_number = num_of_lines_in_file($out_acceptor_tbl);
-
-#     #$sites_number = `wc -l $out_acceptor_tbl | gawk '{print \$1}'`;
-#     #chomp $sites_number;
-#     #$sites_number = int($sites_number);
-#     print "sites_number in $out_acceptor_tbl: $sites_number\n";
-#     my $acc_offset =
-#       $bases_offset;   #position after intron (first of exon (31) -1 for offset)
-
-#     if ( $sites_number > $train_sites_cutoff ) {
-
-#         $order = "1";
-
-#     }
-#     elsif ( $sites_number <= $train_sites_cutoff ) {
-
-#         $order = "0";
-#     }
-
-#     print {*STDERR}
-# "\nThere are $sites_number acceptor sites, enough for a matrix of order $order, offset: $acc_offset \n";
-
-#     my (
-#         $acceptor_matrix, $prof_len_acc, $fxd_acc_offset,
-#         $acceptor_start,  $acceptor_end
-#       )
-#       = get_K_matrix( $out_acceptor_tbl, $backgrnd_kmers_fn, $order,
-#         $acc_offset, 0, 1, 0, 0, 0, 0, 0 );
-#     if (
-#         !defined @{ $param->isocores }[0]->set_profile(
-#             'Acceptor_profile', $prof_len_acc, $fxd_acc_offset, $pwm_cutoff,
-#             $order, 0, 1, 0, 0, 0, 0, $acceptor_matrix
-#         )
-#       )
-#     {
-#         croak "error in setting profile\n";
-#     }
-
-#     my $acceptors_subprofile = "";
-
-#     $my_command =
-# "gawk '{print  substr(\$2,($acceptor_start-3),($prof_len_acc+6))}' $out_acceptor_tbl ";
-#     my $accsub = capture($my_command);
-
-#     $acceptors_subprofile = $work_dir . $species . ".acc.sub.profile";
-#     open( $FH_FOUT, ">", "$acceptors_subprofile" ) or croak "Failed here";
-#     print {$FH_FOUT} "$acceptors_subprofile";
-#     close $FH_FOUT;
-
-# # BUG pictogram
-# #~ $my_command = "./bin/pictogram $acceptors_subprofile $plots_dir/acceptor_profile.pictogram -bits -land";
-# #~ print "\n$my_command\n";
-# #~ run($my_command);
-
-# #
-# # get start site statistics
-# #
-
-#     $order       = "0";
-#     $sites_number = num_of_lines_in_file($out_ATGx_tbl);
-
-#     my $ATGx_offset =
-#       $bases_offset;  #before first position of the exon (31)minus 1 for offset)
-
-#     if ( $sites_number > $train_sites_markov_cutoff ) {
-
-#         $order = "2";
-
-#     }
-#     elsif ( $sites_number <= $train_sites_markov_cutoff ) {
-
-#         $order = "0";
-#     }
-
-#     print {*STDERR}
-# "\nThere are $sites_number ATGx start sites, enough for a matrix of order $order, offset: $ATGx_offset \n";
-
-#     my ( $start_matrix, $prof_len_sta, $fxd_ATGx_offset, $ATGx_start,
-#         $ATGx_end ) =
-#       get_K_matrix( $out_ATGx_tbl, $backgrnd_kmers_fn, $order, $ATGx_offset,
-#         0, 0, 1, 0, 0, 0, 0 );
-
-# # write to parameter file
-#     if (
-#         !defined @{ $param->isocores }[0]->set_profile(
-#             'Start_profile', $prof_len_sta, $fxd_ATGx_offset, $pwm_cutoff,
-#             $order, 0, 1, 0, 0, 0, 0, $start_matrix
-#         )
-#       )
-#     {
-#         croak "error in setting profile\n";
-#     }
-# #
-
-#     my $stasub = "";
-
-#     $my_command =
-# "gawk '{print  substr(\$2,($ATGx_start-3),($prof_len_sta+6))}' $out_ATGx_tbl ";
-#     $stasub = capture($my_command);
-
-#     my $ATGx_subprofile = $work_dir . $species . ".ATGx.sub.profile";
-#     open( $FH_FOUT, ">", "$ATGx_subprofile" ) or croak "Failed here";
-#     print {$FH_FOUT} "$stasub";
-#     close $FH_FOUT;
-
-# ## BUG pictogram
-# #~ $my_command = "./bin/pictogram $ATGx_subprofile $plots_dir/ATGx_profile.pictogram -bits -land";
-# #~ print "\n$my_command\n";
-# #~ run($my_command);
-
-# ## end get start site statistics
-#     return $donor_start, $donor_end, $acceptor_start, $acceptor_end,
-#       $ATGx_start,
-#       $ATGx_end;
-
-# #
-# }
-
-sub compute_matrices_4sites ($my_input_table, $my_site_type)
-{
-
-    my %types_hash = (
-                      acceptor => 'Acceptor_profile',
-                      donor    => 'Donor_profile',
-                      ATGx     => 'Start_profile',
-                      tr_stop  => 'Stop_profile',
-                     );
-
-    my $my_order     = "0";
-    my $my_offset    = $bases_offset;
-    my $sites_number = num_of_lines_in_file($my_input_table);
-
-    if (($my_site_type eq 'acceptor') || ($my_site_type eq 'donor'))
-    {
-        if ($sites_number > $train_sites_cutoff)
-        {
-            $my_order = "1";    ### [<now>] $my_order Acc/Don site...
-        }
-    }
-    elsif ($my_site_type eq 'ATGx')
-    {
-        if ($sites_number > $train_sites_markov_cutoff)
-        {
-            $my_order = "2";    ### [<now>] $my_order ATGx site...
-        }
-    }
-    else
-    {
-        say "ERROR, unknown site type ";
-    }
-
-    my (
-        $my_site_matrix, $my_site_profile_len, $my_site_offset,
-        $my_site_start,  $my_site_end
-       )
-      = get_K_matrix($my_input_table, $backgrnd_freq_fn, $my_order,
-                     $my_offset, $my_site_type);
-    if (
-        !defined @{$param->isocores}[0]->set_profile(
-                             $types_hash{$my_site_type},
-                             $my_site_profile_len, $my_site_offset, $pwm_cutoff,
-                             $my_order, 0, 1, 0, 0, 0, 0, $my_site_matrix
-        )
-       )
-    {
-        croak "error in setting profile of type: $my_site_type}\n";
-    }
-
-    return $my_site_start, $my_site_end;
-
-}
