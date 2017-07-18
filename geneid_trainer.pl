@@ -2141,45 +2141,43 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 sub compute_matrices_4sites ($my_input_table, $my_site_type)
 {
     ### [<now>] running compute_matrices_4sites
+
+    my $sites_number = num_of_lines_in_file($my_input_table);
+    say('sites_number:\t', $sites_number);
+    my $my_offset = $bases_offset;
+
+    my $my_order =
+      order_site_select($sites_number, $my_site_type, $train_sites_cutoff,
+                        $train_sites_markov_cutoff);
+    say('L2152', $my_input_table, $my_order, $my_offset, $my_site_type);
+
+    use Inline Python => <<'END_OF_COMPUTE_MATRICES_4SITES';
+
+def order_site_select(sites_number, site_type, train_sites_cutoff, train_sites_markov_cutoff):
+    ##sites_number = num_of_lines_in_file($my_input_table);
+    #my_order = 0 #default
+    if site_type in ('acceptor','donor'):
+       if sites_number > train_sites_cutoff:
+           my_order = 1
+       else:
+           my_order = 1
+    elif site_type ==   'ATGx':
+        if sites_number > train_sites_markov_cutoff:
+            my_order = 2
+        else:
+            my_order = 0
+    else:
+        print 'ERROR, unknown site',  site_type       
+    return my_order
+
+END_OF_COMPUTE_MATRICES_4SITES
+
     my %types_hash = (
                       acceptor => 'Acceptor_profile',
                       donor    => 'Donor_profile',
                       ATGx     => 'Start_profile',
                       tr_stop  => 'Stop_profile',
                      );
-
-    my $my_order     = "0";
-    my $my_offset    = $bases_offset;
-    my $sites_number = num_of_lines_in_file($my_input_table);
-    say('sites_number:', $sites_number);
-
-    if (($my_site_type eq 'acceptor') || ($my_site_type eq 'donor'))
-    {
-        #~ if ($sites_number > 3000)
-        if ($sites_number > $train_sites_cutoff)
-        {
-            $my_order = "1";    ### [<now>] $my_order Acc/Don site...
-        }
-
-        #~ else ## not in orig script, testing only
-        #~ {
-        #~ $my_order = "2";
-        #~ }
-    }
-    elsif ($my_site_type eq 'ATGx')
-    {
-        if ($sites_number > $train_sites_markov_cutoff)
-        {
-            ### ATGx order2 L2529
-            $my_order = "2";    ### [<now>] $my_order ATGx site...
-        }
-    }
-    else
-    {
-        say "ERROR, unknown site type ";
-    }
-
-    say('L2175', $my_input_table, $my_order, $my_offset, $my_site_type);
 
     my (
         $my_site_matrix, $my_site_profile_len, $my_site_offset,
