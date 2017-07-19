@@ -106,7 +106,7 @@ my $input_gff_fn = $conf->{input_gff};
 my $input_fas_fn = $conf->{genome_fasta};
 my $species      = $conf->{species};
 
-### Got...
+### Got:
 ### $species
 ### $input_gff_fn
 ### $input_fas_fn
@@ -511,7 +511,7 @@ sub normal_run
     $new_param_fn = "$work_dir/$species.geneid.param";
     $param->writeParam($new_param_fn);
 
-    ### [<now>] Optimizing new parameter file...
+    ### [<now>] Optimizing new parameter file at <file>[<line>]...
 
     say "new gff2gp location DEBUG";
     ### [<now>] Convert gff to gp (golden-path-like)format <file>[<line>]...
@@ -537,7 +537,7 @@ sub normal_run
     my $OligoWeight_ini   = $profile_params{'OligoWeight_ini'};
     my $ExWeightParam_ini = $profile_params{'ExWeightParam_ini'};
 
-    ### [<now>] contig optimisation...
+    ### [<now>] contig optimisation at <file>[<line>]...
 
     @evaluation = @{
         parameter_optimize(
@@ -713,7 +713,7 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
         push @profile_trans, \@columns_profile;
     }
     close $FH_PROFILE_2;
-    ### [<now>] Finished derive_coding_potential...
+    ### [<now>] Finished derive_coding_potential at <file>[<line>]...
     return [
             \@profile_init,        \@profile_trans, $total_codingbases,
             $total_noncodingbases, $markov_mod_A
@@ -753,12 +753,11 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     ### [<now>] Before get_genes at <file>[<line>]...
     # print {*STDERR} "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
-    print {*STDERR}
-      "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
-    say "XXX 822";
+    ### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
+
     my $gp_Xgetgenes_tmp_pre_tbl =
       get_genes($fastas_dir, $pso_tmp_gp_from_gff, $work_dir);
-    say "XXX 730";
+
     ### [<now>] After get_genes at <file>[<line>]...
     ### PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl
     ### Get sequences of 400-nt flanked sequences in tabular and gff formats\n";
@@ -931,7 +930,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$cds2gffcontig";
     close $FH_FOUT;
     ## TODO Inspect files / values returned. 2016.12.15
-    ### Finished process_seqs_4opty...
+    ### Finished process_seqs_4opty at <file>[<line>]...
     say "L1302";
     return [
             $temp_gp_cdsgff_contig_eval, $temp_fastagpcontig,
@@ -1363,8 +1362,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     my $sort    = "sort -n";
 
     my ($donor, $acceptor_mtype, $ATGx) = (0, 0, 0);
-    ## BUG temp fix
-    #~ my $run_jacknife_flag = 0;
+
     if ($matrix_type eq 'donor')
     {
         $donor = 1;
@@ -1375,7 +1373,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     }
     elsif ($matrix_type eq 'ATGx')
     {
-        $ATGx = 1;    ### [<now>] $matrix_type ATGx...
+        $ATGx = 1;    ### [<now>] $matrix_type ATGx at <file>[<line>]...
     }
     else
     {
@@ -1389,8 +1387,6 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 
     #    my @info = ($offset-1,$offset+1);
     my $profile_len = 0;
-    ## 2016.12.15a
-    ## my $info_thresh = "";    #bits
 
     #~ ## BUG?
     my $true_seq_name = $true_kmers_tbl;
@@ -1430,7 +1426,6 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 
     say "\n $my_command \n";
     run($my_command);
-    ##$temp_infolog = $my_freq_subtract_fn;
 
     ## True_False req_matrix_fn
     my $my_true_freq_matrix_fn =
@@ -1506,9 +1501,8 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
         run($my_command);
 
     }
-
-    print {*STDERR}
-      "\n L2917: $matrix_type, $my_info_thresholds{$matrix_type}\n";
+    ### [<now>]
+    ### $matrix_type, $my_info_thresholds{$matrix_type}\n";
 
     my $my_info_thresh = $my_info_thresholds{$matrix_type};
 
@@ -1564,7 +1558,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 
     if ($order >= 1 && $donor)
     {
-        ### [<now>] Running donor order_oneplus...
+        ### [<now>] Running donor order_oneplus at <file>[<line>]...
         #my $pre_offset = $offset + $my_dimatrics_dict{'donor'};
 
         my $pre_offset  = $offset + 2;
@@ -1595,7 +1589,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     ## ACCEPTOR DIMATRIX START
     elsif ($order >= 1 && $acceptor_mtype)
     {
-        ### [<now>] Running acceptor order_one_plus...
+        ### [<now>] Running acceptor order_one_plus at <file>[<line>]...
         my $pre_offset  = $offset - 1;
         my $new_offset  = $offset;
         my $post_offset = $offset + 1;
@@ -1629,7 +1623,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     ## ATG DIMATRIX START
     elsif ($order >= 2 && $ATGx)
     {
-        ### [<now>] Running ATGx order_two...
+        ### [<now>] Running ATGx order_two at <file>[<line>]...
         my $pre_offset  = $offset - 2;
         my $new_offset  = $offset - 1;
         my $post_offset = $offset;
@@ -1648,7 +1642,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
 
     ## ALL REMAINING CASES START
     else
-    {    ### [<now>] Running REMAINING CASES...
+    {    ### [<now>] Running REMAINING CASES at <file>[<line>]...
 
         # print {*STDERR} "$path/submatrix_order0.awk $start $end $true_seq_name-log.$ordname-matrix\n";
         $my_command =
@@ -1843,7 +1837,7 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
 
 sub get_opt_paramfile ( $eval_array )
 {
-    ### [<now>] Running get_opt_paramfile...
+    ### [<now>] Running get_opt_paramfile at <file>[<line>]...
     ##,   $branch_switch, $branch_profile_len,
     ##$fxdbraoffset, $branch_matrix
     ##)
@@ -1958,7 +1952,7 @@ sub get_opt_paramfile ( $eval_array )
     $param->writeParam($optimized_geneid_param_fn);
 
     close $FH_SOUT;
-    ### [<now>] Finished get_opt_paramfile...
+    ### [<now>] Finished get_opt_paramfile at <file>[<line>]...
     ### $optimized_geneid_param_fn
 
     return [$best_ExWeightParam, $best_OlWeight, 0, 0, \@evaluation_init];
@@ -1968,7 +1962,7 @@ sub get_opt_paramfile ( $eval_array )
 sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
                         $ExWeightParam_ini)
 {
-    ### [<now>] Running  parameter_evaluate...
+    ### [<now>] Running  parameter_evaluate at <file>[<line>]...
 
     my $my_command;
     my $geneid_test_predict_gff_fn =
@@ -2022,7 +2016,7 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 
     #~ my @evaluation_test = split " ",
     #~ ` ./bin/evaluation -sta $geneid_test_predict_gff_fn $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
-    ### [<now>] Finished sub  parameter_evaluate...
+    ### [<now>] Finished sub  parameter_evaluate at <file>[<line>]...
     return \@evaluation_test;
 
 }    # evaluate parameter function
@@ -2137,15 +2131,15 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 sub compute_matrices_4sites ($my_input_table, $sites_number, $my_site_type)
 {
     ### [<now>] running compute_matrices_4sites
-
+    ### sites_number: $sites_number
     #~ my $sites_number = num_of_lines_in_file($my_input_table);
-    say('sites_number:\t', $sites_number);
+
     my $my_offset = $bases_offset;
 
     my $my_order =
       order_site_select($sites_number, $my_site_type, $train_sites_cutoff,
                         $train_sites_markov_cutoff);
-    say('L2152', $my_input_table, $my_order, $my_offset, $my_site_type);
+    ### L2148 $my_input_table, $my_order, $my_offset, $my_site_type
 
     use Inline Python => <<'END_OF_COMPUTE_MATRICES_4SITES';
 
@@ -2256,7 +2250,7 @@ sub create_data_dirs (@data_dirs)
 
 sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
 {
-    ### [<now>] Running tbl_2_fasta...
+    ### [<now>] Running tbl_2_fasta at <file>[<line>]...
     ### in: $in_tbl_fn
     ### out: $fa_out_fn
 
@@ -2278,13 +2272,13 @@ sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
     }
     close $FH_IN;
     close $FH_FOUT;
-    ### [<now>] Finished tbl_2_fasta...
+    ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
     return $fa_out_fn;
 }
 
 sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
 {
-    ### [<now>] Running tbl_2_single_fastas...
+    ### [<now>] Running tbl_2_single_fastas at <file>[<line>]...
 
     open(my $FH_IN_TBL, "<", "$in_tbl_fn") or croak "Failed here";
 
@@ -2312,19 +2306,19 @@ sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
     }
 
     close $FH_IN_TBL;
-    ### [<now>] Finished tbl_2_single_fastas...
+    ### [<now>] Finished tbl_2_single_fastas at <file>[<line>]...
     #close $FH_FOUT_FASTA;
     return 1;
 }
 
 sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 {
-    ### [<now>] Running fasta_2_tbl...
+    ### [<now>] Running fasta_2_tbl at <file>[<line>]...
+    ### $in_fa, $out_tbl_fn
 
     open(my $FH_IN,   "<", "$in_fa");
     open(my $FH_TOUT, ">", "$out_tbl_fn");
 
-    #print {*STDERR} "$in_fa INSIDE LOOP\n\n";
     my $count = 0;
     while (<$FH_IN>)
     {
@@ -2348,7 +2342,7 @@ sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 
     close $FH_IN;
     close $FH_TOUT;
-    ### [<now>] Finished fasta_2_tbl...
+    ### [<now>] Finished fasta_2_tbl at <file>[<line>]...
     return $out_tbl_fn;
 }
 
