@@ -403,12 +403,17 @@ sub normal_run
     $train_ATGx_tbl            = $conf->{train_ATG_tbl};
     $train_noncanon_ATGx_int   = 0;
 
+    my $train_donor_num    = $conf->{train_donor_num};
+    my $train_acceptor_num = $conf->{train_acc_num};
+    my $train_ATGx_num     = $conf->{train_ATG_num};
+
     my ($donor_start, $donor_end) =
-      compute_matrices_4sites($train_donor_tbl, 'donor');
+      compute_matrices_4sites($train_donor_tbl, $train_donor_num, 'donor');
     my ($acceptor_start, $acceptor_end) =
-      compute_matrices_4sites($train_acceptor_tbl, 'acceptor');
+      compute_matrices_4sites($train_acceptor_tbl, $train_acceptor_num,
+                              'acceptor');
     my ($ATGx_start, $ATGx_end) =
-      compute_matrices_4sites($train_ATGx_tbl, 'ATGx');
+      compute_matrices_4sites($train_ATGx_tbl, $train_ATGx_num, 'ATGx');
 
     ## DERIVE INITIAL/TRANSITION MARKOV MODEL
 
@@ -2129,11 +2134,11 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 #~ return 1;
 #~ }
 
-sub compute_matrices_4sites ($my_input_table, $my_site_type)
+sub compute_matrices_4sites ($my_input_table, $sites_number, $my_site_type)
 {
     ### [<now>] running compute_matrices_4sites
 
-    my $sites_number = num_of_lines_in_file($my_input_table);
+    #~ my $sites_number = num_of_lines_in_file($my_input_table);
     say('sites_number:\t', $sites_number);
     my $my_offset = $bases_offset;
 
@@ -2238,16 +2243,16 @@ sub create_data_dirs (@data_dirs)
     return 1;
 }
 
-sub num_of_lines_in_file ($input_fn)
-{
-    my $my_num_lines;
-    $my_num_lines = capture("cat $input_fn | wc -l ");
+#~ sub num_of_lines_in_file ($input_fn)
+#~ {
+#~ my $my_num_lines;
+#~ $my_num_lines = capture("cat $input_fn | wc -l ");
 
-    #assert No such file or directory #
-    chomp $my_num_lines;
-    $my_num_lines = int($my_num_lines);
-    return $my_num_lines;
-}
+#~ #assert No such file or directory #
+#~ chomp $my_num_lines;
+#~ $my_num_lines = int($my_num_lines);
+#~ return $my_num_lines;
+#~ }
 
 sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
 {
