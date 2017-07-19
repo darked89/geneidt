@@ -452,7 +452,7 @@ sub normal_run
     $my_command =
       "gawk '{print length(\$2)}' $train_introns_filtered_tbl | sort -n";
     my @introns_len_list = capture($my_command);
-    my ($mean, $st) = calc_average(\@introns_len_list);
+    my ($mean, $st) = mean_stdev(\@introns_len_list);
     print {*STDERR} "INTRONS mean, ST: $mean, $st\n";
 
     #~ ## BUG wrong command?
@@ -1313,12 +1313,6 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
 
 }    #getgenes
 
-#~ sub bit_score_graph ($info_output, $info_thresh, $offset)
-#~ {
-### [<now>] Running bit_score_graph at <file>[<line>]...
-#~ ### bitscoregraph input:  $info_output, $info_thresh, $offset
-#~ my ($start , $end) = matrix_info_select($info_output, $info_thresh, $offset);
-
 use Inline Python => <<'END_OF_PYTHON_CODE3';
 
 def bit_score_graph(info_fn, info_thresh, offset):
@@ -1347,9 +1341,6 @@ def bit_score_graph(info_fn, info_thresh, offset):
     return start, end
 
 END_OF_PYTHON_CODE3
-
-#~ return ($start, $end);
-#~ }    #end BitScoreGraph
 
 ## GETKMATRIX FUNCTION (Splice sites and Start ATG codon PWMs)
 sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
@@ -2215,36 +2206,15 @@ sub sorteval
 
 }
 
-sub calc_average ($input_numbers)
-{
-    ### [<now>] Running calc_average...
-    my $sum            = 0;
-    my $elements_count = 0;
-    my ($mean, $stdev);
-
-    foreach my $my_number (@{$input_numbers})
-    {
-        $sum += $my_number;
-        $elements_count++;
-    }
-
-    $mean = $sum / $elements_count;
-    $mean = sprintf("%.3f", $mean);
-
-    $sum = 0;
-    my $tmp_number = 0;
-    foreach my $my_number (@{$input_numbers})
-    {
-        $tmp_number = $my_number - $mean;
-        $sum += $tmp_number * $tmp_number;
-
-        #$sum += ( $my_number - $mean ) * ( $my_number - $mean );
-    }
-    $stdev = sqrt($sum / $elements_count);
-    $stdev = sprintf("%.3f", $stdev);
-    ### [<now>] Finished calc_average...
-    return ($mean, $stdev);
-}
+##  mean_stdev...
+use Inline Python => <<'END_STATS';
+from statistics import mean, stdev
+def mean_stdev(input_list):
+    input_list = [float(x) for x in input_list]
+    list_mean = mean(input_list)
+    list_stdev = stdev(input_list)
+    return list_mean, list_stdev
+END_STATS
 
 sub create_data_dirs (@data_dirs)
 {
