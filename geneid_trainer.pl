@@ -20,7 +20,8 @@ use sigtrap qw(stack-trace old-interface-signals);
 use Carp qw(carp cluck croak confess);
 use Carp::Always;
 use Carp::Assert qw(assert);
-use Smart::Comments;
+
+#~ use Smart::Comments;
 
 #use Data::Dumper::Perltidy;
 use Data::Dumper;
@@ -47,7 +48,7 @@ use Geneid::Isocore;
 use Geneid::geneid;
 use Geneid::geneidCEGMA;
 
-use Geneid::foo;
+#~ use Geneid::foo;
 
 #~ #Geneid::GeneModel->new());
 #~ Geneid::foo::baba();
@@ -86,21 +87,17 @@ $ENV{'PATH'} = $exec_path . ":" . $ENV{'PATH'};
 
 our $conf = LoadFile('gtrain_perl_conf.yaml');
 print Dumper($conf);
-say $conf->{train_cds_fas};
+#~ say $conf->{train_cds_fas};
 
 ## die("checking YAML");
 
-my $genetic_code = "./etc/genetic.code";
+#~ my $genetic_code = "./etc/genetic.code";
 
-### $genetic_code geneticcode at <file>[<line>]
 
 ## no need to run anything if this fails
 ##check_external_progs();
 
 ## Move parts necessary for getting comand line args here
-#~ my $species      = "";
-#~ my $input_gff_fn = "";
-#~ my $input_fas_fn = "";
 
 my $input_gff_fn = $conf->{input_gff};
 my $input_fas_fn = $conf->{genome_fasta};
@@ -182,7 +179,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = "/tmp/workdir_00_gtrain/";
+my $work_dir = $conf->{work_dir};
 
 my $tmp_dir      = "$work_dir/temp_00/";
 my $stats_dir    = "$work_dir/stats/";
@@ -209,12 +206,8 @@ create_data_dirs(@data_dirs);
 ## my $last_bench_time;    #for benchmarking parts of the script
 my $input_nodots_gff = "$work_dir/input_gff_no_dots.gff";
 
-#~ say "\nXXX $input_nodots_gff \n";
-
 my $genome_all_contigs_tbl = "";
 
-#~ my $backgrnd_kmers_fn      = "";
-## my $tblseq      = "";
 
 my @evaluation = ();
 
@@ -238,18 +231,12 @@ my $gp_traincontig_gff     = "";
 my $gp_traincontig_len_int = 0;
 my $gp_traincontig_tbl     = "";
 
-#my $gp_train_fa            = "";
-#my $gp_train_gff           = "";
-#my $gp_train_len_int       = 0;
-#my $gp_train_tbl           = "";
-
 ## Weights for profiles??
 my $best_ExWeightParam = 0;
 my $best_OlWeight      = 0;
 my $best_Acc           = 0;
 my $best_Min           = 0;
 
-my $seqs_eval_gff         = "";
 my $train_inframestop_int = 0;
 my $eval_inframestop_int  = 0;
 my $locus_id              = "";
@@ -298,15 +285,7 @@ sub normal_run
     my $FH_FOUT;
     my $my_command = "";
 
-    ###########################################
-    ### PARAM INIT
-    #set isochores to 1
-    $param->numIsocores(1);
-    $param->isocores([Geneid::Isocore->new()]);
-
-    $param->geneModel(Geneid::GeneModel->new());
-    $param->geneModel->useDefault;
-    ###########################################
+    init_param_file();
 
     ### get data from upstream Python/YAML ###
     ## preserve input GFF file...
@@ -585,6 +564,19 @@ sub normal_run
 ## END OF MAIN PORTION OF SCRIPT
 #
 
+sub init_param_file()
+{
+    ###########################################
+    ### PARAM INIT
+    #set isochores to 1
+    $param->numIsocores(1);
+    $param->isocores([Geneid::Isocore->new()]);
+
+    $param->geneModel(Geneid::GeneModel->new());
+    $param->geneModel->useDefault;
+    ###########################################
+}
+
 ## FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
 sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
 {
@@ -592,16 +584,17 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
 
     my $markov_mod_A = "";
     my $markov_mod_B = "";
-
-    my $my_command =
-      "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_cds_tbl_fn";
-    my $total_codingbases = capture($my_command);
-    chomp $total_codingbases;
-
-    $my_command =
-      "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_intron_tbl_fn ";
-    my $total_noncodingbases = capture($my_command);
-    chomp $total_noncodingbases;
+    my $total_codingbases    = $conf->{train_cds_len};
+    my $total_noncodingbases = $conf->{train_introns_len};
+    #~ my $my_command =
+      #~ "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_cds_tbl_fn";
+    #~ my $total_codingbases = capture($my_command);
+    #~ chomp $total_codingbases;
+    
+    #~ $my_command =
+      #~ "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_intron_tbl_fn ";
+    #~ my $total_noncodingbases = capture($my_command);
+    #~ chomp $total_noncodingbases;
 
     print {*STDERR}
       "There are $total_codingbases coding bases and $total_noncodingbases non-coding bases on this training set:\n";
@@ -1360,7 +1353,24 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
     my $ordname = $orders[$order];
     my $sort    = "sort -n";
-
+    use Inline Python => <<'END_OF_BACKGR_MATRICES_CALC';
+def background_calc(backgound_tab_fn):
+	import os
+	## assumption/temp hack
+	matrix_len = 60 
+	hmm_order = 1
+	backgrnd_freq_matrix_fn = 'foobar' #FIXME
+	
+	exe = './bin/get_k_matrix.pypy'
+	command_A  = '%s %s %s %s' % (exe, hmm_order, matrix_len, backgrnd_kmers_tbl)  
+	command_B  = '| sort > ' 
+	command_C  = '%s' % (backgrnd_freq_matrix_fn)
+	#os.system(command)
+	command = ""
+	#os.system(command)
+	command = ""
+	#os.system(command)
+END_OF_BACKGR_MATRICES_CALC
     my ($donor, $acceptor_mtype, $ATGx) = (0, 0, 0);
 
     if ($matrix_type eq 'donor')
@@ -1391,18 +1401,19 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_freq_fn, $order, $offset,
     #~ ## BUG?
     my $true_seq_name = $true_kmers_tbl;
     $true_seq_name =~ s/\.tbl$//;
-    say "true_seq_name\t", $true_seq_name;
+    ### true_seq_name $true_seq_name;
 
-    ## Open true sequences
-    #    print {*STDERR} "$true_kmers_tbl (true)\n";
-    open(my $FH_TRUE_SEQ, "<", "$true_kmers_tbl") or croak "Failed here";
-    $_ = <$FH_TRUE_SEQ>;
-    my @columns_t = split;
-    my $len       = length($columns_t[1]);
-    close $FH_TRUE_SEQ;
+    #~ ## Open true sequences
+    #~ #    print {*STDERR} "$true_kmers_tbl (true)\n";
+    #~ open(my $FH_TRUE_SEQ, "<", "$true_kmers_tbl") or croak "Failed here";
+    #~ $_ = <$FH_TRUE_SEQ>;
+    #~ my @columns_t = split;
+    #~ my $len       = length($columns_t[1]);
+    #~ close $FH_TRUE_SEQ;
 
-    ## Open background sequences
-    ## mock
+    ## mock: not checking the sequence lenght in matrices.
+    ## this is done upstream by py script
+    my $len  = 60;
     my $len2 = 60;
 
     #    die "$len != $len2\n" if $len != $len2;
@@ -2218,7 +2229,7 @@ END_STATS
 sub create_data_dirs (@data_dirs)
 {
     say "\ninside create_data_dirs function\n";
-    ## check if not a bug XXX
+## check if not a bug XXX
     foreach my $dir_name (@data_dirs)
     {
         say "Creating $dir_name directory\n";
@@ -2248,37 +2259,37 @@ sub create_data_dirs (@data_dirs)
 #~ return $my_num_lines;
 #~ }
 
-sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
+sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn) 
 {
-    ### [<now>] Running tbl_2_fasta at <file>[<line>]...
-    ### in: $in_tbl_fn
-    ### out: $fa_out_fn
+          ### [<now>] Running tbl_2_fasta at <file>[<line>]...
+          ### in: $in_tbl_fn
+          ### out: $fa_out_fn
 
-    open(my $FH_IN,   "<", "$in_tbl_fn") or croak "Failed here";
+      open(my $FH_IN, "<", "$in_tbl_fn") or croak "Failed here";
     open(my $FH_FOUT, ">", "$fa_out_fn") or croak "Failed here";
-    while (<$FH_IN>)
-    {
+    while (<$FH_IN>) {
         chomp;
 
-        #~ my ( $n, $s ) = split( /\s+/, $_ );
+        #my ( $n, $s ) = split( /\s+/, $_ );
         my ($seq_name, $seq) = split;
         my ($seq_position, $seq_len) = (1, length($seq));
         print {$FH_FOUT} ">$seq_name\n";
-        while ($seq_position <= $seq_len)
-        {
+        
+          while ($seq_position <= $seq_len) {
             print {$FH_FOUT} substr($seq, $seq_position - 1, 60) . "\n";
             $seq_position += 60;
-        }
-    }
-    close $FH_IN;
+            
+          } 
+    } close $FH_IN;
     close $FH_FOUT;
-    ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
-    return $fa_out_fn;
+        ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
+      return $fa_out_fn;
+    ;
 }
 
 sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
 {
-    ### [<now>] Running tbl_2_single_fastas at <file>[<line>]...
+### [<now>] Running tbl_2_single_fastas at <file>[<line>]...
 
     open(my $FH_IN_TBL, "<", "$in_tbl_fn") or croak "Failed here";
 
@@ -2306,15 +2317,15 @@ sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
     }
 
     close $FH_IN_TBL;
-    ### [<now>] Finished tbl_2_single_fastas at <file>[<line>]...
+### [<now>] Finished tbl_2_single_fastas at <file>[<line>]...
     #close $FH_FOUT_FASTA;
     return 1;
 }
 
 sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 {
-    ### [<now>] Running fasta_2_tbl at <file>[<line>]...
-    ### $in_fa, $out_tbl_fn
+### [<now>] Running fasta_2_tbl at <file>[<line>]...
+### $in_fa, $out_tbl_fn
 
     open(my $FH_IN,   "<", "$in_fa");
     open(my $FH_TOUT, ">", "$out_tbl_fn");
@@ -2342,14 +2353,14 @@ sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 
     close $FH_IN;
     close $FH_TOUT;
-    ### [<now>] Finished fasta_2_tbl at <file>[<line>]...
+### [<now>] Finished fasta_2_tbl at <file>[<line>]...
     return $out_tbl_fn;
 }
 
 sub fold4fasta ($seq)
 {
-    ## 2016.12.13a {
-    ## my $seq        = shift;
+## 2016.12.13a {
+## my $seq        = shift;
     my $folded_seq = "";
 
     #my $column_limit = 60;

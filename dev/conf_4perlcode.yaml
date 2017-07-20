@@ -6,6 +6,8 @@ species : pmar01
 genome_fasta : dev/pmar4_nodots.fa
 input_gff : dev/pmar4_nodots.gff
 genetic_code : ./etc/genetic.code
+work_dir : /tmp/workdir_00_gtrain/
+
 backgrn_tbl  : tmp/backgrnd.tab
 backgrn_freq : tmp/backgrnd.freq
 backgrnd_hmm2_matrix : tmp/backgrnd_hmm_2.matrix
@@ -36,10 +38,18 @@ train_donor_tbl : tmp/don_sites.tab
 train_ATG_tbl   : tmp/start_sites.tab
 train_stop_tbl  : tmp/stop_sites.tab
 
+#depths/num of lines of training matrices
+train_acc_num : 3479
+train_donor_num : 3479
+train_ATG_num   : 612
+train_stop_num  : 612
+
 train_cds_fas   : tmp/cds_seqs.fa
 train_cds_tbl   : tmp/cds_seqs.tab
 train_intron_tbl : tmp/train_introns.tab
 
+train_cds_len : 635946
+train_introns_len : 304368
 
 
 
