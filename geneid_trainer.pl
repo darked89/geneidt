@@ -7,9 +7,9 @@
 use Modern::Perl;
 use English '-no_match_vars';
 
-## use experimental 'signatures';
 use feature "signatures";
 no warnings "experimental::signatures";
+use feature 'say';
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ use Carp qw(carp cluck croak confess);
 use Carp::Always;
 use Carp::Assert qw(assert);
 
-#~ use Smart::Comments;
+use Smart::Comments;
 
 #use Data::Dumper::Perltidy;
 use Data::Dumper;
@@ -39,7 +39,6 @@ use File::Temp qw/ tempfile tempdir /;
 use YAML::XS qw(LoadFile);
 use IPC::System::Simple qw(run system capture EXIT_ANY);
 use Readonly;
-use feature 'say';
 
 ## geneid_trained modules
 use lib '.';
@@ -54,18 +53,6 @@ use Geneid::geneidCEGMA;
 #~ Geneid::foo::baba();
 #~ say "OK";
 #~ die("test");
-
-## experimental
-#~ ## use Inline::Python;
-
-#~ print "9 + 16 = ", add(9, 16), "\n";
-#~ print "9 - 16 = ", subtract(9, 16), "\n";
-
-#~ use Inline Python => <<'END_OF_PYTHON_CODE1';
-#~ def add(x,y):
-#~ return x + y
-
-#~ END_OF_PYTHON_CODE1
 
 #~ use Inline Python => <<'END_OF_PYTHON_CODE2';
 
@@ -87,12 +74,12 @@ $ENV{'PATH'} = $exec_path . ":" . $ENV{'PATH'};
 
 our $conf = LoadFile('gtrain_perl_conf.yaml');
 print Dumper($conf);
+
 #~ say $conf->{train_cds_fas};
 
 ## die("checking YAML");
 
 #~ my $genetic_code = "./etc/genetic.code";
-
 
 ## no need to run anything if this fails
 ##check_external_progs();
@@ -207,7 +194,6 @@ create_data_dirs(@data_dirs);
 my $input_nodots_gff = "$work_dir/input_gff_no_dots.gff";
 
 my $genome_all_contigs_tbl = "";
-
 
 my @evaluation = ();
 
@@ -424,57 +410,20 @@ sub normal_run
         croak "error in setting Markov_Transition_probability_matrix\n";
     }
 
-    #~ ## DEBUG FIXME
-    #~ ###########################################
-    #~ ##MOVE UP???
-    #~ $param->geneModel(Geneid::GeneModel->new());
-    #~ $param->geneModel->useDefault;
-    #~ ###########################################
-
-    my $sd_intron                  = "";
     my $train_introns_filtered_tbl = $conf->{train_intron_tbl};
-    $my_command =
-      "gawk '{print length(\$2)}' $train_introns_filtered_tbl | sort -n";
-    my @introns_len_list = capture($my_command);
-    my ($mean, $st) = mean_stdev(\@introns_len_list);
-    print {*STDERR} "INTRONS mean, ST: $mean, $st\n";
 
-    #~ ## BUG wrong command?
+    ##my @introns_len_list = seq_sizes_calc($train_introns_filtered_tbl);
+    my ($intr_mean, $intr_stdev, $intr_short, $intr_long) =
+      mean_stdev($train_introns_filtered_tbl);
 
-    #~ #$my_command = "gawk '{print length(\$2)}' $introns_clean_tbl_fn | sort -n";
-    #~ $my_command = "sort -k2,2n $introns_clean_tbl_fn";
-    #~ my @intronlist = capture($my_command);
+    ### "INTRONS mean, ST
 
-    ## my $total_introns     = scalar(@introns_len_list);
-    my @intron_lenX_array = ();
-    my $intron_len        = "";
-    for (my $i = 0 ; $i <= scalar(@introns_len_list) - 1 ; $i++)
-    {
-
-        $intron_len = $introns_len_list[$i];
-        chomp $intron_len;
-        push(@intron_lenX_array, $intron_len);
-    }
-
-    my @slice1 = @intron_lenX_array[0 .. 5];
-    my @slice2 =
-      @intron_lenX_array[(scalar(@intron_lenX_array) - 5)
-      .. (scalar(@intron_lenX_array) - 1)];
-    ##@intron_lenX_array[ ( scalar(@intron_lenX_array) - 5 ) .. ( scalar(@intron_lenX_array) - 1 ) ]
-    ## BUG 2857
-    my $intron_short_int = $introns_len_list[0] - $introns_len_list[0] * (0.25);
-    chomp $intron_short_int;
-    if ($intron_short_int > 40) { $intron_short_int = 40; }
-
-    #my $intron_long_int =  $intronlist[$total_introns - 1];
-    my $intron_long_int =
-      $mean + ($st * 3) > 100_000 ? 100_000 : $mean + ($st * 3);
-    chomp $intron_long_int;
-    ### HACK using intron sizes from python script
     ## $intron_short_int = 21;
     ## $intron_long_int  = 6384;
     ## => getting worse parameter
 
+    my ($intron_short_int, $intron_long_int) =
+      minmax_intron_special($intr_mean, $intr_stdev, $intr_short, $intr_long);
     my $intergenic_min = 200;
     my $intergenic_max = 'Infinity';
 
@@ -516,7 +465,7 @@ sub normal_run
     my $OligoWeight_ini   = $profile_params{'OligoWeight_ini'};
     my $ExWeightParam_ini = $profile_params{'ExWeightParam_ini'};
 
-    ### [<now>] contig optimisation at <file>[<line>]...
+    ### [<now>] contig optimization at <file>[<line>]...
 
     @evaluation = @{
         parameter_optimize(
@@ -582,19 +531,10 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
 {
     ### [<now>] Running derive_coding_potential at <file>[<line>]...
 
-    my $markov_mod_A = "";
-    my $markov_mod_B = "";
+    my $markov_mod_A         = "";
+    my $markov_mod_B         = "";
     my $total_codingbases    = $conf->{train_cds_len};
     my $total_noncodingbases = $conf->{train_introns_len};
-    #~ my $my_command =
-      #~ "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_cds_tbl_fn";
-    #~ my $total_codingbases = capture($my_command);
-    #~ chomp $total_codingbases;
-    
-    #~ $my_command =
-      #~ "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_intron_tbl_fn ";
-    #~ my $total_noncodingbases = capture($my_command);
-    #~ chomp $total_noncodingbases;
 
     print {*STDERR}
       "There are $total_codingbases coding bases and $total_noncodingbases non-coding bases on this training set:\n";
@@ -715,7 +655,7 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
 }    #derive coding potential
 
 ## PROCESS SEQUENCES FUNCTION ( FLANKED GENE MODELS OBTAINED FOR OPTIMIZATION)
-sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
+sub process_seqs_4opty ($in_gff, $opt_type, $contig_opt_flag)
 {
 
     ### [<now>] Running process_seqs_4opty at <file>[<line>]...
@@ -723,19 +663,10 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     my $pso_gp_tbl  = "";
     my $gp_from_gff = "";
     my $pso_gp_gff  = "";
-    my $my_command  = "";
 
-    open(my $FH_LOCID, "-|",
-         "./bin/gff2gp.pypy $my_input_nodots_gff | sort -k 1 ");
-    ## 2017.07.11
-    ##"./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 "
-    ##);
-
-    while (<$FH_LOCID>)
-    {
-        $gp_from_gff .= $_;
-    }
-    close $FH_LOCID;
+    ##my $my_command  = "./bin/gff2gp.pypy $in_gff | sort -k 1";
+    my $my_command = "./bin/gff2gp.pypy $in_gff";
+    $gp_from_gff = capture($my_command);
 
     my $pso_tmp_gp_from_gff =
       $work_dir . $species . $opt_type . $contig_opt_flag . ".gp";
@@ -745,7 +676,6 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     close $FH_FOUT;
 
     ### [<now>] Before get_genes at <file>[<line>]...
-    # print {*STDERR} "BEFORE GETGENES: $fastas_dir, $pso_tmp_gp_from_gff, $work_dir/, $pso_out_tbl\n";
     ### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
 
     my $gp_Xgetgenes_tmp_pre_tbl =
@@ -755,17 +685,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     ### PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl
     ### Get sequences of 400-nt flanked sequences in tabular and gff formats\n";
 
-    open(
-        $FH_LOCID,
-        "-|",
-        "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $gp_Xgetgenes_tmp_pre_tbl | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - "
-    );
-
-    while (<$FH_LOCID>)
-    {
-        $pso_gp_tbl .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $gp_Xgetgenes_tmp_pre_tbl | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - ";
+    $pso_gp_tbl = capture($my_command);
 
     my $temp_gp_tbl =
       $work_dir . $species . $opt_type . $contig_opt_flag . ".gp.tbl";
@@ -773,16 +695,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$pso_gp_tbl";
     close $FH_FOUT;
 
-    open(
-        $FH_LOCID,
-        "-|",
-        "gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $gp_Xgetgenes_tmp_pre_tbl | egrep -v '(Intron|Utr)' - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $pso_gp_gff .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $gp_Xgetgenes_tmp_pre_tbl | egrep -v '(Intron|Utr)' - ";
+    $pso_gp_gff = capture($my_command);
 
     my $temp_gp_gff =
       $work_dir . $species . $opt_type . $contig_opt_flag . ".gp.gff";
@@ -818,17 +733,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$gp_seqs_lengths";
     close $FH_FOUT;
 
-    my $cds_gp = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/gff2cds.awk source=\"annotations\" $temp_gp_gff | sort -k1,1 | join $opt_type_cds_contigs_total_bp - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $cds_gp .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "./bin/gff2cds.awk source=\"annotations\" $temp_gp_gff | sort -k1,1 | join $opt_type_cds_contigs_total_bp - ";
+    my $cds_gp = capture($my_command);
 
     my $temp_gp_cds_fn =
       $work_dir . $species . $opt_type . $contig_opt_flag . ".cds_gp";
@@ -880,18 +787,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$gp_contigs_seqs_lengths";
     close $FH_FOUT;
 
-    my $gp_contig_tmp = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/multiple_annot2one.awk species=$species leng=$my_seq_len $temp_gp_cds_fn "
-    );
-    while (<$FH_LOCID>)
-    {
-
-        $gp_contig_tmp .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "./bin/multiple_annot2one.awk species=$species leng=$my_seq_len $temp_gp_cds_fn ";
+    my $gp_contig_tmp = capture($my_command);
 
     my $temp_gff2gpcontig =
       $work_dir . $species . $opt_type . $contig_opt_flag . ".contig.gp.cds";
@@ -900,17 +798,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$gp_contig_tmp";
     close $FH_FOUT;
 
-    my $cds2gffcontig = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/cds2gff.awk $temp_gff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$my_seq_len,\".\",\".\",\".\",\".\";print}else {print}}' - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $cds2gffcontig .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "./bin/cds2gff.awk $temp_gff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$my_seq_len,\".\",\".\",\".\",\".\";print}else {print}}' - ";
+    my $cds2gffcontig = capture($my_command);
 
     my $temp_gp_cdsgff_contig_eval =
         $work_dir
@@ -2219,11 +2109,41 @@ sub sorteval
 ##  mean_stdev...
 use Inline Python => <<'END_STATS';
 from statistics import mean, stdev
-def mean_stdev(input_list):
+
+def seq_sizes_calc(input_seq_table):
+    sizes_list = []
+    for line in open(input_seq_table).readlines():
+        sl = line.split()
+        seq_size = len(sl[1])
+        sizes_list.append(seq_size)
+        
+    sizes_list.sort()
+    print sizes_list[:10]        
+    return sizes_list
+    
+def mean_stdev(input_seq_table):
+    input_list = seq_sizes_calc(input_seq_table)
+    short_intr = input_list[0]
+    long_intr  = input_list[-1]
     input_list = [float(x) for x in input_list]
     list_mean = mean(input_list)
     list_stdev = stdev(input_list)
-    return list_mean, list_stdev
+    return list_mean, list_stdev, short_intr, long_intr
+    
+    
+def minmax_intron_special( list_mean, list_stdev, short_intr, long_intr):    
+    #~ slice1 = input_list[:5];
+    #~ slice2 = input_list[-5:]
+    
+    short_intr = short_intr * 0.75
+    if short_intr > 40:
+        short_intr = 40 
+    
+    long_intr = list_mean + list_stdev * 3
+    if long_intr > 100000:
+        long_intr = 100000
+    return short_intr, long_intr
+        
 END_STATS
 
 sub create_data_dirs (@data_dirs)
@@ -2248,43 +2168,34 @@ sub create_data_dirs (@data_dirs)
     return 1;
 }
 
-#~ sub num_of_lines_in_file ($input_fn)
-#~ {
-#~ my $my_num_lines;
-#~ $my_num_lines = capture("cat $input_fn | wc -l ");
-
-#~ #assert No such file or directory #
-#~ chomp $my_num_lines;
-#~ $my_num_lines = int($my_num_lines);
-#~ return $my_num_lines;
-#~ }
-
-sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn) 
+sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
 {
-          ### [<now>] Running tbl_2_fasta at <file>[<line>]...
-          ### in: $in_tbl_fn
-          ### out: $fa_out_fn
+    ### [<now>] Running tbl_2_fasta at <file>[<line>]...
+    ### in: $in_tbl_fn
+    ### out: $fa_out_fn
 
-      open(my $FH_IN, "<", "$in_tbl_fn") or croak "Failed here";
+    open(my $FH_IN,   "<", "$in_tbl_fn") or croak "Failed here";
     open(my $FH_FOUT, ">", "$fa_out_fn") or croak "Failed here";
-    while (<$FH_IN>) {
+    while (<$FH_IN>)
+    {
         chomp;
 
         #my ( $n, $s ) = split( /\s+/, $_ );
         my ($seq_name, $seq) = split;
         my ($seq_position, $seq_len) = (1, length($seq));
         print {$FH_FOUT} ">$seq_name\n";
-        
-          while ($seq_position <= $seq_len) {
+
+        while ($seq_position <= $seq_len)
+        {
             print {$FH_FOUT} substr($seq, $seq_position - 1, 60) . "\n";
             $seq_position += 60;
-            
-          } 
-    } close $FH_IN;
+
+        }
+    }
+    close $FH_IN;
     close $FH_FOUT;
-        ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
-      return $fa_out_fn;
-    ;
+    ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
+    return $fa_out_fn;
 }
 
 sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
