@@ -23,7 +23,7 @@ Geneid::GeneModel - Handler for GeneModel objects in GeneID parameter files
     $param->readParam($pin); #read in a template parameter file
 
     for (my $i = 0;$i < $param->numIsocores ; $i++){
-	    if (!defined @{$param->isocores}[$i]->set_profile($label,$length,$newoff,$cutoff,$order,$profile)){die "error in setting profile\n";} #set a new profile where $profile is the profile name.
+        if (!defined @{$param->isocores}[$i]->set_profile($label,$length,$newoff,$cutoff,$order,$profile)){die "error in setting profile\n";} #set a new profile where $profile is the profile name.
     }  
     $param->geneModel = Geneid::GeneModel->new();
 
@@ -57,19 +57,19 @@ sub new
   {
       my ($class, $m) = @_;
       my $self = {
-		  _model_string => undef,
-		  _model => {
-			     IntragenicRules => undef,
-			     IntragenicRules2 => undef,
-			     ExternalRules   => undef,
-			     IntergenicRules => undef,
-			     BeginEndRules   => undef
-			     }
-		 };
+          _model_string => undef,
+          _model => {
+                 IntragenicRules => undef,
+                 IntragenicRules2 => undef,
+                 ExternalRules   => undef,
+                 IntergenicRules => undef,
+                 BeginEndRules   => undef
+                 }
+         };
       
       bless $self, $class;
       if (defined $m){
-	  string_to_model($m);
+      string_to_model($m);
       }
       return $self;
   }
@@ -93,28 +93,28 @@ sub addIntragenicRule2{
 sub intronRange{
     my ($self, $min, $max) = @_;
     if (defined $self->{_model}->{IntragenicRules}) {
-	foreach my $rule (@{$self->{_model}->{IntragenicRules}}) {
-	    $rule->{md}=$min;
-	    $rule->{Md}=$max;
-	}
+    foreach my $rule (@{$self->{_model}->{IntragenicRules}}) {
+        $rule->{md}=$min;
+        $rule->{Md}=$max;
+    }
     }
 }
 sub externalRange{
     my ($self, $min, $max) = @_;
     if (defined $self->{_model}->{ExternalRules}) {
-	foreach my $rule (@{$self->{_model}->{ExternalRules}}) {
-	    $rule->{md}=$min;
-	    $rule->{Md}=$max;
-	}
+    foreach my $rule (@{$self->{_model}->{ExternalRules}}) {
+        $rule->{md}=$min;
+        $rule->{Md}=$max;
+    }
     }
 }
 sub intergenicRange{
     my ($self, $min, $max) = @_;
     if (defined $self->{_model}->{IntergenicRules}) {
-	foreach my $rule (@{$self->{_model}->{IntergenicRules}}) {
-	    $rule->{md}=$min;
-	    $rule->{Md}=$max;
-	}
+    foreach my $rule (@{$self->{_model}->{IntergenicRules}}) {
+        $rule->{md}=$min;
+        $rule->{Md}=$max;
+    }
     }
 }
 
@@ -138,9 +138,9 @@ sub addBeginEndRule{
 sub modelString{
     my ( $self, $val ) = @_;
     if (defined($val)){
-	$self->{_model_string} = $val;
+    $self->{_model_string} = $val;
     }else{
-	$self->model_to_string();
+    $self->model_to_string();
     }
     return $self->{_model_string};
 }
@@ -148,111 +148,111 @@ sub string_to_model{
     my ( $self, $ms ) = @_;
     my $type = 'intra';
     for (split /^/, $ms) {
-	#dk 20150918 debug
-	print STDERR "$_\n\n";
-	#dk 20150918 debug
-	next if $_!~/\w/;
-	chomp;
-	if (m/^#.*INTRA/i){
-	    $type = 'intra';
-	    #print STDERR "here\n";
-	}elsif(m/^#.*External/i){
-	    $type = 'ext';
-	}elsif(m/^#.*INTER/i){
-	    $type = 'inter';
-	}elsif(m/^#.*END/i){
-	    $type = 'begin_end';
-	}else{
-	    #print STDERR "$type\n";
-	    if ($type eq 'intra'){
-		my $block = 0;
-		my @f = split;
-		my @uc = split ":",$f[0];
-		my @de = split ":",$f[1];
-		my ($minD,$maxD) = split ":",$f[2];
-		$block = 1 if exists $f[3];
-		$self->addIntragenicRule([@uc],[@de],$minD,$maxD,$block);
-		
-	    }elsif($type eq 'ext'){
-		my $block = 0;
-		my @f = split;
-		my @uc = split ":",$f[0];
-		my @de = split ":",$f[1];
-		my ($minD,$maxD) = split ":",$f[2];
-		$block = 1 if exists $f[3];
-		$self->addExternalRule([@uc],[@de],$minD,$maxD,$block);
-	    }elsif($type eq 'inter'){
-		my $block = 0;
-		my @f = split;
-		my @uc = split ":",$f[0];
-		my @de = split ":",$f[1];
-		my ($minD,$maxD) = split ":",$f[2];
-		$block = 1 if exists $f[3];
-		$self->addIntergenicRule([@uc],[@de],$minD,$maxD,$block);
-	    }elsif($type eq 'begin_end'){
-		my $block = 0;
-		my @f = split;
-		my @uc = split ":",$f[0];
-		my @de = split ":",$f[1];
-		my ($minD,$maxD) = split ":",$f[2];
-		$block = 1 if exists $f[3];
-		$self->addBeginEndRule([@uc],[@de],$minD,$maxD,$block);
-	    }
-	}
+    #dk 20150918 debug
+    #print STDERR "$_\n\n";
+    #dk 20150918 debug
+    next if $_!~/\w/;
+    chomp;
+    if (m/^#.*INTRA/i){
+        $type = 'intra';
+        #print STDERR "here\n";
+    }elsif(m/^#.*External/i){
+        $type = 'ext';
+    }elsif(m/^#.*INTER/i){
+        $type = 'inter';
+    }elsif(m/^#.*END/i){
+        $type = 'begin_end';
+    }else{
+        #print STDERR "$type\n";
+        if ($type eq 'intra'){
+        my $block = 0;
+        my @f = split;
+        my @uc = split ":",$f[0];
+        my @de = split ":",$f[1];
+        my ($minD,$maxD) = split ":",$f[2];
+        $block = 1 if exists $f[3];
+        $self->addIntragenicRule([@uc],[@de],$minD,$maxD,$block);
+        
+        }elsif($type eq 'ext'){
+        my $block = 0;
+        my @f = split;
+        my @uc = split ":",$f[0];
+        my @de = split ":",$f[1];
+        my ($minD,$maxD) = split ":",$f[2];
+        $block = 1 if exists $f[3];
+        $self->addExternalRule([@uc],[@de],$minD,$maxD,$block);
+        }elsif($type eq 'inter'){
+        my $block = 0;
+        my @f = split;
+        my @uc = split ":",$f[0];
+        my @de = split ":",$f[1];
+        my ($minD,$maxD) = split ":",$f[2];
+        $block = 1 if exists $f[3];
+        $self->addIntergenicRule([@uc],[@de],$minD,$maxD,$block);
+        }elsif($type eq 'begin_end'){
+        my $block = 0;
+        my @f = split;
+        my @uc = split ":",$f[0];
+        my @de = split ":",$f[1];
+        my ($minD,$maxD) = split ":",$f[2];
+        $block = 1 if exists $f[3];
+        $self->addBeginEndRule([@uc],[@de],$minD,$maxD,$block);
+        }
+    }
     }
 }
 sub model_to_string{
     my ( $self, $val ) = @_;
     my $ms = "";
     if (defined $self->{_model}->{IntragenicRules}) {
-	#print STDERR "print INTRAgenic\n";
-	$ms .= "# INTRAgenic connections\n";
-	foreach my $rule (@{$self->{_model}->{IntragenicRules}}) {
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
-	    $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
-	    $ms .= ' block' if $rule->{block};
-	    $ms .= "\n";
-	}
+    #print STDERR "print INTRAgenic\n";
+    $ms .= "# INTRAgenic connections\n";
+    foreach my $rule (@{$self->{_model}->{IntragenicRules}}) {
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
+        $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
+        $ms .= ' block' if $rule->{block};
+        $ms .= "\n";
+    }
     }
     if (defined $self->{_model}->{IntragenicRules2}) {
         foreach my $rule (@{$self->{_model}->{IntragenicRules2}}) {
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
-	    $ms .= sprintf "%-20s   ",join(':',($rule->{mi},$rule->{Mi}));
-	    $ms .= ' block' if $rule->{block};
-	    $ms .= "\n";
-	}
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
+        $ms .= sprintf "%-20s   ",join(':',($rule->{mi},$rule->{Mi}));
+        $ms .= ' block' if $rule->{block};
+        $ms .= "\n";
+    }
     }
     if (defined $self->{_model}->{ExternalRules}) {
-	$ms .= "# External features\n";
-	foreach my $rule (@{$self->{_model}->{ExternalRules}}) {
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
-	    $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
-	    $ms .= ' block' if $rule->{block};
-	    $ms .= "\n";
-	}
+    $ms .= "# External features\n";
+    foreach my $rule (@{$self->{_model}->{ExternalRules}}) {
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
+        $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
+        $ms .= ' block' if $rule->{block};
+        $ms .= "\n";
+    }
     }
     if (defined $self->{_model}->{IntergenicRules}) {
-	$ms .= "# INTERgenic connections\n";
-	foreach my $rule (@{$self->{_model}->{IntergenicRules}}) {
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
-	    $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
-	    $ms .= ' block' if $rule->{block};
-	    $ms .= "\n";
-	}
+    $ms .= "# INTERgenic connections\n";
+    foreach my $rule (@{$self->{_model}->{IntergenicRules}}) {
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
+        $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
+        $ms .= ' block' if $rule->{block};
+        $ms .= "\n";
+    }
     }
     if (defined $self->{_model}->{BeginEndRules}) {
-	$ms .= "# BEGINNING and END of prediction\n";
-	foreach my $rule (@{$self->{_model}->{BeginEndRules}}) {
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
-	    $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
-	    $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
-	    $ms .= ' block' if $rule->{block};
-	    $ms .= "\n";
-	}
+    $ms .= "# BEGINNING and END of prediction\n";
+    foreach my $rule (@{$self->{_model}->{BeginEndRules}}) {
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{uc}});
+        $ms .= sprintf "%-40s   ",join(':',@{$rule->{de}});
+        $ms .= sprintf "%-20s   ",join(':',($rule->{md},$rule->{Md}));
+        $ms .= ' block' if $rule->{block};
+        $ms .= "\n";
+    }
     }
     $self->{_model_string} = $ms;
 }
