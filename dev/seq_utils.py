@@ -212,3 +212,4 @@ def base_freq_count(seq_dict):
             #OK working line below
             #print("%s\t%s\t%s\t%.4f" % (position+1, base, base_frequency, base_count))
     return  freq_output_list           
+

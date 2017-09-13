@@ -55,7 +55,7 @@ for element in product(four_bases, repeat=2):
 background_freq_dict = read_3_cols(background_4cols_fn)
 signal_freq_dict = read_3_cols(signal_4cols_fn)  
 
-assert len(background_freq_dict) == len(signal_freq_dict)
+assert len(background_freq_dict) >= len(signal_freq_dict)
 
 for position in signal_freq_dict.keys():
     #~ ##DEBUG

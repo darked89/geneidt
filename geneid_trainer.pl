@@ -79,16 +79,20 @@ print Dumper($conf);
 
 ## die("checking YAML");
 
-#~ my $genetic_code = "./etc/genetic.code";
+my $genetic_code = "./etc/genetic.code";
 
 ## no need to run anything if this fails
 ##check_external_progs();
 
 ## Move parts necessary for getting comand line args here
+my $input_hash   = $conf->{input};
+my $input_gff_fn = $input_hash->{input_gff};
+my $input_fas_fn = $input_hash->{genome_fasta};
+my $species      = $input_hash->{species};
 
-my $input_gff_fn = $conf->{input_gff};
-my $input_fas_fn = $conf->{genome_fasta};
-my $species      = $conf->{species};
+#~ my $input_gff_fn = $conf->{input_gff};
+#~ my $input_fas_fn = $conf->{genome_fasta};
+#~ my $species      = $conf->{species};
 
 ### Got:
 ### $species
@@ -166,8 +170,8 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = $conf->{work_dir};
 
+my $work_dir = $conf->{input}->{work_dir};
 my $tmp_dir      = "$work_dir/temp_00/";
 my $stats_dir    = "$work_dir/stats/";
 my $sites_dir    = "$work_dir/sites/";
