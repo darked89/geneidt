@@ -26,7 +26,7 @@ Geneid::Isocore - Handler for Isocore objects in GeneID parameter files
     $param->readParam($pin); #read in a template parameter file
 
     for (my $i = 0;$i < $param->numIsocores ; $i++){
-	    if (!defined @{$param->isocores}[$i]->set_profile($label,$length,$newoff,$cutoff,$order,$profile)){die "error in setting profile\n";} #set a new profile where $profile is the profile name.
+        if (!defined @{$param->isocores}[$i]->set_profile($label,$length,$newoff,$cutoff,$order,$profile)){die "error in setting profile\n";} #set a new profile where $profile is the profile name.
     }  
 
     $param->writeParam; # write out the parameter file
@@ -59,75 +59,75 @@ methods. Internal methods are usually preceded with a _
 =cut
 
 my %profilenames = (
-		    Start_profile => 1,
-		    U12_Branch_point_profile => 1,
-		    Branch_point_profile => 1,
-		    Poly_Pyrimidine_Tract_profile => 1,
-		    U12gtag_Acceptor_profile => 1,
-		    U12atac_Acceptor_profile => 1,
-		    Acceptor_profile => 1,
-		    U12gtag_Donor_profile => 1,
-		    U12atac_Donor_profile => 1,
-		    U2gcag_Donor_profile => 1,
-		    U2gta_Donor_profile => 1,
-		    U2gtg_Donor_profile => 1,
-		    U2gty_Donor_profile => 1,
-		    Donor_profile => 1,
-		    Stop_profile => 1,
-		    PolyA_Signal_profile => 1,
-		   );
+            Start_profile => 1,
+            U12_Branch_point_profile => 1,
+            Branch_point_profile => 1,
+            Poly_Pyrimidine_Tract_profile => 1,
+            U12gtag_Acceptor_profile => 1,
+            U12atac_Acceptor_profile => 1,
+            Acceptor_profile => 1,
+            U12gtag_Donor_profile => 1,
+            U12atac_Donor_profile => 1,
+            U2gcag_Donor_profile => 1,
+            U2gta_Donor_profile => 1,
+            U2gtg_Donor_profile => 1,
+            U2gty_Donor_profile => 1,
+            Donor_profile => 1,
+            Stop_profile => 1,
+            PolyA_Signal_profile => 1,
+           );
 sub new 
   {
       my ($class) = @_; 
       my $self = {
-		  _boundaries_of_isochore => [0,100],
-		  _Absolute_cutoff_exons => [(qw(-150 -150 -150 -150 0))],
-		  _Coding_cutoff_oligos => [(qw(-100 -150 -150 -150))],
-		  _Site_factor => [0.6,0.6,0.6,0.6,0.6],
-		  _Exon_factor => [0.4,0.4,0.4,0.4],
-		  _HSP_factor => [1.0,1.0,1.0,1.0,1.0],
-		  _Evidence_Factor => 1,
-		  _Evidence_Weight => 0,
-		  _RSS_Markov_Score => undef,
-		  _RSS_Donor_Score_Cutoff => undef,
-		  _RSS_Acceptor_Score_Cutoff => undef,
-		  _U12_Splice_Score_Threshold => undef,
-		  _U12_Exon_Score_Threshold => undef,
-		  _U12_Exon_weight => undef,
-		  _Exon_weights => [-4,-4,-4,-4,0],
-		  _Start_profile => undef,
-		  _U12_Branch_point_profile => undef,
-		  _Poly_Pyrimidine_Tract_profile => undef,
-		  _U12gtag_Acceptor_profile => undef,
-		  _U12atac_Acceptor_profile => undef,
-		  _Acceptor_profile => undef,
-		  _U12gtag_Donor_profile => undef,
-		  _U12atac_Donor_profile => undef,
-		  _Donor_profile => undef,
-		  _PolyA_Signal_profile => undef,
-		  _Stop_profile => {label=>'Stop_Profile',length=>4,offset=>0,cutoff=>-9999,order=>0,afactor=>"",bfactor=>"",acc_context=>"",dist=>"",optdist=>"",penalty_factor=>"",profile=>[
-																							       [1,'A',0],
-																							       [1,'C',0],
-																							       [1,'G',0],
-																							       [1,'T',0],
-																							       [2,'A',-9999],
-																							       [2,'C',-9999],
-																							       [2,'G',-9999],
-																							       [2,'T',0.000],
-																							       [3,'A',0.000],
-																							       [3,'C',-9999],
-																							       [3,'G',0.000],
-																							       [3,'T',-9999],
-																							       [4,'A',0.000],
-																							       [4,'C',-9999],
-																							       [4,'G',0.000],
-																							       [4,'T',-9999]
-																							       ]},
-		  _Markov_order => undef,
-		  _Markov_Initial_probability_matrix => undef,
-		  _Markov_Transition_probability_matrix => undef,
-		  _maximum_number_of_donors_per_acceptor_site => 5
-		 };
+          _boundaries_of_isochore => [0,100],
+          _Absolute_cutoff_exons => [(qw(-150 -150 -150 -150 0))],
+          _Coding_cutoff_oligos => [(qw(-100 -150 -150 -150))],
+          _Site_factor => [0.6,0.6,0.6,0.6,0.6],
+          _Exon_factor => [0.4,0.4,0.4,0.4],
+          _HSP_factor => [1.0,1.0,1.0,1.0,1.0],
+          _Evidence_Factor => 1,
+          _Evidence_Weight => 0,
+          _RSS_Markov_Score => undef,
+          _RSS_Donor_Score_Cutoff => undef,
+          _RSS_Acceptor_Score_Cutoff => undef,
+          _U12_Splice_Score_Threshold => undef,
+          _U12_Exon_Score_Threshold => undef,
+          _U12_Exon_weight => undef,
+          _Exon_weights => [-4,-4,-4,-4,0],
+          _Start_profile => undef,
+          _U12_Branch_point_profile => undef,
+          _Poly_Pyrimidine_Tract_profile => undef,
+          _U12gtag_Acceptor_profile => undef,
+          _U12atac_Acceptor_profile => undef,
+          _Acceptor_profile => undef,
+          _U12gtag_Donor_profile => undef,
+          _U12atac_Donor_profile => undef,
+          _Donor_profile => undef,
+          _PolyA_Signal_profile => undef,
+          _Stop_profile => {label=>'Stop_Profile',length=>4,offset=>0,cutoff=>-9999,order=>0,afactor=>"",bfactor=>"",acc_context=>"",dist=>"",optdist=>"",penalty_factor=>"",profile=>[
+                                                                                                   [1,'A',0],
+                                                                                                   [1,'C',0],
+                                                                                                   [1,'G',0],
+                                                                                                   [1,'T',0],
+                                                                                                   [2,'A',-9999],
+                                                                                                   [2,'C',-9999],
+                                                                                                   [2,'G',-9999],
+                                                                                                   [2,'T',0.000],
+                                                                                                   [3,'A',0.000],
+                                                                                                   [3,'C',-9999],
+                                                                                                   [3,'G',0.000],
+                                                                                                   [3,'T',-9999],
+                                                                                                   [4,'A',0.000],
+                                                                                                   [4,'C',-9999],
+                                                                                                   [4,'G',0.000],
+                                                                                                   [4,'T',-9999]
+                                                                                                   ]},
+          _Markov_order => undef,
+          _Markov_Initial_probability_matrix => undef,
+          _Markov_Transition_probability_matrix => undef,
+          _maximum_number_of_donors_per_acceptor_site => 5
+         };
       bless $self, $class;
   }
 
