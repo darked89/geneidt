@@ -12,14 +12,14 @@ There are several measures to print about these comparisons:
 
 ### Nucleotide level:
 
-* NuR    
-* NuP      
-* TP      
-* TN      
-* FP      
-* FN    
-* SN      
-* SP      
+* **NuR** ?? total annotated nucleotides ??    
+* **NuP** ?? total predicted nucleotides ??      
+* **TP** true positive      
+* **TN** true negative     
+* **FP** false positive      
+* **FN** false negative    
+* **SN** sensitivity      
+* **SP** specificity      
 * AC      
 * CC 
 
@@ -77,10 +77,46 @@ Options are about printing:
 the percents, preserving the absolute values such as TN, TP, FN, FP, ...
 
 
+### Used by geneid_trainer:
 
-                   
+Script runs evaluation binary with options
+```
+evaluation -sta 
+```
 
---------------------------
+The parsed output contains:
+```
+SN	  SP	  CC	 SNe	 SPe	SNSP		SNg	 SPg	SNSPg raME	raWE
+```
+and it is prefixed with geneid_trainer values 
+```
+oWF eWF 
+```
+
+1. oWF 
+1. eWF 
+1. SN 
+1. SP #3 desc
+1. CC 
+1. SNe 
+1. SPe #1 desc
+1. SNSP 
+1. SNg 
+1. SPg #2 desc
+1. SNSPg 
+1. raME #4 asc
+1. raWE #5 asc
+
+The array is then sorted:
+```
+    ## descending numerical
+    $b->[7] <=> $a->[7]    ## reverse numerical
+      || $b->[10] <=> $a->[10]
+      || $b->[4] <=> $a->[4]
+      ## ascending numerical
+      || $a->[11] <=> $b->[11]
+      || $a->[12] <=> $b->[12]
+```
 
 ## Input format for real(annotations) and prediction files
 
