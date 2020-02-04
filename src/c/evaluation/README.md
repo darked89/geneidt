@@ -82,7 +82,7 @@ the percents, preserving the absolute values such as TN, TP, FN, FP, ...
 
 --------------------------
 
-3. Format for real and prediction files:
+## Input format for real(annotations) and prediction files
 
 In both files, there is a token to notice end/begin of data for more than one sequence ($)
 
