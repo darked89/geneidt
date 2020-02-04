@@ -1,34 +1,74 @@
 README for evaluation'01: Enrique Blanco.
 
-1. Evaluation:
+# Evaluation
 
-evaluation is a program to assess the accuracy of gene predictions at nucleotide, exon and gene level. Two input 
-gff-files are required: one for predictions and other for annotations (real genes). There are several measures
-to print about these comparisons:
+Evaluation is a program to assess the accuracy of gene predictions at nucleotide, exon and gene level. 
+Two input gff-files are required: 
+predictions & annotations (real genes). 
 
-* Nucleotide level:
-NuR    NuP      TP      TN      FP      FN    SN      SP      AC      CC 
 
-* Exon level:
-ExR    ExP     TPe      ME      WE  raME    raWE     SNe     SPe    SNSP
+## Stats
+There are several measures to print about these comparisons:
+
+### Nucleotide level:
+
+* NuR    
+* NuP      
+* TP      
+* TN      
+* FP      
+* FN    
+* SN      
+* SP      
+* AC      
+* CC 
+
+### Exon level:
+
+* ExR    
+* ExP     
+* TPe      
+* ME      
+* WE  
+* raME    
+* raWE     
+* SNe     
+* SPe    
+* SNSP
  
-* Gene level: 
-GeR    GeP     TPg      MG      WG  raMG    raWG     SNg     SPg    SNSPg   raJG    raSG
+### Gene level: 
+
+* GeR    
+* GeP     
+* TPg      
+* MG      
+* WG  
+* raMG    
+* raWG     
+* SNg     
+* SPg    
+* SNSPg   
+* raJG    
+* raSG
   
 New gene level statistics are about split and join genes while remain classical and already known measures
 such as specifity or sensibility. Ratios (ra) are percents in Missing/Wrong exons and genes.
 
---------------------------
 
-2. Options:
+## Uage & Options:
+
+```
+evaluation [-vats] <Predicted_genes.gff> <Real_genes.aff>  
+```
+
 
 Options are about printing:
-
+```
         -v: Verbose. Print all messages
         -a: Average. Print average stats (more than 1 sequence)
         -t: Total. Print total stats (more than 1 sequence)
         -s: Short. Print a short output                  
-
+```
 * Short: Short version from the original standard output only with percent values at all the levels.
 
 * Average: Arithmetic mean using the already computed values in the input sequences.
@@ -37,10 +77,8 @@ Options are about printing:
 the percents, preserving the absolute values such as TN, TP, FN, FP, ...
 
 
-NAME
-        evaluation - a program to measure gene prediction accuracy
-SYNOPSIS
-        evaluation [-vats] <Predict_genes> <Real_genes>             
+
+                   
 
 --------------------------
 
@@ -51,8 +89,8 @@ In both files, there is a token to notice end/begin of data for more than one se
 -> Annotations:
 At the beginning it is necessary one gff-line to put the length of sequence.
 
-For instance:
 
+```
 Annotation filename:
 AB009080        ANNOTA  Sequence        1       4875    .       .       .       1
 AB009080        ANNOTATED       First   354     1352    1.000000        +       0       1
@@ -77,20 +115,21 @@ AB016609        geneid_dd       Internal        703     1227    47.60   +       
 AB016609        geneid_dd       Internal        1328    1547    22.06   +       1       gene_1  #       AA      293:366
 AB016609        geneid_dd       Terminal        1630    2766    136.21  +       0       gene_1  #       AA      367:745    
 
+```
 Here one script to insert $ into a gff-file is kindly provided (by G.Parra)
 
 Script to insert "$" between sequences in a gff file with more than one sequence:
+```
 sort +0 -1 +3n  input.gff | gawk '{if (NR==1) ant=$1; if ($1!=ant) {print "$";ant=$1}; print }' > output.gff
+```
 
---------------------------
+## Directories:
 
-4. Directories:
-
-src: source code
-samples: artifTests/ realTests/ -> sets of filenames to test the program
-ancient: old code for evaluation (CGI version)
-include: headers
-bin: place for binary
-objects: place for obj. files
+* src: source code
+* samples: artifTests/ realTests/ -> sets of filenames to test the program
+* ancient: old code for evaluation (CGI version)
+* include: headers
+* bin: place for binary
+* objects: place for obj. files
 
 
