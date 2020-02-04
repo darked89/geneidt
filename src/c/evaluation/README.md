@@ -90,8 +90,9 @@ In both files, there is a token to notice end/begin of data for more than one se
 At the beginning it is necessary one gff-line to put the length of sequence.
 
 
+
+### Annotation filename:
 ```
-Annotation filename:
 AB009080        ANNOTA  Sequence        1       4875    .       .       .       1
 AB009080        ANNOTATED       First   354     1352    1.000000        +       0       1
 AB009080        ANNOTATED       Internal        1489    1581    1.000000        +       0       1
@@ -103,8 +104,10 @@ AB016609        ANNOTATED       First   200     552     1.000000        +       
 AB016609        ANNOTATED       Internal        703     1233    1.000000        +       1       1
 AB016609        ANNOTATED       Internal        1328    1547    1.000000        +       1       1
 AB016609        ANNOTATED       Terminal        1630    2766    1.000000        +       0       1   
+```
 
-Prediction filename:
+### Prediction filename:
+```
 AB009080        geneid_dd       First   354     1352    184.47  +       0       gene_1  #       AA      1:333
 AB009080        geneid_dd       Internal        1489    1581    14.70   +       0       gene_1  #       AA      334:364
 AB009080        geneid_dd       Internal        1669    2485    139.27  +       0       gene_1  #       AA      365:637
@@ -122,6 +125,9 @@ Script to insert "$" between sequences in a gff file with more than one sequence
 ```
 sort +0 -1 +3n  input.gff | gawk '{if (NR==1) ant=$1; if ($1!=ant) {print "$";ant=$1}; print }' > output.gff
 ```
+
+**Caveat**: above inputs do not work with the provided C code. GFFs with multiple contigs not supported???   
+
 
 ## Directories:
 
