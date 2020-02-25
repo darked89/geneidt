@@ -2051,6 +2051,11 @@ sub compute_matrices_4sites ($my_input_table, $sites_number, $my_site_type)
 def order_site_select(sites_number, site_type, train_sites_cutoff, train_sites_markov_cutoff):
     ##sites_number = num_of_lines_in_file($my_input_table);
     #my_order = 0 #default
+    encoding = 'utf-8'
+    print("inside order_site_select")
+    
+    # fixing b-string:
+    site_type = site_type.decode(encoding)
     if site_type in ('acceptor','donor'):
        if sites_number > train_sites_cutoff:
            my_order = 1
@@ -2062,7 +2067,7 @@ def order_site_select(sites_number, site_type, train_sites_cutoff, train_sites_m
         else:
             my_order = 0
     else:
-        print 'ERROR, unknown site',  site_type       
+        print( 'ERROR, unknown site',  site_type)      
     return my_order
 
 END_OF_COMPUTE_MATRICES_4SITES
@@ -2122,7 +2127,7 @@ def seq_sizes_calc(input_seq_table):
         sizes_list.append(seq_size)
         
     sizes_list.sort()
-    print sizes_list[:10]        
+    print(sizes_list[:10])        
     return sizes_list
     
 def mean_stdev(input_seq_table):
