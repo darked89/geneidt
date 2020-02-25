@@ -35,6 +35,7 @@ use Readonly;
 use feature 'say';
 
 ## geneid_trained modules
+use lib '.';
 use Geneid::Param;
 use Geneid::Isocore;
 use Geneid::geneid;
@@ -72,7 +73,7 @@ my $gff2ps      = 0;
 ## Get arguments (command line)
 GetOptions(
     'species:s'       => \$species,
-    'gff:s'           => \$gff,
+    'gff:s'            => \$gff,
     'fastas:s'        => \$fasta,
     'sout|statsout:s' => \$sout,
     'branch'          => \$branchp,
@@ -100,7 +101,7 @@ print STDERR $usage and exit unless ( $species && $gff && $fasta && $sout );
 
 #create_work_dirs();
 my $work_dir = "$PROGRAM_HOME/workdir_00_gtrain/";
-my $tmp_dir  = "$work_dir/temp_00/";
+my $tmp_dir  = "$work_dir/master_temp_00/";
 
 #my $TMP         = "$work_dir/tmp/";
 #my $stats_dir   = "$work_dir/stats/";
