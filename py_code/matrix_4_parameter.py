@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 #!/usr/bin/gawk -f
 #USAGE= $BIN/preparetrimatrixstart4parameter.awk 4 5 6 7 $DATA/set2/sites/starts.geneid.dimatrix
@@ -90,4 +90,4 @@ for matrix_position in site_logratios_dict.keys():
     for kmer in kmer_plus_list2:
         logratio = site_logratios_dict[matrix_position][kmer]
         out_string = '%s %s %s' % (matrix_position, kmer, logratio)
-        print out_string
+        print( out_string)

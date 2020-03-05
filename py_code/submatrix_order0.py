@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 replacement for submatrix_order0.awk
@@ -26,8 +26,8 @@ end   = int(sys.argv[2])
 in_fn = sys.argv[3]
 
 for line in open(in_fn).readlines():
-	sl = line.split()
-	col_two = int(sl[1])
-	if (col_two >= start) and (col_two <= end):
-		col_two = col_two - start + 1 
-		print col_two, sl[0], sl[2]
+    sl = line.split()
+    col_two = int(sl[1])
+    if (col_two >= start) and (col_two <= end):
+        col_two = col_two - start + 1 
+        print( col_two, sl[0], sl[2])

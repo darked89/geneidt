@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 #USAGE= gawk -f aux.awk Background_P_file, Observed_P_file
@@ -76,11 +76,11 @@ for position in signal_freq_dict.keys():
             result = log(signal/background)
                         ## natural base e log
         else:
-            print "ERROR. bad values"
-            print position, kmer, signal_freq_dict[position][kmer]
-            print position, kmer, background_freq_dict[position][kmer]
+            print( "ERROR. bad values")
+            print( position, kmer, signal_freq_dict[position][kmer])
+            print( position, kmer, background_freq_dict[position][kmer])
             break
         out_string = "%s\t%s\t%s" % (position, kmer, result)
         out_string = "%s %s %s" % (position, kmer, result)
         #out_string = "%s %s %s" % (kmer, position,  result)
-        print out_string
+        print( out_string )

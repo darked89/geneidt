@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 
@@ -39,9 +39,10 @@ def read_4_cols(input_fn):
     tmp_frequency_dict = {}
     for line in open(input_fn).readlines():
         sl = line.split()
-        position  = int(sl[1])
-        base      = sl[0]
-        frequency = float(sl[3])
+	### 202003 darked: 3 lines below differ from later  script
+        position  = int(sl[0])
+        base      = sl[1]
+        frequency = float(sl[2])
         if position not in tmp_frequency_dict.keys():
             tmp_frequency_dict[position] = {}
         tmp_frequency_dict[position][base] = frequency
@@ -80,13 +81,13 @@ for position in signal_freq_dict.keys():
             result = log(signal/background)
                         ## natural base e log
         else:
-            print "ERROR. bad values"
-            print position, base, signal_freq_dict[position][base]
-            print position, base, background_freq_dict[position][base]
+            print( "ERROR. bad values")
+            print( position, base, signal_freq_dict[position][base])
+            print( position, base, background_freq_dict[position][base])
             break
         #out_string = "%s\t%s\t%s" % (position, base, result)
         out_string = "%s %s %s" % (base, position,  result)
-        print out_string
+        print( out_string)
 
 """
       if ($4!=0 && BP[$1 $2]!=0 && $4!=1) print $1, $2, log($4/BP[$1 $2]);
