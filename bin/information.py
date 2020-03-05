@@ -1,1 +1,1 @@
-../py_code/information.py
+../py_code/information.pypy3

@@ -1,1 +1,1 @@
-../py_code/submatrix_order0.py
+../py_code/submatrix_order0.pypy3

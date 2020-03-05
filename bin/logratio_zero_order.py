@@ -1,1 +1,1 @@
-../py_code/logratio_zero_order.py
+../py_code/logratio_zero_order.pypy3
