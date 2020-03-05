@@ -27,7 +27,7 @@ DESCRIPTION OF DIAGNOSTICS
     See warnings.
     
 
-The signatures feature is experimental at ./geneid_trainer.pl line 1016 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 861 (#1)
     (S experimental::signatures) This warning is emitted if you unwrap a
     subroutine's arguments using a signature.  Simply suppress the warning
     if you want to use the feature, but know that in doing so you are taking
@@ -38,83 +38,83 @@ The signatures feature is experimental at ./geneid_trainer.pl line 1016 (#1)
         use feature "signatures";
         sub foo ($left, $right) { ... }
     
-The signatures feature is experimental at ./geneid_trainer.pl line 1016.
-The signatures feature is experimental at ./geneid_trainer.pl line 1291 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 1291.
-The signatures feature is experimental at ./geneid_trainer.pl line 1700 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 1700.
-The signatures feature is experimental at ./geneid_trainer.pl line 1745 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 1745.
-The signatures feature is experimental at ./geneid_trainer.pl line 1880 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 1880.
-The signatures feature is experimental at ./geneid_trainer.pl line 2137 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 2137.
-The signatures feature is experimental at ./geneid_trainer.pl line 2560 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 2560.
-The signatures feature is experimental at ./geneid_trainer.pl line 2633 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 2633.
-The signatures feature is experimental at ./geneid_trainer.pl line 2651 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 2651.
-The signatures feature is experimental at ./geneid_trainer.pl line 3049 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3049.
-The signatures feature is experimental at ./geneid_trainer.pl line 3072 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3072.
-The signatures feature is experimental at ./geneid_trainer.pl line 3248 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3248.
-The signatures feature is experimental at ./geneid_trainer.pl line 3396 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3396.
-The signatures feature is experimental at ./geneid_trainer.pl line 3686 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3686.
-The signatures feature is experimental at ./geneid_trainer.pl line 3718 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3718.
-The signatures feature is experimental at ./geneid_trainer.pl line 3744 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3744.
-The signatures feature is experimental at ./geneid_trainer.pl line 3782 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3782.
-The signatures feature is experimental at ./geneid_trainer.pl line 3864 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3864.
-The signatures feature is experimental at ./geneid_trainer.pl line 3937 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 3937.
-The signatures feature is experimental at ./geneid_trainer.pl line 4061 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 4061.
-The signatures feature is experimental at ./geneid_trainer.pl line 4072 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 4072.
-The signatures feature is experimental at ./geneid_trainer.pl line 4119 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 4119.
-The signatures feature is experimental at ./geneid_trainer.pl line 4177 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 4177.
-The signatures feature is experimental at ./geneid_trainer.pl line 4443 (#1)
-The signatures feature is experimental at ./geneid_trainer.pl line 4443.
+The signatures feature is experimental at ./geneid_trainer.pl line 861.
+The signatures feature is experimental at ./geneid_trainer.pl line 960 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 960.
+The signatures feature is experimental at ./geneid_trainer.pl line 1049 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1049.
+The signatures feature is experimental at ./geneid_trainer.pl line 1094 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1094.
+The signatures feature is experimental at ./geneid_trainer.pl line 1230 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1230.
+The signatures feature is experimental at ./geneid_trainer.pl line 1465 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1465.
+The signatures feature is experimental at ./geneid_trainer.pl line 1888 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1888.
+The signatures feature is experimental at ./geneid_trainer.pl line 1961 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1961.
+The signatures feature is experimental at ./geneid_trainer.pl line 1979 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 1979.
+The signatures feature is experimental at ./geneid_trainer.pl line 2295 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2295.
+The signatures feature is experimental at ./geneid_trainer.pl line 2318 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2318.
+The signatures feature is experimental at ./geneid_trainer.pl line 2473 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2473.
+The signatures feature is experimental at ./geneid_trainer.pl line 2621 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2621.
+The signatures feature is experimental at ./geneid_trainer.pl line 2911 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2911.
+The signatures feature is experimental at ./geneid_trainer.pl line 2943 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2943.
+The signatures feature is experimental at ./geneid_trainer.pl line 2970 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 2970.
+The signatures feature is experimental at ./geneid_trainer.pl line 3007 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3007.
+The signatures feature is experimental at ./geneid_trainer.pl line 3089 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3089.
+The signatures feature is experimental at ./geneid_trainer.pl line 3162 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3162.
+The signatures feature is experimental at ./geneid_trainer.pl line 3286 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3286.
+The signatures feature is experimental at ./geneid_trainer.pl line 3297 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3297.
+The signatures feature is experimental at ./geneid_trainer.pl line 3344 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3344.
+The signatures feature is experimental at ./geneid_trainer.pl line 3402 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3402.
+The signatures feature is experimental at ./geneid_trainer.pl line 3668 (#1)
+The signatures feature is experimental at ./geneid_trainer.pl line 3668.
 
 ### Got...
 ### Got...
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
-	Smart::Comments::_Dump("pref", "Got...") called at ./geneid_trainer.pl line 120
+	Smart::Comments::_Dump("pref", "Got...") called at ./geneid_trainer.pl line 116
 ### $species: 'pmar01'
 ### $species: 'pmar01'
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
-	Smart::Comments::_Dump("pref", "\$species:", "var", ARRAY(0x5582752cd608)) called at ./geneid_trainer.pl line 121
+	Smart::Comments::_Dump("pref", "\$species:", "var", ARRAY(0x556604a06608)) called at ./geneid_trainer.pl line 117
 ### $input_gff_fn: 'test_data/pmarinus4training.gff'
 ### $input_gff_fn: 'test_data/pmarinus4training.gff'
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
-	Smart::Comments::_Dump("pref", "\$input_gff_fn:", "var", ARRAY(0x5582752f1028)) called at ./geneid_trainer.pl line 122
+	Smart::Comments::_Dump("pref", "\$input_gff_fn:", "var", ARRAY(0x556604a2a028)) called at ./geneid_trainer.pl line 118
 ### $input_fas_fn: 'test_data/pmarinus4training.fa'
 ### $input_fas_fn: 'test_data/pmarinus4training.fa'
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
-	Smart::Comments::_Dump("pref", "\$input_fas_fn:", "var", ARRAY(0x5582752f1070)) called at ./geneid_trainer.pl line 123
+	Smart::Comments::_Dump("pref", "\$input_fas_fn:", "var", ARRAY(0x556604a2a070)) called at ./geneid_trainer.pl line 119
 ### $sout: 'statsfile_out.pmar01'
 ### $sout: 'statsfile_out.pmar01'
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
-	Smart::Comments::_Dump("pref", "\$sout:", "var", ARRAY(0x5582752cd608)) called at ./geneid_trainer.pl line 124
+	Smart::Comments::_Dump("pref", "\$sout:", "var", ARRAY(0x556604a06608)) called at ./geneid_trainer.pl line 120
 ### $fix_fasta: 1
 ### $fix_fasta: 1
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
-	Smart::Comments::_Dump("pref", "\$fix_fasta:", "var", ARRAY(0x5582752f1028)) called at ./geneid_trainer.pl line 125
+	Smart::Comments::_Dump("pref", "\$fix_fasta:", "var", ARRAY(0x556604a2a028)) called at ./geneid_trainer.pl line 121
 
-### [Thu Mar  5 09:33:21 2020] Starting script at <loc>...
-### [Thu Mar  5 09:33:21 2020] Starting script at <loc>...
+### [Thu Mar  5 16:51:44 2020] Starting script at <loc>...
+### [Thu Mar  5 16:51:44 2020] Starting script at <loc>...
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
-	Smart::Comments::_Dump("pref", "[<now>] Starting script at <loc>...") called at ./geneid_trainer.pl line 127
+	Smart::Comments::_Dump("pref", "[<now>] Starting script at <loc>...") called at ./geneid_trainer.pl line 123
 
 inside create_data_dirs function
 
@@ -141,10 +141,15 @@ Creating /tmp/workdir_gtrain//geneid/ directory
 Creating /tmp/workdir_gtrain//results/ directory
 
 
-### [Thu Mar  5 09:33:21 2020] template parameter file
-### [Thu Mar  5 09:33:21 2020] template parameter file
+### [Thu Mar  5 16:51:44 2020] template parameter file
+### [Thu Mar  5 16:51:44 2020] template parameter file
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
-	Smart::Comments::_Dump("pref", "[<now>] template parameter file:", "var", undef) called at ./geneid_trainer.pl line 401
+	Smart::Comments::_Dump("pref", "[<now>] template parameter file:", "var", undef) called at ./geneid_trainer.pl line 392
+
+### END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
+### END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAIN"..., "var", undef) called at ./geneid_trainer.pl line 400
 cp test_data/pmarinus4training.gff /tmp/workdir_gtrain//input_gff_no_dots.gff
 
 Obtain locus_id (list of genomic sequences / genes)
@@ -152,14 +157,20 @@ Obtain locus_id (list of genomic sequences / genes)
  TTT got here TTT
 
 
-The gff file (/tmp/workdir_gtrain//input_gff_no_dots.gff) contains a total of 765 genomic sequences and 765 gene models
+The gff file (/tmp/workdir_gtrain//input_gff_no_dots.gff) contains a total of 764 genomic sequences and 764 gene models
+
+### get a list of genes TOTAL
+### get a list of genes TOTAL
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "get a list of genes TOTAL:", "var", undef) called at ./geneid_trainer.pl line 454
+	main::normal_run() called at ./geneid_trainer.pl line 402
 
 Obtain list of all transcripts
 
 
-A subset of 612 sequences (randomly chosen from the 765 gene models) was used for training
+A subset of 611 sequences (randomly chosen from the 764 gene models) was used for training
 
-The new training gff file includes 612 gene models (80% of total seqs)
+The new training gff file includes 611 gene models (80% of total seqs)
 
 Obtain list of training genes
 
@@ -174,10 +185,20 @@ cp /tmp/workdir_gtrain/pmar01_train_setaside80.gff /tmp/workdir_gtrain/pmar01.tr
 
 L575 : /tmp/workdir_gtrain/pmar01.train.geneid_gff 	 /tmp/workdir_gtrain/pmar01_train_setaside80.2cols 
 
-EXTRACT CDS and INTRON SEQUENCES from .train set..
-
+### [Thu Mar  5 16:51:45 2020] running extract_cds_introns at ./geneid_trainer.pl[865]...
+### [Thu Mar  5 16:51:45 2020] running extract_cds_introns at ./geneid_trainer.pl[865]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] running extract_cds_introns at <file>[<line>]...") called at ./geneid_trainer.pl line 865
+	main::extract_cds_introns("/tmp/workdir_gtrain/pmar01.train.geneid_gff", "/tmp/workdir_gtrain/pmar01_train_setaside80.2cols", ".train") called at ./geneid_trainer.pl line 603
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### $my_nodots_gff my_contig_transcr_2cols, $type
+### $my_nodots_gff my_contig_transcr_2cols, $type
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "\$my_nodots_gff my_contig_transcr_2cols, \$type:", "var", undef) called at ./geneid_trainer.pl line 866
+	main::extract_cds_introns("/tmp/workdir_gtrain/pmar01.train.geneid_gff", "/tmp/workdir_gtrain/pmar01_train_setaside80.2cols", ".train") called at ./geneid_trainer.pl line 603
+	main::normal_run() called at ./geneid_trainer.pl line 402
 /tmp/workdir_gtrain/pmar01_train_setaside80.2cols and /tmp/workdir_gtrain/pmar01.train.geneid_gff
-1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9 ..10 ..11 ..12 ..13 ..14 ..15 ..16 ..17 ..18 ..19 ..20 ..21 ..22 ..23 ..24 ..25 ..26 ..27 ..28 ..29 ..30 ..31 ..32 ..33 ..34 ..35 ..36 ..37 ..38 ..39 ..40 ..41 ..42 ..43 ..44 ..45 ..46 ..47 ..48 ..49 ..50 ..51 ..52 ..53 ..54 ..55 ..56 ..57 ..58 ..59 ..60 ..61 ..62 ..63 ..64 ..65 ..66 ..67 ..68 ..69 ..70 ..71 ..72 ..73 ..74 ..75 ..76 ..77 ..78 ..79 ..80 ..81 ..82 ..83 ..84 ..85 ..86 ..87 ..88 ..89 ..90 ..91 ..92 ..93 ..94 ..95 ..96 ..97 ..98 ..99 ..100 ..101 ..102 ..103 ..104 ..105 ..106 ..107 ..108 ..109 ..110 ..111 ..112 ..113 ..114 ..115 ..116 ..117 ..118 ..119 ..120 ..121 ..122 ..123 ..124 ..125 ..126 ..127 ..128 ..129 ..130 ..131 ..132 ..133 ..134 ..135 ..136 ..137 ..138 ..139 ..140 ..141 ..142 ..143 ..144 ..145 ..146 ..147 ..148 ..149 ..150 ..151 ..152 ..153 ..154 ..155 ..156 ..157 ..158 ..159 ..160 ..161 ..162 ..163 ..164 ..165 ..166 ..167 ..168 ..169 ..170 ..171 ..172 ..173 ..174 ..175 ..176 ..177 ..178 ..179 ..180 ..181 ..182 ..183 ..184 ..185 ..186 ..187 ..188 ..189 ..190 ..191 ..192 ..193 ..194 ..195 ..196 ..197 ..198 ..199 ..200 ..201 ..202 ..203 ..204 ..205 ..206 ..207 ..208 ..209 ..210 ..211 ..212 ..213 ..214 ..215 ..216 ..217 ..218 ..219 ..220 ..221 ..222 ..223 ..224 ..225 ..226 ..227 ..228 ..229 ..230 ..231 ..232 ..233 ..234 ..235 ..236 ..237 ..238 ..239 ..240 ..241 ..242 ..243 ..244 ..245 ..246 ..247 ..248 ..249 ..250 ..251 ..252 ..253 ..254 ..255 ..256 ..257 ..258 ..259 ..260 ..261 ..262 ..263 ..264 ..265 ..266 ..267 ..268 ..269 ..270 ..271 ..272 ..273 ..274 ..275 ..276 ..277 ..278 ..279 ..280 ..281 ..282 ..283 ..284 ..285 ..286 ..287 ..288 ..289 ..290 ..291 ..292 ..293 ..294 ..295 ..296 ..297 ..298 ..299 ..300 ..301 ..302 ..303 ..304 ..305 ..306 ..307 ..308 ..309 ..310 ..311 ..312 ..313 ..314 ..315 ..316 ..317 ..318 ..319 ..320 ..321 ..322 ..323 ..324 ..325 ..326 ..327 ..328 ..329 ..330 ..331 ..332 ..333 ..334 ..335 ..336 ..337 ..338 ..339 ..340 ..341 ..342 ..343 ..344 ..345 ..346 ..347 ..348 ..349 ..350 ..351 ..352 ..353 ..354 ..355 ..356 ..357 ..358 ..359 ..360 ..361 ..362 ..363 ..364 ..365 ..366 ..367 ..368 ..369 ..370 ..371 ..372 ..373 ..374 ..375 ..376 ..377 ..378 ..379 ..380 ..381 ..382 ..383 ..384 ..385 ..386 ..387 ..388 ..389 ..390 ..391 ..392 ..393 ..394 ..395 ..396 ..397 ..398 ..399 ..400 ..401 ..402 ..403 ..404 ..405 ..406 ..407 ..408 ..409 ..410 ..411 ..412 ..413 ..414 ..415 ..416 ..417 ..418 ..419 ..420 ..421 ..422 ..423 ..424 ..425 ..426 ..427 ..428 ..429 ..430 ..431 ..432 ..433 ..434 ..435 ..436 ..437 ..438 ..439 ..440 ..441 ..442 ..443 ..444 ..445 ..446 ..447 ..448 ..449 ..450 ..451 ..452 ..453 ..454 ..455 ..456 ..457 ..458 ..459 ..460 ..461 ..462 ..463 ..464 ..465 ..466 ..467 ..468 ..469 ..470 ..471 ..472 ..473 ..474 ..475 ..476 ..477 ..478 ..479 ..480 ..481 ..482 ..483 ..484 ..485 ..486 ..487 ..488 ..489 ..490 ..491 ..492 ..493 ..494 ..495 ..496 ..497 ..498 ..499 ..500 ..501 ..502 ..503 ..504 ..505 ..506 ..507 ..508 ..509 ..510 ..511 ..512 ..513 ..514 ..515 ..516 ..517 ..518 ..519 ..520 ..521 ..522 ..523 ..524 ..525 ..526 ..527 ..528 ..529 ..530 ..531 ..532 ..533 ..534 ..535 ..536 ..537 ..538 ..539 ..540 ..541 ..542 ..543 ..544 ..545 ..546 ..547 ..548 ..549 ..550 ..551 ..552 ..553 ..554 ..555 ..556 ..557 ..558 ..559 ..560 ..561 ..562 ..563 ..564 ..565 ..566 ..567 ..568 ..569 ..570 ..571 ..572 ..573 ..574 ..575 ..576 ..577 ..578 ..579 ..580 ..581 ..582 ..583 ..584 ..585 ..586 ..587 ..588 ..589 ..590 ..591 ..592 ..593 ..594 ..595 ..596 ..597 ..598 ..599 ..600 ..601 ..602 ..603 ..604 ..605 ..606 ..607 ..608 ..609 ..610 ..611 ..612 ..DONE
+1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9 ..10 ..11 ..12 ..13 ..14 ..15 ..16 ..17 ..18 ..19 ..20 ..21 ..22 ..23 ..24 ..25 ..26 ..27 ..28 ..29 ..30 ..31 ..32 ..33 ..34 ..35 ..36 ..37 ..38 ..39 ..40 ..41 ..42 ..43 ..44 ..45 ..46 ..47 ..48 ..49 ..50 ..51 ..52 ..53 ..54 ..55 ..56 ..57 ..58 ..59 ..60 ..61 ..62 ..63 ..64 ..65 ..66 ..67 ..68 ..69 ..70 ..71 ..72 ..73 ..74 ..75 ..76 ..77 ..78 ..79 ..80 ..81 ..82 ..83 ..84 ..85 ..86 ..87 ..88 ..89 ..90 ..91 ..92 ..93 ..94 ..95 ..96 ..97 ..98 ..99 ..100 ..101 ..102 ..103 ..104 ..105 ..106 ..107 ..108 ..109 ..110 ..111 ..112 ..113 ..114 ..115 ..116 ..117 ..118 ..119 ..120 ..121 ..122 ..123 ..124 ..125 ..126 ..127 ..128 ..129 ..130 ..131 ..132 ..133 ..134 ..135 ..136 ..137 ..138 ..139 ..140 ..141 ..142 ..143 ..144 ..145 ..146 ..147 ..148 ..149 ..150 ..151 ..152 ..153 ..154 ..155 ..156 ..157 ..158 ..159 ..160 ..161 ..162 ..163 ..164 ..165 ..166 ..167 ..168 ..169 ..170 ..171 ..172 ..173 ..174 ..175 ..176 ..177 ..178 ..179 ..180 ..181 ..182 ..183 ..184 ..185 ..186 ..187 ..188 ..189 ..190 ..191 ..192 ..193 ..194 ..195 ..196 ..197 ..198 ..199 ..200 ..201 ..202 ..203 ..204 ..205 ..206 ..207 ..208 ..209 ..210 ..211 ..212 ..213 ..214 ..215 ..216 ..217 ..218 ..219 ..220 ..221 ..222 ..223 ..224 ..225 ..226 ..227 ..228 ..229 ..230 ..231 ..232 ..233 ..234 ..235 ..236 ..237 ..238 ..239 ..240 ..241 ..242 ..243 ..244 ..245 ..246 ..247 ..248 ..249 ..250 ..251 ..252 ..253 ..254 ..255 ..256 ..257 ..258 ..259 ..260 ..261 ..262 ..263 ..264 ..265 ..266 ..267 ..268 ..269 ..270 ..271 ..272 ..273 ..274 ..275 ..276 ..277 ..278 ..279 ..280 ..281 ..282 ..283 ..284 ..285 ..286 ..287 ..288 ..289 ..290 ..291 ..292 ..293 ..294 ..295 ..296 ..297 ..298 ..299 ..300 ..301 ..302 ..303 ..304 ..305 ..306 ..307 ..308 ..309 ..310 ..311 ..312 ..313 ..314 ..315 ..316 ..317 ..318 ..319 ..320 ..321 ..322 ..323 ..324 ..325 ..326 ..327 ..328 ..329 ..330 ..331 ..332 ..333 ..334 ..335 ..336 ..337 ..338 ..339 ..340 ..341 ..342 ..343 ..344 ..345 ..346 ..347 ..348 ..349 ..350 ..351 ..352 ..353 ..354 ..355 ..356 ..357 ..358 ..359 ..360 ..361 ..362 ..363 ..364 ..365 ..366 ..367 ..368 ..369 ..370 ..371 ..372 ..373 ..374 ..375 ..376 ..377 ..378 ..379 ..380 ..381 ..382 ..383 ..384 ..385 ..386 ..387 ..388 ..389 ..390 ..391 ..392 ..393 ..394 ..395 ..396 ..397 ..398 ..399 ..400 ..401 ..402 ..403 ..404 ..405 ..406 ..407 ..408 ..409 ..410 ..411 ..412 ..413 ..414 ..415 ..416 ..417 ..418 ..419 ..420 ..421 ..422 ..423 ..424 ..425 ..426 ..427 ..428 ..429 ..430 ..431 ..432 ..433 ..434 ..435 ..436 ..437 ..438 ..439 ..440 ..441 ..442 ..443 ..444 ..445 ..446 ..447 ..448 ..449 ..450 ..451 ..452 ..453 ..454 ..455 ..456 ..457 ..458 ..459 ..460 ..461 ..462 ..463 ..464 ..465 ..466 ..467 ..468 ..469 ..470 ..471 ..472 ..473 ..474 ..475 ..476 ..477 ..478 ..479 ..480 ..481 ..482 ..483 ..484 ..485 ..486 ..487 ..488 ..489 ..490 ..491 ..492 ..493 ..494 ..495 ..496 ..497 ..498 ..499 ..500 ..501 ..502 ..503 ..504 ..505 ..506 ..507 ..508 ..509 ..510 ..511 ..512 ..513 ..514 ..515 ..516 ..517 ..518 ..519 ..520 ..521 ..522 ..523 ..524 ..525 ..526 ..527 ..528 ..529 ..530 ..531 ..532 ..533 ..534 ..535 ..536 ..537 ..538 ..539 ..540 ..541 ..542 ..543 ..544 ..545 ..546 ..547 ..548 ..549 ..550 ..551 ..552 ..553 ..554 ..555 ..556 ..557 ..558 ..559 ..560 ..561 ..562 ..563 ..564 ..565 ..566 ..567 ..568 ..569 ..570 ..571 ..572 ..573 ..574 ..575 ..576 ..577 ..578 ..579 ..580 ..581 ..582 ..583 ..584 ..585 ..586 ..587 ..588 ..589 ..590 ..591 ..592 ..593 ..594 ..595 ..596 ..597 ..598 ..599 ..600 ..601 ..602 ..603 ..604 ..605 ..606 ..607 ..608 ..609 ..610 ..611 ..DONE
 
 Create tabular format of CDS and INTRON sequences for .train sequences
 /tmp/workdir_gtrain//cds/pmar01.train.cds.fa
@@ -189,8 +210,18 @@ cp /tmp/workdir_gtrain/pmar01_evaluation_setaside20.gff /tmp/workdir_gtrain/pmar
 
 L588 tmp_locus_id_X_new:  /tmp/workdir_gtrain/pmar01.eval.geneid_gff 	 /tmp/workdir_gtrain/pmar01_evaluation_setaside20.2cols
 
-EXTRACT CDS and INTRON SEQUENCES from .eval set..
-
+### [Thu Mar  5 16:56:48 2020] running extract_cds_introns at ./geneid_trainer.pl[865]...
+### [Thu Mar  5 16:56:48 2020] running extract_cds_introns at ./geneid_trainer.pl[865]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] running extract_cds_introns at <file>[<line>]...") called at ./geneid_trainer.pl line 865
+	main::extract_cds_introns("/tmp/workdir_gtrain/pmar01.eval.geneid_gff", "/tmp/workdir_gtrain/pmar01_evaluation_setaside2"..., ".eval") called at ./geneid_trainer.pl line 625
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### $my_nodots_gff my_contig_transcr_2cols, $type
+### $my_nodots_gff my_contig_transcr_2cols, $type
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "\$my_nodots_gff my_contig_transcr_2cols, \$type:", "var", undef) called at ./geneid_trainer.pl line 866
+	main::extract_cds_introns("/tmp/workdir_gtrain/pmar01.eval.geneid_gff", "/tmp/workdir_gtrain/pmar01_evaluation_setaside2"..., ".eval") called at ./geneid_trainer.pl line 625
+	main::normal_run() called at ./geneid_trainer.pl line 402
 /tmp/workdir_gtrain/pmar01_evaluation_setaside20.2cols and /tmp/workdir_gtrain/pmar01.eval.geneid_gff
 1 ..2 ..3 ..4 ..5 ..6 ..7 ..8 ..9 ..10 ..11 ..12 ..13 ..14 ..15 ..16 ..17 ..18 ..19 ..20 ..21 ..22 ..23 ..24 ..25 ..26 ..27 ..28 ..29 ..30 ..31 ..32 ..33 ..34 ..35 ..36 ..37 ..38 ..39 ..40 ..41 ..42 ..43 ..44 ..45 ..46 ..47 ..48 ..49 ..50 ..51 ..52 ..53 ..54 ..55 ..56 ..57 ..58 ..59 ..60 ..61 ..62 ..63 ..64 ..65 ..66 ..67 ..68 ..69 ..70 ..71 ..72 ..73 ..74 ..75 ..76 ..77 ..78 ..79 ..80 ..81 ..82 ..83 ..84 ..85 ..86 ..87 ..88 ..89 ..90 ..91 ..92 ..93 ..94 ..95 ..96 ..97 ..98 ..99 ..100 ..101 ..102 ..103 ..104 ..105 ..106 ..107 ..108 ..109 ..110 ..111 ..112 ..113 ..114 ..115 ..116 ..117 ..118 ..119 ..120 ..121 ..122 ..123 ..124 ..125 ..126 ..127 ..128 ..129 ..130 ..131 ..132 ..133 ..134 ..135 ..136 ..137 ..138 ..139 ..140 ..141 ..142 ..143 ..144 ..145 ..146 ..147 ..148 ..149 ..150 ..151 ..152 ..153 ..DONE
 
@@ -202,9 +233,28 @@ L653 :  /tmp/workdir_gtrain/pmar01_.train.cds_intron_gff 	 /tmp/workdir_gtrain/p
 
 EXTRACT START AND SPLICE SITES from transcripts
 
-1..2..3..4..5..6..7..8..9..10..11..12..13..14..15..16..17..18..19..20..21..22..23..24..25..26..27..28..29..30..31..32..33..34..35..36..37..38..39..40..41..42..43..44..45..46..47..48..49..50..51..52..53..54..55..56..57..58..59..60..61..62..63..64..65..66..67..68..69..70..71..72..73..74..75..76..77..78..79..80..81..82..83..84..85..86..87..88..89..90..91..92..93..94..95..96..97..98..99..100..101..102..103..104..105..106..107..108..109..110..111..112..113..114..115..116..117..118..119..120..121..122..123..124..125..126..127..128..129..130..131..132..133..134..135..136..137..138..139..140..141..142..143..144..145..146..147..148..149..150..151..152..153..154..155..156..157..158..159..160..161..162..163..164..165..166..167..168..169..170..171..172..173..174..175..176..177..178..179..180..181..182..183..184..185..186..187..188..189..190..191..192..193..194..195..196..197..198..199..200..201..202..203..204..205..206..207..208..209..210..211..212..213..214..215..216..217..218..219..220..221..222..223..224..225..226..227..228..229..230..231..232..233..234..235..236..237..238..239..240..241..242..243..244..245..246..247..248..249..250..251..252..253..254..255..256..257..258..259..260..261..262..263..264..265..266..267..268..269..270..271..272..273..274..275..276..277..278..279..280..281..282..283..284..285..286..287..288..289..290..291..292..293..294..295..296..297..298..299..300..301..302..303..304..305..306..307..308..309..310..311..312..313..314..315..316..317..318..319..320..321..322..323..324..325..326..327..328..329..330..331..332..333..334..335..336..337..338..339..340..341..342..343..344..345..346..347..348..349..350..351..352..353..354..355..356..357..358..359..360..361..362..363..364..365..366..367..368..369..370..371..372..373..374..375..376..377..378..379..380..381..382..383..384..385..386..387..388..389..390..391..392..393..394..395..396..397..398..399..400..401..402..403..404..405..406..407..408..409..410..411..412..413..414..415..416..417..418..419..420..421..422..423..424..425..426..427..428..429..430..431..432..433..434..435..436..437..438..439..440..441..442..443..444..445..446..447..448..449..450..451..452..453..454..455..456..457..458..459..460..461..462..463..464..465..466..467..468..469..470..471..472..473..474..475..476..477..478..479..480..481..482..483..484..485..486..487..488..489..490..491..492..493..494..495..496..497..498..499..500..501..502..503..504..505..506..507..508..509..510..511..512..513..514..515..516..517..518..519..520..521..522..523..524..525..526..527..528..529..530..531..532..533..534..535..536..537..538..539..540..541..542..543..544..545..546..547..548..549..550..551..552..553..554..555..556..557..558..559..560..561..562..563..564..565..566..567..568..569..570..571..572..573..574..575..576..577..578..579..580..581..582..583..584..585..586..587..588..589..590..591..592..593..594..595..596..597..598..599..600..601..602..603..604..605..606..607..608..609..610..611..612..
+1..2..3..4..5..6..7..8..9..10..11..12..13..14..15..16..17..18..19..20..21..22..23..24..25..26..27..28..29..30..31..32..33..34..35..36..37..38..39..40..41..42..43..44..45..46..47..48..49..50..51..52..53..54..55..56..57..58..59..60..61..62..63..64..65..66..67..68..69..70..71..72..73..74..75..76..77..78..79..80..81..82..83..84..85..86..87..88..89..90..91..92..93..94..95..96..97..98..99..100..101..102..103..104..105..106..107..108..109..110..111..112..113..114..115..116..117..118..119..120..121..122..123..124..125..126..127..128..129..130..131..132..133..134..135..136..137..138..139..140..141..142..143..144..145..146..147..148..149..150..151..152..153..154..155..156..157..158..159..160..161..162..163..164..165..166..167..168..169..170..171..172..173..174..175..176..177..178..179..180..181..182..183..184..185..186..187..188..189..190..191..192..193..194..195..196..197..198..199..200..201..202..203..204..205..206..207..208..209..210..211..212..213..214..215..216..217..218..219..220..221..222..223..224..225..226..227..228..229..230..231..232..233..234..235..236..237..238..239..240..241..242..243..244..245..246..247..248..249..250..251..252..253..254..255..256..257..258..259..260..261..262..263..264..265..266..267..268..269..270..271..272..273..274..275..276..277..278..279..280..281..282..283..284..285..286..287..288..289..290..291..292..293..294..295..296..297..298..299..300..301..302..303..304..305..306..307..308..309..310..311..312..313..314..315..316..317..318..319..320..321..322..323..324..325..326..327..328..329..330..331..332..333..334..335..336..337..338..339..340..341..342..343..344..345..346..347..348..349..350..351..352..353..354..355..356..357..358..359..360..361..362..363..364..365..366..367..368..369..370..371..372..373..374..375..376..377..378..379..380..381..382..383..384..385..386..387..388..389..390..391..392..393..394..395..396..397..398..399..400..401..402..403..404..405..406..407..408..409..410..411..412..413..414..415..416..417..418..419..420..421..422..423..424..425..426..427..428..429..430..431..432..433..434..435..436..437..438..439..440..441..442..443..444..445..446..447..448..449..450..451..452..453..454..455..456..457..458..459..460..461..462..463..464..465..466..467..468..469..470..471..472..473..474..475..476..477..478..479..480..481..482..483..484..485..486..487..488..489..490..491..492..493..494..495..496..497..498..499..500..501..502..503..504..505..506..507..508..509..510..511..512..513..514..515..516..517..518..519..520..521..522..523..524..525..526..527..528..529..530..531..532..533..534..535..536..537..538..539..540..541..542..543..544..545..546..547..548..549..550..551..552..553..554..555..556..557..558..559..560..561..562..563..564..565..566..567..568..569..570..571..572..573..574..575..576..577..578..579..580..581..582..583..584..585..586..587..588..589..590..591..592..593..594..595..596..597..598..599..600..601..602..603..604..605..606..607..608..609..610..611..
 Convert gff to gp (golden-path-like)format (artificial contig - concatenated sequences - approx. 800 nt between sequences)
-BEFORE GETGENES: /tmp/workdir_gtrain//fastas/, /tmp/workdir_gtrain/pmar01.train1.gp, /tmp/workdir_gtrain/ , 1 
+
+### [Thu Mar  5 17:00:22 2020] process_seqs_4opty at ./geneid_trainer.pl[1231]...
+### [Thu Mar  5 17:00:22 2020] process_seqs_4opty at ./geneid_trainer.pl[1231]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] process_seqs_4opty at <file>[<line>]...") called at ./geneid_trainer.pl line 1231
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
+### [Thu Mar  5 17:00:23 2020] Before get_genes at ./geneid_trainer.pl[1264]...
+### [Thu Mar  5 17:00:23 2020] Before get_genes at ./geneid_trainer.pl[1264]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Before get_genes at <file>[<line>]...") called at ./geneid_trainer.pl line 1264
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
+### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "\$fastas_dir, \$pso_tmp_gp_from_gff, \$work_dir , \$contig_opt_fl"..., "var", undef) called at ./geneid_trainer.pl line 1265
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
 PRETBL AFTER GETGENES: /tmp/workdir_gtrain//gp_exon_utr_intron.tbl 
 
 Get sequences of 400-nt flanked sequences in tabular and gff formats
@@ -213,12 +263,53 @@ DONE
 
 Get sequences of 400-nt flanked sequences in multi-fasta format
 
+### [Thu Mar  5 17:00:23 2020] Running tbl_2_fasta at ./geneid_trainer.pl[2944]...
+### [Thu Mar  5 17:00:23 2020] Running tbl_2_fasta at ./geneid_trainer.pl[2944]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Running tbl_2_fasta at <file>[<line>]...") called at ./geneid_trainer.pl line 2944
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.train1.gp.tbl", "/tmp/workdir_gtrain/pmar01.train1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### in: '/tmp/workdir_gtrain/pmar01.train1.gp.tbl'
+### in: '/tmp/workdir_gtrain/pmar01.train1.gp.tbl'
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
+	Smart::Comments::_Dump("pref", "in:", "var", ARRAY(0x556605d27e48)) called at ./geneid_trainer.pl line 2945
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.train1.gp.tbl", "/tmp/workdir_gtrain/pmar01.train1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### out: '/tmp/workdir_gtrain/pmar01.train1.gp.fa'
+### out: '/tmp/workdir_gtrain/pmar01.train1.gp.fa'
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
+	Smart::Comments::_Dump("pref", "out:", "var", ARRAY(0x55660583f678)) called at ./geneid_trainer.pl line 2946
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.train1.gp.tbl", "/tmp/workdir_gtrain/pmar01.train1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.train.cds_intron_gff", ".train", 1) called at ./geneid_trainer.pl line 658
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
 Set up files for optimization
 
 
 Convert gff to gp (golden-path-like)format (test set for evaluation of new parameter file -
         (artificial contig - concatenated sequences - approx. 800 nt between sequences)
-BEFORE GETGENES: /tmp/workdir_gtrain//fastas/, /tmp/workdir_gtrain/pmar01.eval1.gp, /tmp/workdir_gtrain/ , 1 
+
+### [Thu Mar  5 17:00:23 2020] process_seqs_4opty at ./geneid_trainer.pl[1231]...
+### [Thu Mar  5 17:00:23 2020] process_seqs_4opty at ./geneid_trainer.pl[1231]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] process_seqs_4opty at <file>[<line>]...") called at ./geneid_trainer.pl line 1231
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
+### [Thu Mar  5 17:00:23 2020] Before get_genes at ./geneid_trainer.pl[1264]...
+### [Thu Mar  5 17:00:23 2020] Before get_genes at ./geneid_trainer.pl[1264]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Before get_genes at <file>[<line>]...") called at ./geneid_trainer.pl line 1264
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
+### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "\$fastas_dir, \$pso_tmp_gp_from_gff, \$work_dir , \$contig_opt_fl"..., "var", undef) called at ./geneid_trainer.pl line 1265
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
 PRETBL AFTER GETGENES: /tmp/workdir_gtrain//gp_exon_utr_intron.tbl 
 
 Get sequences of 400-nt flanked sequences in tabular and gff formats
@@ -226,6 +317,28 @@ WWW reading /tmp/workdir_gtrain/pmar01.eval1.gp
 DONE
 
 Get sequences of 400-nt flanked sequences in multi-fasta format
+
+### [Thu Mar  5 17:00:24 2020] Running tbl_2_fasta at ./geneid_trainer.pl[2944]...
+### [Thu Mar  5 17:00:24 2020] Running tbl_2_fasta at ./geneid_trainer.pl[2944]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Running tbl_2_fasta at <file>[<line>]...") called at ./geneid_trainer.pl line 2944
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.eval1.gp.tbl", "/tmp/workdir_gtrain/pmar01.eval1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### in: '/tmp/workdir_gtrain/pmar01.eval1.gp.tbl'
+### in: '/tmp/workdir_gtrain/pmar01.eval1.gp.tbl'
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
+	Smart::Comments::_Dump("pref", "in:", "var", ARRAY(0x556605f608b8)) called at ./geneid_trainer.pl line 2945
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.eval1.gp.tbl", "/tmp/workdir_gtrain/pmar01.eval1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
+### out: '/tmp/workdir_gtrain/pmar01.eval1.gp.fa'
+### out: '/tmp/workdir_gtrain/pmar01.eval1.gp.fa'
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 480.
+	Smart::Comments::_Dump("pref", "out:", "var", ARRAY(0x556605e03438)) called at ./geneid_trainer.pl line 2946
+	main::tbl_2_fasta("/tmp/workdir_gtrain/pmar01.eval1.gp.tbl", "/tmp/workdir_gtrain/pmar01.eval1.gp.fa") called at ./geneid_trainer.pl line 1322
+	main::process_seqs_4opty("/tmp/workdir_gtrain/pmar01_.eval.cds_intron_gff", ".eval", 1) called at ./geneid_trainer.pl line 681
+	main::normal_run() called at ./geneid_trainer.pl line 402
 
 Set up files for optimization
 
@@ -236,19 +349,17 @@ premade background
 
  XXX L2136: /tmp/workdir_gtrain//Donor_canonical.DK /tmp/workdir_gtrain/pmar01_background 
 
- ./bin/information.py  /tmp/workdir_gtrain/Donor_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Donor_canonical.DK_pmar01_background.information  
+ ./bin/information.py    /tmp/workdir_gtrain/Donor_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Donor_canonical.DK_pmar01_background.information  
 
 
- ./bin/get_k_matrix.pypy3 1 60 /tmp/workdir_gtrain//Donor_canonical.DK.tbl | sort -n > /tmp/workdir_gtrain/Donor_canonical.DK_hmm_2.matrix 
+ ./bin/get_k_matrix.py   1 60 /tmp/workdir_gtrain//Donor_canonical.DK.tbl | sort -n > /tmp/workdir_gtrain/Donor_canonical.DK_hmm_2.matrix 
 
 
- ./bin/get_k_matrix.pypy3 1 60 /tmp/workdir_gtrain/pmar01_background.tbl | sort -n > /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix  
+ ./bin/get_k_matrix.py   1 60 /tmp/workdir_gtrain/pmar01_background.tbl | sort -n > /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix  
 
 
- ./bin/logratio_kmatrix.py /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix /tmp/workdir_gtrain/Donor_canonical.DK_hmm_2.matrix > /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix  
+ ./bin/logratio_kmatrix.py   /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix /tmp/workdir_gtrain/Donor_canonical.DK_hmm_2.matrix > /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix  
 
-
- L2917: donor, 0.15
 bitscoregraph input:  /tmp/workdir_gtrain/Donor_canonical.DK_pmar01_background.information, 0.15, 30
  1 0.01 
  2 0.01 
@@ -265,12 +376,12 @@ bitscoregraph input:  /tmp/workdir_gtrain/Donor_canonical.DK_pmar01_background.i
 13 0.00 
 14 0.01 
 15 0.00 
-16 0.00 
+16 0.01 
 17 0.01 
 18 0.01 
 19 0.00 
 20 0.02 
-21 0.01 
+21 0.02 
 22 0.00 
 23 0.01 
 24 0.00 
@@ -283,8 +394,8 @@ bitscoregraph input:  /tmp/workdir_gtrain/Donor_canonical.DK_pmar01_background.i
 31 0.49 ==============
 32 2.05 =============================================================
 33 1.95 ==========================================================
-34 0.85 =========================
-35 0.40 ===========
+34 0.84 =========================
+35 0.39 ===========
 36 0.45 =============
 37 0.03 
 38 0.00 
@@ -319,32 +430,30 @@ new offset: 1
 new start: 29
 new order: 1
 
-### [Thu Mar  5 09:42:15 2020] Running donor order_oneplus...
-### [Thu Mar  5 09:42:15 2020] Running donor order_oneplus...
+### [Thu Mar  5 17:00:53 2020] Running donor order_oneplus...
+### [Thu Mar  5 17:00:53 2020] Running donor order_oneplus...
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
-	Smart::Comments::_Dump("pref", "[<now>] Running donor order_oneplus...") called at ./geneid_trainer.pl line 2923
-	main::get_K_matrix("/tmp/workdir_gtrain//Donor_canonical.DK.tbl", "/tmp/workdir_gtrain/pmar01_background.tbl", 1, 30, "donor") called at ./geneid_trainer.pl line 4481
-	main::compute_matrices_4sites("/tmp/workdir_gtrain//Donor_canonical.DK.tbl", "donor") called at ./geneid_trainer.pl line 803
-	main::normal_run() called at ./geneid_trainer.pl line 411
-./bin/submatrix.py  29 35 /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix  > /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix_1_donor.submatrix 
+	Smart::Comments::_Dump("pref", "[<now>] Running donor order_oneplus...") called at ./geneid_trainer.pl line 2181
+	main::get_K_matrix("/tmp/workdir_gtrain//Donor_canonical.DK.tbl", "/tmp/workdir_gtrain/pmar01_background.tbl", 1, 30, "donor") called at ./geneid_trainer.pl line 3706
+	main::compute_matrices_4sites("/tmp/workdir_gtrain//Donor_canonical.DK.tbl", "donor") called at ./geneid_trainer.pl line 706
+	main::normal_run() called at ./geneid_trainer.pl line 402
+./bin/submatrix.py    29 35 /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix  > /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix_1_donor.submatrix 
 ./bin/prepare_dimatrix_donor_4parameter.awk  3 4 5 /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix_1_donor.submatrix > /tmp/workdir_gtrain/Donor_canonical.DKdonor.log.hmm_2.matrix_1_donor.matrix_4param 
 ??profile??  length: 35 - 29 / 7 
 
  XXX L2136: /tmp/workdir_gtrain//Acceptor_canonical.DK /tmp/workdir_gtrain/pmar01_background 
 
- ./bin/information.py  /tmp/workdir_gtrain/Acceptor_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Acceptor_canonical.DK_pmar01_background.information  
+ ./bin/information.py    /tmp/workdir_gtrain/Acceptor_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Acceptor_canonical.DK_pmar01_background.information  
 
 
- ./bin/get_k_matrix.pypy3 1 60 /tmp/workdir_gtrain//Acceptor_canonical.DK.tbl | sort -n > /tmp/workdir_gtrain/Acceptor_canonical.DK_hmm_2.matrix 
+ ./bin/get_k_matrix.py   1 60 /tmp/workdir_gtrain//Acceptor_canonical.DK.tbl | sort -n > /tmp/workdir_gtrain/Acceptor_canonical.DK_hmm_2.matrix 
 
 
- ./bin/get_k_matrix.pypy3 1 60 /tmp/workdir_gtrain/pmar01_background.tbl | sort -n > /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix  
+ ./bin/get_k_matrix.py   1 60 /tmp/workdir_gtrain/pmar01_background.tbl | sort -n > /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix  
 
 
- ./bin/logratio_kmatrix.py /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix /tmp/workdir_gtrain/Acceptor_canonical.DK_hmm_2.matrix > /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix  
+ ./bin/logratio_kmatrix.py   /tmp/workdir_gtrain/pmar01_background_hmm_2.matrix /tmp/workdir_gtrain/Acceptor_canonical.DK_hmm_2.matrix > /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix  
 
-
- L2917: acceptor, 0.04
 bitscoregraph input:  /tmp/workdir_gtrain/Acceptor_canonical.DK_pmar01_background.information, 0.04, 30
  1 0.02 
  2 0.02 
@@ -415,34 +524,32 @@ new offset: 20
 new start: 10
 new order: 1
 
-### [Thu Mar  5 09:42:43 2020] Running acceptor order_one_plus...
-### [Thu Mar  5 09:42:43 2020] Running acceptor order_one_plus...
+### [Thu Mar  5 17:01:22 2020] Running acceptor order_one_plus...
+### [Thu Mar  5 17:01:22 2020] Running acceptor order_one_plus...
  at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
-	Smart::Comments::_Dump("pref", "[<now>] Running acceptor order_one_plus...") called at ./geneid_trainer.pl line 2954
-	main::get_K_matrix("/tmp/workdir_gtrain//Acceptor_canonical.DK.tbl", "/tmp/workdir_gtrain/pmar01_background.tbl", 1, 30, "acceptor") called at ./geneid_trainer.pl line 4481
-	main::compute_matrices_4sites("/tmp/workdir_gtrain//Acceptor_canonical.DK.tbl", "acceptor") called at ./geneid_trainer.pl line 805
-	main::normal_run() called at ./geneid_trainer.pl line 411
+	Smart::Comments::_Dump("pref", "[<now>] Running acceptor order_one_plus...") called at ./geneid_trainer.pl line 2212
+	main::get_K_matrix("/tmp/workdir_gtrain//Acceptor_canonical.DK.tbl", "/tmp/workdir_gtrain/pmar01_background.tbl", 1, 30, "acceptor") called at ./geneid_trainer.pl line 3706
+	main::compute_matrices_4sites("/tmp/workdir_gtrain//Acceptor_canonical.DK.tbl", "acceptor") called at ./geneid_trainer.pl line 708
+	main::normal_run() called at ./geneid_trainer.pl line 402
 my_command_A: 
-./bin/submatrix.py  10 33 /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix  > /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix_1_acceptor.submatrix 
+./bin/submatrix.py    10 33 /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix  > /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix_1_acceptor.submatrix 
 my_command_B: 
 ./bin/prepare_dimatrix_acceptor_4parameter.awk 19 20 21 /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix_1_acceptor.submatrix > /tmp/workdir_gtrain/Acceptor_canonical.DKacceptor.log.hmm_2.matrix_1_acceptor.matrix_4param 
 ??profile??  length: 33 - 10 / 24 
 
  XXX L2136: /tmp/workdir_gtrain//Start_canonical.DK /tmp/workdir_gtrain/pmar01_background 
 
- ./bin/information.py  /tmp/workdir_gtrain/Start_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.information  
+ ./bin/information.py    /tmp/workdir_gtrain/Start_canonical.DK.freq /tmp/workdir_gtrain/pmar01_background.freq  > /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.information  
 
 
- ./bin/logratio_zero_order.py /tmp/workdir_gtrain/pmar01_background.freq /tmp/workdir_gtrain/Start_canonical.DK.freq > /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix 
+ ./bin/logratio_zero_order.py   /tmp/workdir_gtrain/pmar01_background.freq /tmp/workdir_gtrain/Start_canonical.DK.freq > /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix 
 
-
- L2917: ATGx, 0.15
 bitscoregraph input:  /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.information, 0.15, 30
  1 0.02 
  2 0.01 
  3 0.04 =
  4 0.03 
- 5 0.01 
+ 5 0.02 
  6 0.02 
  7 0.05 =
  8 0.07 ==
@@ -457,13 +564,13 @@ bitscoregraph input:  /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.i
 17 0.04 =
 18 0.05 =
 19 0.08 ==
-20 0.06 =
+20 0.05 =
 21 0.08 ==
 22 0.09 ==
 23 0.10 ===
-24 0.09 ==
+24 0.08 ==
 25 0.04 =
-26 0.16 ====
+26 0.15 ====
 27 0.07 ==
 28 0.19 =====
 29 0.11 ===
@@ -474,9 +581,9 @@ bitscoregraph input:  /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.i
 34 0.09 ==
 35 0.24 =======
 36 0.06 =
-37 0.05 =
+37 0.04 =
 38 0.04 =
-39 0.11 ===
+39 0.10 ===
 40 0.02 
 41 0.04 =
 42 0.04 =
@@ -486,7 +593,7 @@ bitscoregraph input:  /tmp/workdir_gtrain/Start_canonical.DK_pmar01_background.i
 46 0.04 =
 47 0.01 
 48 0.05 =
-49 0.02 
+49 0.03 
 50 0.02 
 51 0.04 =
 52 0.03 
@@ -506,21 +613,55 @@ end:35 offset:5 start:26  donor:0 acceptor_mtype:0 ATG: 1
 new offset: 5
 new start: 26
 new order: 0
-./bin/submatrix_order0.py 26 35 /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix  > /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix_0_ATGx.matrix_4param
+./bin/submatrix_order0.py   26 35 /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix  > /tmp/workdir_gtrain/Start_canonical.DKATGx.log.hmm_0.matrix_0_ATGx.matrix_4param
 ??profile??  length: 35 - 26 / 10 
-There are 635946 coding bases and 304368 non-coding bases on this training set:
+
+### DERIVE INITIAL/TRANSITION MARKOV MODEL
+### DERIVE INITIAL/TRANSITION MARKOV MODEL
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "DERIVE INITIAL/TRANSITION MARKOV MODEL:", "var", undef) called at ./geneid_trainer.pl line 714
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
+### [Thu Mar  5 17:01:35 2020] Running derive_coding_potential at ./geneid_trainer.pl[1095]...
+### [Thu Mar  5 17:01:35 2020] Running derive_coding_potential at ./geneid_trainer.pl[1095]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Running derive_coding_potential at <file>[<line>]...") called at ./geneid_trainer.pl line 1095
+	main::derive_coding_potential("/tmp/workdir_gtrain//cds/pmar01.train.cds.tbl", "/tmp/workdir_gtrain//introns/pmar01.train.intro"...) called at ./geneid_trainer.pl line 721
+	main::normal_run() called at ./geneid_trainer.pl line 402
+There are 633177 coding bases and 295214 non-coding bases on this training set:
 Deriving a markov model of order 5 OPTION_1
 Intron model
- markov: (4) name: intron; type:FREQ; order:4; pseudo:10; seqs: ARRAY(0x5582764cb480); frame=0 name: intron; type:MM; order:5; pseudo:10; seqs: ARRAY(0x5582764cb480); frame=0Coding model
- name: coding; type:FREQ; order:4; pseudo:0.25; seqs: ARRAY(0x5582764dbed8); frame=2 name: coding; type:MM; order:5; pseudo:0.25; seqs: ARRAY(0x5582764dbed8); frame=2INTRONS mean, ST: 87.487, 185.512
+ markov: (4) name: intron; type:FREQ; order:4; pseudo:10; seqs: ARRAY(0x556605c3d708); frame=0 name: intron; type:MM; order:5; pseudo:10; seqs: ARRAY(0x556605c3d708); frame=0Coding model
+ name: coding; type:FREQ; order:4; pseudo:0.25; seqs: ARRAY(0x556605c29c18); frame=2 name: coding; type:MM; order:5; pseudo:0.25; seqs: ARRAY(0x556605c29c18); frame=2
+### PARAM settings
+### PARAM settings
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "PARAM settings:", "var", undef) called at ./geneid_trainer.pl line 727
+	main::normal_run() called at ./geneid_trainer.pl line 402
+INTRONS mean, ST: 85.421, 151.884
 
 shortest intron: 15.75
-longest intron: 644.023
+longest intron: 541.073
 minimum intergenic: 200
 maximum intergenic: Infinity
 
-Optimizing new parameter file
+### WRITE PRELIMINARY NON-OPTIMIZED PARAMETER FILE
+### WRITE PRELIMINARY NON-OPTIMIZED PARAMETER FILE
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "WRITE PRELIMINARY NON-OPTIMIZED PARAMETER FILE:", "var", undef) called at ./geneid_trainer.pl line 765
+	main::normal_run() called at ./geneid_trainer.pl line 402
 
+### [Thu Mar  5 17:01:38 2020] Optimizing new parameter file at ./geneid_trainer.pl[770]...
+### [Thu Mar  5 17:01:38 2020] Optimizing new parameter file at ./geneid_trainer.pl[770]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] Optimizing new parameter file at <file>[<line>]...") called at ./geneid_trainer.pl line 770
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
+### [Thu Mar  5 17:01:38 2020] contig optimization at ./geneid_trainer.pl[777]...
+### [Thu Mar  5 17:01:38 2020] contig optimization at ./geneid_trainer.pl[777]...
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "[<now>] contig optimization at <file>[<line>]...") called at ./geneid_trainer.pl line 777
+	main::normal_run() called at ./geneid_trainer.pl line 402
 
  DEBUG: CONTIG OPTIMISATION
 
@@ -531,10 +672,10 @@ eWF: -4.5
 oWF: 0.25# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -607,7 +748,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/PUT2LtvNY4.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/Ix0KBhWlaT.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -616,10 +757,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.3# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -692,7 +833,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/RfsPB6cpT3.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/382hm6v1K5.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -701,10 +842,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.35# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -777,7 +918,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/86YqIzxDfD.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/_5pxQVpVYj.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -786,10 +927,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.4# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -862,7 +1003,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/wxWKuCGxF_.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/sjS87wOaQo.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -871,10 +1012,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.45# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -947,7 +1088,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/TpAudnBxZH.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/veE9bcdvd3.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -956,10 +1097,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.5# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1032,7 +1173,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/s4zInJLiC1.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/GFXtQM03I6.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1043,10 +1184,10 @@ eWF: -4
 oWF: 0.25# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1119,7 +1260,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/gIU8LDnwWD.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/2vT0pTUAAd.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1128,10 +1269,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.3# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1204,7 +1345,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/erfCbdjn_W.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/xm98ePCuUz.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1213,10 +1354,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.35# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1289,7 +1430,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/LmvCuoVcP0.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/45FBdMyNTI.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1298,10 +1439,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.4# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1374,7 +1515,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/i4NS8VaT8W.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/8kq3hIuVYc.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1383,10 +1524,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.45# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1459,7 +1600,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/92K2IudlOs.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/ghb_XU2YpW.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1468,10 +1609,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.5# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1544,7 +1685,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/qsNRkgCZYU.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/5vXQEgZQWR.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1555,10 +1696,10 @@ eWF: -3.5
 oWF: 0.25# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1631,7 +1772,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/Gn4hs2LBjg.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/w8AjWTy8I0.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1640,10 +1781,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.3# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1716,7 +1857,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/ZLoOZFMbEP.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/9W7Im0YS4v.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1725,10 +1866,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.35# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1801,7 +1942,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/kOQArTwjXV.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/cMQ2aYS675.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1810,10 +1951,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.4# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1886,7 +2027,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/g0vWa5vBaF.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/tty0qmVSTS.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1895,10 +2036,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.45# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -1971,7 +2112,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/1mw13E_sDC.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/iB9tlzEiJx.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -1980,10 +2121,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.5# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2056,7 +2197,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/sRNX2_OnIB.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/fBYEIkMf8z.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2067,10 +2208,10 @@ eWF: -3
 oWF: 0.25# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2143,7 +2284,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/Kj1gVI4OfM.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/_Y36d5o8zZ.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2152,10 +2293,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.3# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2228,7 +2369,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/1f9AhVMkee.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/wkZoriDaIf.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2237,10 +2378,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.35# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2313,7 +2454,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/X16SyAMXQX.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/aOhK0gt1EH.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2322,10 +2463,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.4# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2398,7 +2539,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/RePwWloE8g.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/9BGjegxcPU.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2407,10 +2548,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.45# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2483,7 +2624,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/VskLC4bP30.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/fKqw2Sf8Cu.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2492,10 +2633,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.5# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2568,7 +2709,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/Zh5SHXxUDr.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/3ATLeNMdGE.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2579,10 +2720,10 @@ eWF: -2.5
 oWF: 0.25# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2655,7 +2796,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/HTAbWZlxze.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/mbL4GLhKc9.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2664,10 +2805,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.3# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2740,7 +2881,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/kpFQ7wTm7B.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/8z1jhHkvXi.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2749,10 +2890,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.35# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2825,7 +2966,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/1hLLqkffpV.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/NQJHiHgoRv.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2834,10 +2975,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.4# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2910,7 +3051,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/8NILjA89TS.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/23osq61BEl.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -2919,10 +3060,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.45# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -2995,7 +3136,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/qPSFHyOuNO.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/JnqoO2nQpq.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -3004,10 +3145,10 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
 0.5# INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -3080,7 +3221,7 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 
 
-temp geneid file: /tmp/workdir_gtrain/geneid/GQGAEHF9Jn.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/oglKX1klad.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.gff /tmp/workdir_gtrain/pmar01.train1.cds_gp_contig.eval.gff  > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_A
 
@@ -3088,21 +3229,21 @@ tail -2 /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalo
             gawk '{printf "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f\n", 0.5, -2.5, $1, $2, $3, $4, $5, $6, $9, $10, $11, $7, $8}' > /tmp/workdir_gtrain//temp_00//Predictions.pmar01.geneid.param.temp_evalout_B 
 
 
-Best performance obtained using I_OlWeight_F: 0.40 and myExWeightParam_tmp: -4.50
+Best performance obtained using I_OlWeight_F: 0.35 and myExWeightParam_tmp: -4.50
 Sorted performance results (Three best performance estimates) for different values of oWF and eWF:
 oWF	eWF	SN	SP	CC	SNe	SPe	SNSP	SNg	SPg	SNSPg	raME	raWE
-0.40	-4.50	0.94	0.93	0.88	0.75	0.79	0.77	0.42	0.45	0.44	0.09	0.07
-0.45	-4.00	0.95	0.93	0.89	0.77	0.78	0.77	0.42	0.44	0.43	0.07	0.08
-0.40	-4.00	0.95	0.93	0.89	0.78	0.77	0.77	0.40	0.44	0.42	0.07	0.08
-0.50	-4.00	0.95	0.93	0.88	0.76	0.77	0.77	0.42	0.43	0.42	0.07	0.08
-0.35	-4.50	0.94	0.93	0.88	0.75	0.79	0.77	0.40	0.45	0.42	0.09	0.07
+0.35	-4.50	0.94	0.94	0.89	0.76	0.79	0.78	0.42	0.47	0.45	0.08	0.06
+0.45	-4.00	0.95	0.93	0.89	0.78	0.78	0.78	0.43	0.45	0.44	0.07	0.08
+0.40	-4.00	0.95	0.93	0.89	0.78	0.78	0.78	0.41	0.43	0.42	0.06	0.08
+0.35	-4.00	0.95	0.93	0.89	0.78	0.77	0.78	0.39	0.43	0.41	0.06	0.08
+0.40	-4.50	0.94	0.94	0.89	0.75	0.79	0.77	0.43	0.46	0.45	0.09	0.06
 # INTRAgenic connections
 
 
-First+:Internal+                           Internal+:Terminal+                        15.75:644.023          
+First+:Internal+                           Internal+:Terminal+                        15.75:541.073          
 
 
-Internal-:Terminal-                        First-:Internal-                           15.75:644.023          
+Internal-:Terminal-                        First-:Internal-                           15.75:541.073          
 
 
 First+                                     Intron+                                    1:1                    
@@ -3178,9 +3319,15 @@ First-:Internal-:Terminal-:Single-         End-                                 
 
 New optimized parameter file named: pmar01.geneid.optimized.param 
 
+### EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
+### EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
+ at /usr/share/perl5/site_perl/Smart/Comments.pm line 450.
+	Smart::Comments::_Dump("pref", "EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PR"..., "var", undef) called at ./geneid_trainer.pl line 825
+	main::normal_run() called at ./geneid_trainer.pl line 402
+
 geneid_test_predict_gff_fn: /tmp/workdir_gtrain//geneid_test_predictions.pmar01.geneid.optimized.param.gff
 
-temp geneid file: /tmp/workdir_gtrain/geneid/rFlQMuep__.eval_par.geneid 
+temp geneid file: /tmp/workdir_gtrain/geneid/9Pki4Oui6_.eval_par.geneid 
 
 ./bin/evaluation -sta /tmp/workdir_gtrain//geneid_test_predictions.pmar01.geneid.optimized.param.gff /tmp/workdir_gtrain/pmar01.eval1.cds_gp_contig.eval.gff > /tmp/workdir_gtrain//geneid//Predictions.pmar01.geneid.optimized.param.temp_evalout_A
 
@@ -3190,5 +3337,5 @@ tail -2 /tmp/workdir_gtrain//geneid//Predictions.pmar01.geneid.optimized.param.t
 Performance of new optimized parameter file on test set:
 
 SN	SP	CC	SNe	SPe	SNSP	SNg	SPg	SNSPg	raME	raWE
-0.25	-4.50	0.92	0.96	0.89	0.72	0.78	0.75	0.34	0.40	0.37	0.11	0.06
+0.25	-4.50	0.93	0.96	0.90	0.74	0.80	0.77	0.39	0.42	0.41	0.10	0.05
 

@@ -5,7 +5,7 @@
 
 # hack to use geneid_1.3.15dev gff3 output with gffcompare
 
-sed -i 's/CDS/exon/g'
+sed -i 's/CDS/exon/g' geneid_test_genome_pmar.gff
 
 ```
 
@@ -14,28 +14,28 @@ sed -i 's/CDS/exon/g'
 #
 
 #= Summary for dataset: geneid_test_genome_pmar.gff 
-#     Query mRNAs :   31987 in   31987 loci  (17890 multi-exon transcripts)
+#     Query mRNAs :   31773 in   31773 loci  (17895 multi-exon transcripts)
 #            (0 multi-transcript loci, ~1.0 transcripts per locus)
 # Reference mRNAs :   37681 in   37497 loci  (17104 multi-exon)
-# Super-loci w/ reference transcripts:    17978
+# Super-loci w/ reference transcripts:    17955
 #-----------------| Sensitivity | Precision  |
-        Base level:    67.9     |    72.7    |
-        Exon level:    39.2     |    46.8    |
-      Intron level:    43.5     |    52.1    |
-Intron chain level:     8.7     |     8.3    |
-  Transcript level:     8.4     |     9.9    |
-       Locus level:     8.4     |     9.9    |
+        Base level:    68.4     |    73.5    |
+        Exon level:    40.6     |    47.8    |
+      Intron level:    45.6     |    53.6    |
+Intron chain level:     9.1     |     8.7    |
+  Transcript level:     8.5     |    10.1    |
+       Locus level:     8.5     |    10.1    |
 
-     Matching intron chains:    1481
-       Matching transcripts:    3157
-              Matching loci:    3157
+     Matching intron chains:    1558
+       Matching transcripts:    3202
+              Matching loci:    3202
 
-          Missed exons:   54747/145812	( 37.5%)
-           Novel exons:   34534/122292	( 28.2%)
-        Missed introns:   23820/108127	( 22.0%)
-         Novel introns:   20512/90305	( 22.7%)
-           Missed loci:   15644/37497	( 41.7%)
-            Novel loci:   13388/31987	( 41.9%)
+          Missed exons:   53199/145812	( 36.5%)
+           Novel exons:   34267/123772	( 27.7%)
+        Missed introns:   24576/108127	( 22.7%)
+         Novel introns:   20438/91999	( 22.2%)
+           Missed loci:   15946/37497	( 42.5%)
+            Novel loci:   13083/31773	( 41.2%)
 
- Total union super-loci across all input datasets: 31366 
-31987 out of 31987 consensus transcripts written in 1092efo3fixed_pmar.annotated.gtf (0 discarded as redundant)
+ Total union super-loci across all input datasets: 31038 
+31773 out of 31773 consensus transcripts written in debug_pmar.annotated.gtf (0 discarded as redundant)
