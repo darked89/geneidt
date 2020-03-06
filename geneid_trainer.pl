@@ -53,8 +53,6 @@ use Geneid::geneidCEGMA;
 
 
 ## MAIN VARIABLES
-## my $PROGRAM_NAME    = "geneid_trainer";
-## my $PROGRAM_VERSION = "2020.03.05a";
 my $PROGRAM_HOME = getcwd;
 
 my $exec_path = "$PROGRAM_HOME/bin/";
@@ -78,18 +76,11 @@ my $fix_fasta    = 0;
 ## Get arguments (command line)
 GetOptions(
     'species:s'       => \$species,
-    'gff:s'           => \$input_gff_fn,
+    'gff:s'            => \$input_gff_fn,
     'fasta:s'         => \$input_fas_fn,
     'sout|statsout:s' => \$sout,
-    'fix_fasta'       => \$fix_fasta
+    'fix_fasta'        => \$fix_fasta
 
-    #'branch'          => \$branch_pred_flag,
-    #'reduced|red'     => \$reduced,
-
-    #'path|binpath:s'  => \$path,
-    #'interactive|i' => \$interactive_flag,
-    #'tenfold'       => \$tenfold,
-    #'gff2ps'        => \$input_gff_fn2ps
 );
 my $usage =
     "Usage: $PROGRAM_NAME -species H.sapiens -gff gff_name -fasta fasta_name -sout statsfile_out -fix_fasta 1";
@@ -110,11 +101,9 @@ if (!($species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta))
 
 ### [<now>] Starting script at <loc>...
 
-#  unless ( $species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta );
-## EXAMPLE COMMAND LINE: ./geneidTRAINer1_2TA.pl -species S.cerevisiae -gff S_cerevisiae4training.gff -fastas yeast_genome.fa -sout stats.txt -branch -reduced
-## Get arguments (command line) END
 
-## end of getting ARGS
+
+### end of getting ARGS...
 ## set CONSTANTS
 ## Constant values. modify if needed
 Readonly::Scalar my $pwm_cutoff     => -7;
@@ -236,11 +225,6 @@ my $best_OlWeight      = 0;
 my $best_Acc           = 0;
 my $best_Min           = 0;
 
-## FIX used just inside a function
-# my $acceptors_subprofile = "";
-# my $donors_subprofile    = "";
-# my $ATGx_subprofile      = "";
-
 ## my $X_geneid_sorted_gff = "";
 my $seqs_eval_gff          = "";
 my $train_inframestop_int = 0;
@@ -325,7 +309,7 @@ my $new_param_fn = "$work_dir/$species.geneid.param";
 $param->numIsocores(1);
 $param->isocores([Geneid::Isocore->new()]);
 
-### END CREATING A PARAMETER FILE REGARDLESS OF WHETHER THE TRAINING IS COMPLETE OR REDUCED
+### END CREATING A PARAMETER FILE
 
 normal_run();
 
@@ -499,21 +483,6 @@ sub normal_run
     #~ {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
     print {*STDERR} "NOT_USE_ALL_SEQS \n\n";
 
-    #~ ## not used
-    #~ #  "\nConvert general gff2 to geneid-gff format  NOT_USE_ALL_SEQS \n\n";
-    #~ # XXX function name
-    #~ }
-    ## Convert general gff2 to geneid gff format
-    ## extract and check cds and intron sequences. Remove inframe stops and check all seqs start with ATG and end with STOP
-    ## TRAIN
-    #~ my $t1 = Benchmark->new;
-    #~ my $td = timediff($t1, $t0);
-    #~ print "\nTTT the code took t0->t1:",timestr($td),"\n";
-    #~ $last_bench_time = $t1;
-
-    ## XXXXXX extracted lines start
-    #
-    ## CREATE FASTAS CDS; INTRON, SITES DIRs WITHIN PATH (ONLY FIRST TIME)
     {
         ## BUG => there is no need to convert gff to geneid format each time we run
 
@@ -585,19 +554,7 @@ sub normal_run
     )
         = @{process_seqs_4opty($train_filtered_gff, ".train", 1)};
 
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (training set for later optimization -400-nt flanked sequences)\n";
-    #~ ($gp_train_gff, $gp_train_fa, $gp_train_tbl, $gp_train_len_int) =
-    #~ @{process_seqs_4opty($train_filtered_gff, ".train", 0)};
-    #~ print {*STDERR} "$gp_train_gff";
-
-    ## prepare test set for evaluation of newly developed parameter file (EVAL)
-
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (400-nt flanking)(test set for evaluation of new parameter file)\n";
-    #~ ($gp_eval_gff, $gp_eval_fa, $gp_eval_tbl, $gp_eval_len_int) =
-    #~ @{process_seqs_4opty($eval_filtered_gff, ".eval", 0)};
-    #~ print {*STDERR} "DONE\n";
+    
 
     print {*STDERR}
         "\nConvert gff to gp (golden-path-like)format (test set for evaluation of new parameter file -
@@ -609,11 +566,7 @@ sub normal_run
         = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
     print {*STDERR} "DONE\n";
 
-    #~ my $t3 = Benchmark->new;
-    #~ my $td = timediff( $t3, $last_bench_time );
-    #~ print "\nTTT the code took t2->t3:", timestr($td), "\n";
-    #~ $last_bench_time = $t3;
-
+   
     ## GET BACKGROUND SEQUENCES
 
     print
@@ -857,10 +810,6 @@ sub extract_cds_introns ($my_nodots_gff, $my_contig_transcr_2cols, $type)
 ## FUNCTION TO EXTRACT AND PROCESS SPLICE SITES AND START CODON
 sub extractprocessSITES ($my_input_nodots_gff, $locusid_2cols)
 {
-    ## 2016.12.13a {
-
-    ## my ($my_input_nodots_gff, $locus_id) = @_;
-    ## my $FH_LOCID;
     my $my_command = "";
     ## SPLICE SITES
     print {*STDERR} "\nEXTRACT START AND SPLICE SITES from transcripts\n\n";
@@ -890,16 +839,6 @@ sub extractprocessSITES ($my_input_nodots_gff, $locusid_2cols)
     }    #while $FH_LOC_sites
     close $FH_LOC_sites;
 
-    #    my $acceptors_fa  = "$sites_dir/Acceptor_sites.fa";
-    #    my $acceptors_tbl = "$work_dir/Acceptor_sites.tbl";
-    #
-    #    my $donors_fa  = "$sites_dir/Donor_sites.fa";
-    #    my $donors_tbl = "$work_dir/Donor_sites.tbl";
-    #
-    #    my $preATGx_fa  = "$sites_dir/Start_sites.fa";
-    #    my $preATGx_tbl = "$work_dir/Start_sites.tbl";
-
-    ## 2016.12.14a
     ## foreach my $site (qw(Acceptor Donor Start Stop ))
     foreach my $site (qw(Donor Acceptor  Start  ))
     {
