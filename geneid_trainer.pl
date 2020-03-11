@@ -35,6 +35,8 @@ use File::Path;
 use File::Basename;
 use File::Temp qw/ tempfile tempdir /;
 
+use YAML::XS qw(LoadFile); #from dev_unstable
+
 use IPC::System::Simple qw(run system capture EXIT_ANY);
 use Readonly;
 
@@ -166,6 +168,7 @@ Readonly::Hash my %my_info_thresholds => (
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
 my $work_dir = "/tmp/workdir_0001_dev_py3/";
+my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
 my $stats_dir    = "$work_dir/stats/";
@@ -298,23 +301,26 @@ my $train_transcr_num  = 0;
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
 
-### CREATE BLANK PARAMETER FILE...
-### [<now>] template parameter file
-my $param        = Geneid::Param->new($species);
-my $new_param_fn = "$work_dir/$species.geneid.param";
+#~ ### CREATE BLANK PARAMETER FILE...
+#~ ### [<now>] template parameter file
+#~ my $param        = Geneid::Param->new($species);
+#~ my $new_param_fn = "$work_dir/$species.geneid.param";
 
-#set isochores to 1
-$param->numIsocores(1);
-$param->isocores([Geneid::Isocore->new()]);
+#~ #set isochores to 1
+#~ $param->numIsocores(1);
+#~ $param->isocores([Geneid::Isocore->new()]);
 
-### END CREATING A PARAMETER FILE
-### [<now>] template parameter file at <file>[<line>]
+#~ ### END CREATING A PARAMETER FILE
+#~ ### [<now>] template parameter file at <file>[<line>]
+
+my $param = init_param_file($species);
 
 normal_run();
 
 sub normal_run
 {
-
+    
+    
     $genome_all_contigs_tbl = $work_dir . $species . ".genomic_all_contigs.tbl";
     my $my_command =
         "./bin/fas_to_tbl.py $input_fas_fn $genome_all_contigs_tbl $fastas_dir";
@@ -731,8 +737,20 @@ sub normal_run
 #
 ## END OF MAIN PORTION OF SCRIPT
 #
-sub init_param_file()
+sub init_param_file($species)
 {
+### CREATE BLANK PARAMETER FILE...
+### [<now>] template parameter file
+my $param        = Geneid::Param->new($species);
+my $new_param_fn = "$work_dir/$species.geneid.param";
+
+#set isochores to 1
+$param->numIsocores(1);
+$param->isocores([Geneid::Isocore->new()]);
+
+### END CREATING A PARAMETER FILE
+### [<now>] template parameter file at <file>[<line>]
+
     ### [<now>] running init_param_file at <file>[<line>]...
     ###########################################
     ### PARAM INIT
@@ -742,7 +760,10 @@ sub init_param_file()
 
     $param->geneModel(Geneid::GeneModel->new());
     $param->geneModel->useDefault;
+    
+
     ###########################################
+    return $param;
 }
 
 sub extract_cds_introns ($my_nodots_gff, $my_contig_transcr_2cols, $type)
@@ -777,6 +798,8 @@ sub extract_cds_introns ($my_nodots_gff, $my_contig_transcr_2cols, $type)
         #~ my $fname_ssgff_A = $FH_ssgff_A->filename;
         ## CDS
         my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
+        
+        ### CDS extraction "-cE"
         my $my_command =
             "./bin/ssgff -cE $fastas_dir/$id_genomic $tmp_single_gene_gff >  $fname_ssgff_A";
         run($my_command);
@@ -786,7 +809,7 @@ sub extract_cds_introns ($my_nodots_gff, $my_contig_transcr_2cols, $type)
 
         #` ./bin/ssgff -cE $work_dir/fastas_$species/$id_genomic $tmp_dir/$id_gene.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
 
-        ## INTRONS
+        ## INTRONS extraction
         #~ my $FH_ssgff_B    = File::Temp->new();
         #~ my $fname_ssgff_B = $FH_ssgff_B->filename;
         my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
@@ -2540,8 +2563,8 @@ sub calc_stats
     ## OBTAIN GENE MODEL SET STATISTICS
     ## Open gene model object
 
-    $param->geneModel(Geneid::GeneModel->new());
-    $param->geneModel->useDefault;
+    #~ $param->geneModel(Geneid::GeneModel->new());
+    #~ $param->geneModel->useDefault;
     #
     ##my $FH_SOUT;
     open(my $FH_SOUT, ">", "$work_dir/test.WriteStatsFileLog.txt")
