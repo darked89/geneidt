@@ -495,7 +495,7 @@ sub normal_run
             gff_2_geneidgff_mock($train_set_gff, $species, ".train");
         print {*STDERR}
             "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
-
+        ## FIXME 20200311: get the relevant files from the upstream python script
         (
             $train_cds_filtered_tbl,       $train_introns_filtered_tbl,
             $train_locusid_filtered_2cols, $train_filtered_gff,
@@ -518,6 +518,9 @@ sub normal_run
         print {*STDERR}
             "L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
         ## 2016.12.10 not used??
+	
+	## FIXME 20200311: get the relevant files from the upstream python script
+	## in reality these are not needed
         (
             $eval_cds_filtered_tbl, $eval_introns_filtered_tbl,    #-- not used
             $eval_locusid_filtered_2cols,                          #-- not used
@@ -941,7 +944,7 @@ sub extractprocessSITES ($my_input_nodots_gff, $locusid_2cols)
 
     return \@newsites;
 
-}    #subectractprocesssites end
+}    #sub ectractprocesssites end
 
 sub noncanonical ($site_type, %canonical_const)
 {
@@ -988,21 +991,21 @@ sub noncanonical ($site_type, %canonical_const)
 }
 
 ### FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
-sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
+sub derive_coding_potential ($train_cds_filtered_tbl, $train_introns_filtered_tbl)
 {
     ### [<now>] Running derive_coding_potential at <file>[<line>]...
-    ## my ($in_cds_tbl_fn, $in_intron_tbl_fn) = @_;
+    ## my ($train_cds_filtered_tbl, $train_introns_filtered_tbl) = @_;
 
     my $markov_mod_A = "";
     my $markov_mod_B = "";
 
     my $my_command =
-        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_cds_tbl_fn";
+        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $train_cds_filtered_tbl";
     my $total_codingbases = capture($my_command);
     chomp $total_codingbases;
 
     $my_command =
-        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $in_intron_tbl_fn ";
+        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $train_introns_filtered_tbl ";
     my $total_noncodingbases = capture($my_command);
     chomp $total_noncodingbases;
 
@@ -1035,7 +1038,7 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
             "Deriving a markov model of order $markov_mod_A  OPTION_2\n";
     }
 
-    open(my $FH_INTRONS_tbl, "<", "$in_intron_tbl_fn") or croak "Failed here";
+    open(my $FH_INTRONS_tbl, "<", "$train_introns_filtered_tbl") or croak "Failed here";
     my @intron_seqs = ();
     while (<$FH_INTRONS_tbl>)
     {
@@ -1046,7 +1049,7 @@ sub derive_coding_potential ($in_cds_tbl_fn, $in_intron_tbl_fn)
     }
     close $FH_INTRONS_tbl;
 
-    open(my $FH_CDSes_tbl, "<", "$in_cds_tbl_fn") or croak "Failed here";
+    open(my $FH_CDSes_tbl, "<", "$train_cds_filtered_tbl") or croak "Failed here";
     my @coding_seqs = ();
     while (<$FH_CDSes_tbl>)
     {
