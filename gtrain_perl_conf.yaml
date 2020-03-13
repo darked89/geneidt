@@ -1,0 +1,148 @@
+---
+
+#inputs to modify for each project
+input:
+    species: pmar01
+    genome_fasta: ./inputs/pmar4_nodots.fa
+    input_gff:     ./inputs/pmar4_nodots.gff
+    genetic_code: etc/genetic.code
+    work_dir: ./workdir_00_gtrain/
+
+dirs:
+    tmp_dir:   temp_00
+    stats_dir:   stats
+    sites_dir:   sites
+    plots_dir:   plots
+    introns_dir:   introns
+    fastas_dir:   fastas
+    backgrnd_dir:   backgrnd
+    cds_dir:   cds
+    geneid_dir   :   geneid
+    results_dir  :   results
+
+## Constant values. modify if needed
+bases_offset: 30 
+#bases in front/after? a feature (buggy...)
+
+train_fraction:     0.8   #fraction of seq used for training
+backgrnd_kmer_size: 60
+backgrnd_kmer_num:  100000
+
+sites:
+    acceptor:
+        name: Acceptor_profile
+        can_seq: AG
+        info_treshold: 0.15
+        offset: 28
+    donor:
+        name: Donor_profile
+        can_seq: GT
+        info_treshold: 0.04
+        offset: 31
+    ATGx:
+        name: Start_profile
+        can_seq: ATG
+        info_treshold: 0.15
+        offset: 30
+    tr_stop:
+        name: Stop_profile
+        can_seq: TGA
+        info_treshold: 0.15 #fake
+    branch:
+        name: Branch_profile
+        can_seq: AAA #fake
+        info_treshold: 0.30
+cutoffs:
+    pwm             : -7
+    train_loci           : 500
+    train_sites          : 1400
+    train_sites_alt      : 1200 # changed in some part?
+    train_sites_markov   : 5500
+
+    coding_bp_limit_A : 400000
+    coding_bp_limit_B : 375000
+
+    non_coding_bp_limit_A : 100000
+    non_coding_bp_limit_B : 150000
+    non_coding_bp_limit_C : 35000
+
+    multi_total_noncodingbases : 25
+
+    coding_param_X : 0.25
+    intron_param_X : 10
+
+profile_params: 
+    #~ ## EXON WEIGHT PARAMETER
+    ##ExWeightParam_ini   : -5.0,
+    ExonWeight:
+        init:   -4.5
+        step:    0.5
+        limit:  -2.5
+    #~ ## EXON/OLIGO FACTOR PARAMETER
+    OligoWeight:
+        init:   0.25
+        step:   0.05
+        limit:  0.50
+    #~ ## Minimum Branch Profile Distance
+    #~ ## unused 20161201
+    #~ ##    i_BranchProfDist : 7,
+    #~ ##    d_BranchProfDist : 2,
+    #~ ##    f_BranchProfDist : 9,
+    #~ ## ACCEPTOR CONTEXT
+    ##    iAccCtx : 40,
+    ##    dAccCtx : 10,
+    ##    fAccCtx : 70,
+                                      
+#~ ## end set CONSTANTS
+
+
+
+# for faster testing only
+backgrn_tbl  : ./precomputed/backgrnd.tab
+backgrn_freq : ./precomputed/backgrnd.freq
+backgrnd_hmm2_matrix : precomputed/backgrnd_hmm_2.matrix
+
+all_cont_transc :   ./precomputed/all_cont_transc.2col
+train_cont_transc : ./precomputed/train_cont_transc.2col
+eval_cont_transc :  ./precomputed/eval_cont_transc.2col
+
+train_gff : ./precomputed/train.gff
+eval_gff  : ./precomputed/eval.gff
+
+all_transc_int  : 765
+all_contigs_int : 765
+eval_transc_int : 153
+train_transc_int : 612
+
+#training eval sets
+all_transc   : ./precomputed/pmar_all_transcr.ids  
+eval_transc  : ./precomputed/pmar_eval_transcr.ids  
+train_transc : ./precomputed/pmar_train_transcr.ids
+
+all_gff_contigs :   ./precomputed/pmar_all_gff_contigs.ids
+eval_gff_contigs :  ./precomputed/pmar_eval_contig.ids
+train_gff_contigs : ./precomputed/pmar_train_contig.ids
+
+train_acc_tbl :   ./precomputed/acc_sites.tab
+train_donor_tbl : ./precomputed/don_sites.tab
+train_ATG_tbl   : ./precomputed/start_sites.tab
+train_stop_tbl  : ./precomputed/stop_sites.tab
+
+#depths/num of lines of training matrices
+train_acc_num   : 3479
+train_donor_num : 3479
+train_ATG_num   : 612
+train_stop_num  : 612
+
+train_cds_fas   :  ./precomputed/cds_seqs.fa
+train_cds_tbl   :  ./precomputed/cds_seqs.tab
+train_intron_tbl : ./precomputed/train_introns.tab
+
+train_cds_len : 635946
+train_introns_len : 304368
+
+
+
+
+
+
