@@ -345,62 +345,67 @@ sub normal_run
     $my_command = "gawk '{print \$1,\$9}' $input_nodots_gff | sort | uniq ";
     $locus_id   = capture($my_command);
 
-    # my $FH_FOUT;
-    say "\n TTT got here TTT\n";
-    $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
-    open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
-    print {$FH_FOUT} "$locus_id";
-    close $FH_FOUT;
+    my $FH_FOUT;
+    #say "\n TTT got here TTT\n";
+    #$contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
+    #open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
+    #print {$FH_FOUT} "$locus_id";
+    #close $FH_FOUT;
 
-    ## number of gene models TOTAL
-    $my_command =
-        " gawk '{print \$2}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    $transcr_all_number = capture($my_command);
+    #~ ## number of gene models TOTAL
+    #~ $my_command =
+        #~ " gawk '{print \$2}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
+    #~ $transcr_all_number = capture($my_command);
 
-    chomp $transcr_all_number;
-    ## number of genomic sequences TOTAL
-    $my_command =
-        "gawk '{print \$1}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    my $total_genomic = capture($my_command);
+    #~ chomp $transcr_all_number;
+    #~ ## number of genomic sequences TOTAL
+    #~ $my_command =
+        #~ "gawk '{print \$1}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
+    #~ my $total_genomic = capture($my_command);
 
-    chomp $total_genomic;
+    #~ chomp $total_genomic;
 
-    print {*STDERR}
-        "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
+    #~ print {*STDERR}
+        #~ "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
 
-    ### get a list of genes TOTAL
-    print {*STDERR} "\nObtain list of all transcripts\n\n";
+    #~ ### get a list of genes TOTAL
+    #~ print {*STDERR} "\nObtain list of all transcripts\n\n";
 
-    $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
-    my $transcr_list_tmp = capture($my_command);
+    #~ $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
+    #~ my $transcr_list_tmp = capture($my_command);
 
-    my $transcr_all_list_fn = $work_dir . $species . "_all_seqs.lst";
-    open($FH_FOUT, ">", "$transcr_all_list_fn") or croak "Failed here";
-    print {$FH_FOUT} "$transcr_list_tmp";
-    close $FH_FOUT;
+    #~ my $transcr_all_list_fn = $work_dir . $species . "_all_seqs.lst";
+    #~ open($FH_FOUT, ">", "$transcr_all_list_fn") or croak "Failed here";
+    #~ print {$FH_FOUT} "$transcr_list_tmp";
+    #~ close $FH_FOUT;
 
-    if ($transcr_all_number >= $train_loci_cutoff)
+    #if ($transcr_all_number >= $train_loci_cutoff)
+    
+    
+    # FIXME 20200313 temp solution
+    $transcr_all_number = 765;
+    if ($transcr_all_number > 1)
     {
 
         $train_transcr_num = int($train_fraction * $transcr_all_number);
-
+        $train_transcr_num = 612;
         print {*STDERR}
             "\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n";
         ## DEBUG KEEP !!! shuf => random select
         ## head -$train_transcr_num just the first ones
         #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
 
-        $my_command =
-            "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
+        #~ $my_command =
+            #~ "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
 
-        $locus_id_new = capture($my_command);
+        #~ $locus_id_new = capture($my_command);
 
-        $train_contigs_transcr_2cols =
-            $work_dir . $species . "_train_setaside80.2cols";
-        open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
-            or croak "Failed here";
-        print {$FH_FOUT} "$locus_id_new";
-        close $FH_FOUT;
+        #~ $train_contigs_transcr_2cols =
+            #~ $work_dir . $species . "_train_setaside80.2cols";
+        #~ open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
+            #~ or croak "Failed here";
+        #~ print {$FH_FOUT} "$locus_id_new";
+        #~ close $FH_FOUT;
 
         $train_transcr_used_int = $train_transcr_num;
 
@@ -411,14 +416,14 @@ sub normal_run
         print {*STDERR}
             "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
         ## ??? BUG ???
-        $my_command =
-            "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
-        $gff_4_training = capture($my_command);
+        #~ $my_command =
+            #~ "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
+        #~ $gff_4_training = capture($my_command);
 
-        $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
-        open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
-        print {$FH_FOUT} "$gff_4_training";
-        close $FH_FOUT;
+        #~ $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
+        #~ open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
+        #~ print {$FH_FOUT} "$gff_4_training";
+        #~ close $FH_FOUT;
 
         print {*STDERR} "\nObtain list of training genes\n\n";
 
@@ -435,22 +440,22 @@ sub normal_run
         #
         ## new locus_id for evaluation test set
         #
-        my $locus_id_eval = "";
+        #~ my $locus_id_eval = "";
 
-        $my_command =
+        #~ $my_command =
 
-            #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
-            "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
+            #~ #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
+            #~ "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
 
-        $locus_id_eval = capture($my_command);
-        chomp $locus_id_eval;
+        #~ $locus_id_eval = capture($my_command);
+        #~ chomp $locus_id_eval;
 
-        $eval_contigs_transcr_2cols =
-            $work_dir . $species . "_evaluation_setaside20.2cols";
-        open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
-            or croak "Failed here";
-        print {$FH_FOUT} "$locus_id_eval";
-        close $FH_FOUT;
+        #~ $eval_contigs_transcr_2cols =
+            #~ $work_dir . $species . "_evaluation_setaside20.2cols";
+        #~ open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
+            #~ or croak "Failed here";
+        #~ print {$FH_FOUT} "$locus_id_eval";
+        #~ close $FH_FOUT;
 
         ##
         ## gff for evaluation test set
