@@ -201,7 +201,7 @@ def get_genes_list(list_filename):
     f.close()
     return  gene_list
 
-def extract_sites(transcript_dict, genome_fas, genome_fas_dict, splice_type):
+def extract_sites(transcript_dict, genome_fas, genome_fas_dict, splice_type, gene_set_type):
 
     def plus_strand_feat(chrom, position, offset):
         chrom_size = genome_fas_dict[chrom]
@@ -244,7 +244,10 @@ def extract_sites(transcript_dict, genome_fas, genome_fas_dict, splice_type):
         temp_seq = temp_seq[::-1] #reversing
         return temp_seq, len(temp_seq)
     
-    
+    def output_tbl():
+        """not implemented yet """
+        pass
+        
     #counter = 0
     def get_acceptors(transcript_list):
         if transcript_list == None:
@@ -375,8 +378,8 @@ def extract_sites(transcript_dict, genome_fas, genome_fas_dict, splice_type):
         print("ERROR: not implemented yet")
 
 
-def extract_cds_seqs(*transcript_list):
-    transcript_list = transcript_dict.keys()
+def extract_cds_seqs(input_gene_dict, gene_set_type):
+    transcript_list = input_gene_dict.keys()
     #debug
     #transcript_list = ['model.1879.m002022', 'foobar']
     #pattern for longest ORF in transcript
@@ -397,9 +400,9 @@ def extract_cds_seqs(*transcript_list):
         return exon_seq
         
     
-    
+    strand_tag = "unknown"
     for transcript_id in transcript_list:
-        current_record = transcript_dict[transcript_id]
+        current_record = input_gene_dict[transcript_id]
         num_of_exons = len(current_record)
         strand = current_record[0]['strand']
         
@@ -415,19 +418,24 @@ def extract_cds_seqs(*transcript_list):
         if strand == '-':
             tmp_seq =  Seq(transcript_seq)
             transcript_seq = "%s" %(tmp_seq.reverse_complement())
+            strand_tag = "R"
+        else:
+            strand_tag = "F"
 
         ## DEBUG
         #~ print ">%s_from_%s_exons_%s_trans" % (transcript_id, num_of_exons, strand)
         #~ print "%s" % transcript_seq
         try:        
             cds_seq = max(orf_finder.findall(transcript_seq), key = len)
-            print(">%s_from_%s_exons_%s_CDS" % (transcript_id, num_of_exons, strand))
-            print( cds_seq)
+            #print(">%s_from_%s_exons_%s_CDS_%s" % (transcript_id, num_of_exons, strand_tag, gene_set_type))
+            out_str = f"{transcript_id}_from_{num_of_exons}_exons_{strand_tag}_{gene_set_type}\t"
+            out_str = out_str + cds_seq
+            print(out_str)
         except:
             print("error: transcript_id", transcript_id)
 
-def extract_introns(*transcript_list):
-    transcript_list   = transcript_dict.keys()
+def extract_introns(input_gene_dict, gene_set_type):
+    transcript_list   = input_gene_dict.keys()
     intron_sizes_list = []
     
     #~ def get_exon_seq(exon_record, strand):            
@@ -447,7 +455,7 @@ def extract_introns(*transcript_list):
     
     
     for transcript_id in transcript_list:
-        current_record = transcript_dict[transcript_id]
+        current_record = input_gene_dict[transcript_id]
         num_of_exons = len(current_record)
         if num_of_exons != 1:
             introns_positions_list = []
@@ -488,7 +496,8 @@ def extract_introns(*transcript_list):
             pass
     
     intron_sizes_list.sort()
-    print("INTRON_MIN_MAX",    intron_sizes_list[0], intron_sizes_list[-1])
+    #print("INTRON_MIN_MAX",    intron_sizes_list[0], intron_sizes_list[-1])
+    return intron_sizes_list
         #~ for exon in current_record:
                 #~ #print "$$$$", exon
                 #~ introns_seq += "%s" % get_intron_seq(exon, strand)
@@ -518,15 +527,17 @@ def filter_dict(transcript_dict, filter_list):
 
 if __name__ == "__main__":
     sites_2_extract = ["acceptors", "donors", "ATG", "stop"]
-
+    gene_set_types  = ["training", "evaluate"]
+    
     gff_fn = cfg['gff']['genes_fn']
     transcript_dict = gff_reader(gff_fn)
     #print "transcript_dict size:", len(transcript_dict)
     training_genes = get_genes_list(cfg['training_set'])
     evaluate_genes = get_genes_list(cfg['evaluate_set'])
     
-    training_dict  = filter_dict(transcript_dict, training_genes)
-    evaluate_dict  = filter_dict(transcript_dict, evaluate_genes)
+    meta_dict = {}
+    meta_dict['training']  = filter_dict(transcript_dict, training_genes)
+    meta_dict['evaluate']  = filter_dict(transcript_dict, evaluate_genes)
     
     """
     saveout = sys.stdout
@@ -536,9 +547,18 @@ if __name__ == "__main__":
     sys.stdout = saveout
     output_fh.close()
     """
-    
+    #training extraction:
     for site in sites_2_extract:
-        extract_sites(transcript_dict, genome_fas, genome_fas_dict, site)
+        output_fn = f"pmar01.train.{site}.tbl"
+        
+        saveout = sys.stdout
+        output_fh = open(output_fn, 'w')
+        sys.stdout = output_fh
+        
+        #extract_sites(training_dict, genome_fas, genome_fas_dict, site, "train")
+        extract_sites(meta_dict['training'], genome_fas, genome_fas_dict, site, "train")
+        sys.stdout = saveout
+        output_fh.close()
     """
     extract_sites(transcript_dict, genome_fas, genome_fas_dict, "acceptors")
     extract_sites(transcript_dict, genome_fas, genome_fas_dict, "donors")
@@ -548,5 +568,45 @@ if __name__ == "__main__":
     extract_sites(transcript_dict, genome_fas, genome_fas_dict, "ATG")
     extract_sites(transcript_dict, genome_fas, genome_fas_dict, "stop")
     """
-    extract_cds_seqs()
-    extract_introns()
+    
+    
+    #for gene_set in gene_set_types:
+    output_fn  = "pmar01.train.cds.tbl"
+    #print(f"file name: {output_fn}")
+    saveout    = sys.stdout
+    output_fh  = open(output_fn, 'w')
+    sys.stdout = output_fh
+    
+    extract_cds_seqs(meta_dict['training'], "train")
+    
+    sys.stdout = saveout
+    output_fh.close()
+    
+    
+    
+    #extract_introns train ()
+    
+    output_fn  = "pmar01.train.introns.tbl"
+    #print(f"file name: {output_fn}")
+    saveout    = sys.stdout
+    output_fh  = open(output_fn, 'w')
+    sys.stdout = output_fh
+    
+    extract_introns(meta_dict['training'], "train")
+    
+    sys.stdout = saveout
+    output_fh.close()
+    
+    
+    #extract_introns eval()
+    
+    output_fn  = "pmar01.eval.introns.tbl"
+    #print(f"file name: {output_fn}")
+    saveout    = sys.stdout
+    output_fh  = open(output_fn, 'w')
+    sys.stdout = output_fh
+    
+    extract_introns(meta_dict['evaluate'], "eval")
+    
+    sys.stdout = saveout
+    output_fh.close()
