@@ -9,6 +9,11 @@ use English '-no_match_vars';
 
 use feature "signatures";
 no warnings "experimental::signatures";
+
+use warnings::unused; # installs the check routine as 'once'
+
+use warnings 'once';  # enables  the check routine
+
 use feature 'say';
 
 use strict;
@@ -60,7 +65,7 @@ my $exec_path = "$PROGRAM_HOME/bin/";
 local $ENV;
 $ENV{'PATH'} = $exec_path . ":" . $ENV{'PATH'};
 
-my $genetic_code = "./etc/genetic.code";
+## UNUSED NOW my $genetic_code = "./etc/genetic.code";
 
 
 ## no need to run anything if this fails
@@ -107,10 +112,11 @@ if (!($species && $input_gff_fn && $input_fas_fn && $sout && $fix_fasta))
 ## Constant values. modify if needed
 Readonly::Scalar my $pwm_cutoff     => -7;
 Readonly::Scalar my $bases_offset   => 30;    #bases in front/after? a feature
-Readonly::Scalar my $train_fraction => 0.8;   #fraction of seq used for training
-Readonly::Scalar my $train_loci_cutoff         => 500;
+## UNUSED HERE
+## Readonly::Scalar my $train_fraction => 0.8;   #fraction of seq used for training
+## Readonly::Scalar my $train_loci_cutoff         => 500;
 Readonly::Scalar my $train_sites_cutoff        => 1_400;
-Readonly::Scalar my $train_sites_cutoff_alt    => 1_200; # changed in some part?
+## Readonly::Scalar my $train_sites_cutoff_alt    => 1_200; # changed in some part?
 Readonly::Scalar my $train_sites_markov_cutoff => 5_500;
 Readonly::Scalar my $backgrnd_kmer_size        => 60;
 Readonly::Scalar my $backgrnd_kmer_num => 100_000;
@@ -124,7 +130,7 @@ Readonly::Scalar my $non_coding_bp_limit_A => 100_000;
 Readonly::Scalar my $non_coding_bp_limit_B => 150_000;
 Readonly::Scalar my $non_coding_bp_limit_C => 35_000;
 
-Readonly::Scalar my $multi_total_noncodingbases => 25;
+## UNUSED now Readonly::Scalar my $multi_total_noncodingbases => 25;
 Readonly::Scalar my $coding_param_X => 0.25;
 Readonly::Scalar my $intron_param_X => 10;
 
@@ -147,14 +153,14 @@ Readonly::Hash my %profile_params => (
         ##    dAccCtx => 10,
         ##    fAccCtx => 70,
     );
-
-Readonly::Hash my %canonical_const => (
-        Donor    => [31, 'GT'],
-        Acceptor => [28, 'AG'],
-        Start    => [30, 'ATG'],
+## UNUSED NOW
+#~ Readonly::Hash my %canonical_const => (
+        #~ Donor    => [31, 'GT'],
+        #~ Acceptor => [28, 'AG'],
+        #~ Start    => [30, 'ATG'],
         ## stop 2do
         ## branch 2do
-    );
+##    );
 Readonly::Hash my %my_info_thresholds => (
         donor    => 0.15,
         acceptor => 0.04,
@@ -167,7 +173,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = "./workdir_gt_pre_20200318_03/";
+my $work_dir = "./workdir_gt_pre_20200318_08nogeneidgff_input/";
 my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
@@ -237,7 +243,8 @@ my $intron_short_int      = 0;
 my $intergenic_max        = 0;
 my $intergenic_min        = 0;
 
-my $eval_cds_filtered_tbl       = "";
+## UNUSED now
+## my $eval_cds_filtered_tbl       = "";
 my $eval_filtered_gff           = "";
 my $eval_introns_filtered_tbl   = "";
 my $eval_locusid_filtered_2cols = "";
@@ -342,49 +349,33 @@ sub normal_run
 
     print {*STDERR} "\nObtain locus_id (list of genomic sequences / genes)\n";
 
-    $my_command = "gawk '{print \$1,\$9}' $input_nodots_gff | sort | uniq ";
-    $locus_id   = capture($my_command);
-
-    my $FH_FOUT;
-    #say "\n TTT got here TTT\n";
     
-    $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
-    open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
-    print {$FH_FOUT} "$locus_id";
-    close $FH_FOUT;
+    $contigs_all_transcr_2cols = "./precomputed/all_cont_transc.2col"; # @@@
+        
+    $transcr_all_number = 765; # @@@
+    
 
-    ## number of gene models TOTAL
-    $my_command =
-        " gawk '{print \$2}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    $transcr_all_number = capture($my_command);
-
-    chomp $transcr_all_number;
-    ## number of genomic sequences TOTAL
-    $my_command =
-        "gawk '{print \$1}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    my $total_genomic = capture($my_command);
-
-    chomp $total_genomic;
+    my $total_genomic = 765; # @@@
+    
+    #~ chomp $total_genomic;
 
     print {*STDERR}
         "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
 
-    ### get a list of genes TOTAL
+    ### get a list of transcripts TOTAL
     print {*STDERR} "\nObtain list of all transcripts\n\n";
 
-    $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
-    my $transcr_list_tmp = capture($my_command);
+    
+    my $transcr_all_list_fn = "./precomputed/pmar_all_transcr.ids";
+    
 
-    my $transcr_all_list_fn = $work_dir . $species . "_all_seqs.lst";
-    open($FH_FOUT, ">", "$transcr_all_list_fn") or croak "Failed here";
-    print {$FH_FOUT} "$transcr_list_tmp";
-    close $FH_FOUT;
 
     #if ($transcr_all_number >= $train_loci_cutoff)
     
     
     # FIXME 20200313 temp solution
-    $transcr_all_number = 765;
+    ## $transcr_all_number = 765;
+    ## hack for if
     if ($transcr_all_number > 1)
     {
 
@@ -399,125 +390,36 @@ sub normal_run
         
         $train_contigs_transcr_2cols = "./precomputed/train_cont_transc.2col"; #@@@
         
-        #~ $train_contigs_transcr_2cols =
-            #~ $work_dir . $species . "_train_setaside80.2cols";
-        #~ $my_command =
-            #~ "head --lines=$train_transcr_num $contigs_all_transcr_2cols > $train_contigs_transcr_2cols";
-        #~ run($my_command);
-        
-        ##$locus_id_new = capture($my_command);
-
-        
-        #~ open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
-            #~ or croak "Failed here";
-        #~ print {$FH_FOUT} "$locus_id_new";
-        #~ close $FH_FOUT;
-
-        ##$train_transcr_used_int = $train_transcr_num;
-
-        ## gff for training subset
-        ##
-        my $gff_4_training = "";
         $train_set_gff = "precomputed/train.gff"; #@@@
         
         print {*STDERR}
             "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
-        ## ??? BUG ???
-        #~ $my_command =
-            #~ "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
-        #~ $gff_4_training = capture($my_command);
-
-        
-        #~ open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
-        #~ print {$FH_FOUT} "$gff_4_training";
-        #~ close $FH_FOUT;
 
         print {*STDERR} "\nObtain list of training genes\n\n";
-
-        #my $train_transcr_list_tmp = "";
-
-        #~ $my_command = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
-        #~ my $train_transcr_list_tmp = capture($my_command);
-
-        #~ $train_transcr_lst_fn = $work_dir . $species . "train_setaside80.lst";
         
         $train_transcr_lst_fn = "./precomputed/pmar_train_transcr.ids"; # @@@
-        #~ open($FH_FOUT, ">", "$train_transcr_lst_fn") or croak "Failed here";
-        #~ print {$FH_FOUT} "$train_transcr_list_tmp";
-        #~ close $FH_FOUT;
-
-        #
-        ## new locus_id for evaluation test set
-        #
-        #~ my $locus_id_eval = "";
-
-        #~ $my_command =
-
-            #~ #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
-            #~ "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
-
-        #~ $locus_id_eval = capture($my_command);
-        #~ chomp $locus_id_eval;
-
-        #~ $eval_contigs_transcr_2cols =
-            #~ $work_dir . $species . "_evaluation_setaside20.2cols";
+        
         $eval_contigs_transcr_2cols =   "./precomputed/eval_cont_transc.2col"; # @@@
-        #~ open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
-            #~ or croak "Failed here";
-        #~ print {$FH_FOUT} "$locus_id_eval";
-        #~ close $FH_FOUT;
-
-        ##
-        ## gff for evaluation test set
-        #
-
-        #~ $my_command =
-            #~ "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff | gawk '{ print \$9}' | sort | uniq | wc -l";
-        ## ??? BUG this is a number...
-        ## $seqs_eval_gff = capture($my_command);
-        $seqs_eval_gff = 153;
-        #chomp $input_gff_fnseqseval;
-
+        $seqs_eval_gff = 153; # @@@
+        
         print {*STDERR}
             "The evaluation gff file includes $seqs_eval_gff gene models (20% of total seqs)\n\n";
-
-        #~ $my_command =
-            #~ "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff ";
-        #~ my $gff_4_evaluation = capture($my_command);
-
-        #~ $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
         
-        $eval_set_gff = "./precomputed/eval.gff";
+        $eval_set_gff = "./precomputed/eval.gff"; # @@@
         
-        #~ open($FH_FOUT, ">", "$eval_set_gff") or croak "Failed here";
-        #~ print {$FH_FOUT} "$gff_4_evaluation";
-        #~ close $FH_FOUT;
 
     }    # seqs > 500
-    ##LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
 
-
-    ## UNUSED now
-    #~ else
-    #~ {    # seqs < $train_loci_cutoff
-        #~ ## BUG we do not do jacknife anyway here
-        #~ croak "we do not have >= $train_loci_cutoff sequences, quitting now";
-    #~ }    # seqs < 500
-
-    #~ if (!$use_allseqs_flag)
-    #~ {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
-    ## print {*STDERR} "NOT_USE_ALL_SEQS \n\n";
     
     
-    ## remove extra \{ 
-    ##{
+
         ## BUG => there is no need to convert gff to geneid format each time we run
 
         $train_2cols_seq_locusid_fn =
             gff_2_geneidgff_mock($train_set_gff, $species, ".train");
         print {*STDERR}
             "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
-        ## FIXME 20200311: get the relevant files from the upstream python script
+
         ## FIXME 20200316: encode these in the yaml
         
             $train_cds_filtered_tbl        =  "./precomputed/pmar01.train.cds.tbl";
@@ -526,56 +428,17 @@ sub normal_run
             $train_filtered_gff             =  "./precomputed/train.gff";
             $train_inframestop_int        = 0; 
         
-        
-        #~ (
-            #~ $train_cds_filtered_tbl,       $train_introns_filtered_tbl,
-            #~ $train_locusid_filtered_2cols, $train_filtered_gff,
-            #~ $train_inframestop_int
-        #~ )
-            #~ = @{
-            #~ extract_cds_introns(
-                #~ $train_2cols_seq_locusid_fn,
-                #~ $train_contigs_transcr_2cols,
-                #~ ".train"
-            #~ )
-            #~ };
 
-        #  print {*STDERR} " OUTSIDE EXTRACTCDSINTRON outgff: $train_filtered_gff\noutlocus_id: $out_locus_id_X\n";
-        ## TRAIN
-        ## EVAL
         $eval_2cols_seq_locusid_fn =
             gff_2_geneidgff_mock($eval_set_gff, $species, ".eval");
 
         print {*STDERR}
             "L533 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
-        ## 2016.12.10 not used??
-	
-	## FIXME 20200311: get the relevant files from the upstream python script
-	## in reality these are not needed
+
 
             $eval_filtered_gff = "./precomputed/eval.gff"; #@@@
             $eval_inframestop_int = 0; # @@@
         
-        
-	
-        #~ (
-            #~ $eval_cds_filtered_tbl, $eval_introns_filtered_tbl,    #-- not used
-            #~ $eval_locusid_filtered_2cols,                          #-- not used
-            #~ $eval_filtered_gff, $eval_inframestop_int
-        #~ )
-            #~ = @{
-            #~ extract_cds_introns(
-                #~ $eval_2cols_seq_locusid_fn,
-                #~ $eval_contigs_transcr_2cols,
-                #~ ".eval"
-            #~ )
-            #~ };
-
-        #EVAL
-
-    ##}
-    ## end remove extra {
-    #
 
     ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
     print {*STDERR}
@@ -588,56 +451,9 @@ sub normal_run
         $train_ATGx_tbl              = "./precomputed/pmar01.train.start_sites.tbl";  #@@@ 
         $train_noncanon_ATGx_int     = 0; #@@@
      
-        
-        
-    #(
-        #$train_donor_tbl,    $train_noncanon_donors_int,
-        #$train_acceptor_tbl, $train_noncanon_accept_int,
-        #$train_ATGx_tbl,     $train_noncanon_ATGx_int
-    #)
-        #= @{extractprocessSITES($train_filtered_gff,
-        #$train_locusid_filtered_2cols)};
+    
 
-    ## prepare sequences for optimization of newly developed parameter file (TRAIN)
-
-    print {*STDERR}
-        "\nConvert gff to gp (golden-path-like)format (artificial contig - concatenated sequences - approx. 800 nt between sequences)\n";
-
-    (
-        $gp_traincontig_gff, $gp_traincontig_fa,
-        $gp_traincontig_tbl, $gp_traincontig_len_int
-    )
-        = @{process_seqs_4opty($train_filtered_gff, ".train", 1)};
-
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (training set for later optimization -400-nt flanked sequences)\n";
-    #~ ($gp_train_gff, $gp_train_fa, $gp_train_tbl, $gp_train_len_int) =
-    #~ @{process_seqs_4opty($train_filtered_gff, ".train", 0)};
-    #~ print {*STDERR} "$gp_train_gff";
-
-    ## prepare test set for evaluation of newly developed parameter file (EVAL)
-
-    #~ print {*STDERR}
-    #~ "\nConvert gff to gp (golden-path-like)format (400-nt flanking)(test set for evaluation of new parameter file)\n";
-    #~ ($gp_eval_gff, $gp_eval_fa, $gp_eval_tbl, $gp_eval_len_int) =
-    #~ @{process_seqs_4opty($eval_filtered_gff, ".eval", 0)};
-    #~ print {*STDERR} "DONE\n";
-
-    print {*STDERR}
-        "\nConvert gff to gp (golden-path-like)format (test set for evaluation of new parameter file -
-        (artificial contig - concatenated sequences - approx. 800 nt between sequences)\n";
-    (
-        $gp_evalcontig_gff, $gp_evalcontig_fa,
-        $gp_evalcontig_tbl, $gp_evalcontig_len_int
-    )
-        = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
-    print {*STDERR} "DONE\n";
-
-    #~ my $t3 = Benchmark->new;
-    #~ my $td = timediff( $t3, $last_bench_time );
-    #~ print "\nTTT the code took t2->t3:", timestr($td), "\n";
-    #~ $last_bench_time = $t3;
-
+ 
     ### GET BACKGROUND SEQUENCES
 
     print
@@ -645,15 +461,13 @@ sub normal_run
 
     $backgrnd_kmers_fn = $work_dir . $species . "_background.tbl";
     get_background_kmers(
-        $backgrnd_kmer_size,     $input_fas_fn,
-        $genome_all_contigs_tbl, $backgrnd_kmer_num,
+        $backgrnd_kmer_size,     
+        $input_fas_fn,
+        $genome_all_contigs_tbl, 
+        $backgrnd_kmer_num,
         $backgrnd_kmers_fn
     );
 
-    # my (
-    #     $donor_start,  $donor_end,  $acceptor_start,
-    #     $acceptor_end, $ATGx_start, $ATGx_end
-    # ) = compute_sites_pictogram();
 
     my ($donor_start, $donor_end) =
         compute_matrices_4sites($train_donor_tbl, 'donor');
@@ -725,6 +539,33 @@ sub normal_run
     $new_param_fn = "$work_dir/$species.geneid.RAW.param";
     $param->writeParam($new_param_fn);
 
+
+    ## # START prepare sequences for optimization BLOCK
+    ## of newly developed parameter file (TRAIN)
+
+    ### [<now>] TART prepare sequences for optimization at <file>[<line>]...
+
+    print {*STDERR}
+        "\nConvert gff to gp (golden-path-like)format (artificial contig - concatenated sequences - approx. 800 nt between sequences)\n";
+
+    (
+        $gp_traincontig_gff, $gp_traincontig_fa,
+        $gp_traincontig_tbl, $gp_traincontig_len_int
+    )
+        = @{process_seqs_4opty($train_filtered_gff, ".train", 1)};
+    print {*STDERR}
+        "\nConvert gff to gp (golden-path-like)format (test set for evaluation of new parameter file -
+        (artificial contig - concatenated sequences - approx. 800 nt between sequences)\n";
+    (
+        $gp_evalcontig_gff, $gp_evalcontig_fa,
+        $gp_evalcontig_tbl, $gp_evalcontig_len_int
+    )
+        = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
+    print {*STDERR} "DONE\n";
+    
+    ## # END prepare sequences for optimization BLOCK
+
+
     ### [<now>] Optimizing new parameter file at <file>[<line>]...
 
     ## OPTIMIZATION FUNCTION NO BRANCH
@@ -792,7 +633,7 @@ sub init_param_file($species)
 ### CREATE BLANK PARAMETER FILE...
 ### [<now>] template parameter file
 my $param        = Geneid::Param->new($species);
-my $new_param_fn = "$work_dir/$species.geneid.param";
+## my $new_param_fn = "$work_dir/$species.geneid.param";
 
 #set isochores to 1
 $param->numIsocores(1);
@@ -1178,15 +1019,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
         $temp_tabulargpcontig,       $temp_seqlencontig
     ];
 
-    ##}
-    #    elsif (!$contig_opt_flag)
-    #    {
-    #        print {*STDERR} "L1803, NOT CONTIG OPT\n";
-    #        return [
-    #            $eval_gp_out_gff, $temp_gp_fa,
-    #            $temp_gp_tbl,     $opt_type_cds_contigs_total_bp
-    #        ];
-    #    }
+
 
 }    #processSequences optimization
 
@@ -1672,7 +1505,9 @@ sub BitScoreGraph ($info_output, $info_thresh, $offset)
 sub get_pre_matrix ($kmers_tbl, $order)
 {    ### TMP HACK 2016.12.16
     my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
-    my $ordname = $orders[$order];
+    
+    ## UNUSED
+    ## my $ordname = $orders[$order];
     my $FH_KMERS;
     open($FH_KMERS, "<", "$kmers_tbl") or croak "Failed here";
     my $first_line = <$FH_KMERS>;
@@ -1681,8 +1516,11 @@ sub get_pre_matrix ($kmers_tbl, $order)
     close $FH_KMERS;
 
     my $frequency_fn = $work_dir . basename($kmers_tbl) . ".freq";
+    
+    ### [<now>] start frequency.py at <file>[<line>]...
     my $my_command   = ("./bin/frequency.py   1 $kmers_tbl  >  $frequency_fn");
-    run($my_command);    ### [<now>] Running...
+    run($my_command);    
+    ### [<now>] finish frequency.py at <file>[<line>]...
 }
 
 ## GETKMATRIX FUNCTION (Splice sites and Start ATG codon PWMs)
