@@ -167,7 +167,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = "./workdir_gt_pre_20200316_01/";
+my $work_dir = "./workdir_gt_pre_20200318_03/";
 my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
@@ -231,7 +231,7 @@ my $seqs_eval_gff         = "";
 my $train_inframestop_int = 0;
 my $eval_inframestop_int  = 0;
 my $locus_id              = "";
-my $locus_id_new          = "";
+##my $locus_id_new          = "";
 my $intron_long_int       = 0;
 my $intron_short_int      = 0;
 my $intergenic_max        = 0;
@@ -388,7 +388,7 @@ sub normal_run
     if ($transcr_all_number > 1)
     {
 
-        $train_transcr_num = int($train_fraction * $transcr_all_number);
+        ## $train_transcr_num = int($train_fraction * $transcr_all_number);
         $train_transcr_num = 612;
         print {*STDERR}
             "\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n";
@@ -396,105 +396,121 @@ sub normal_run
         ## head -$train_transcr_num just the first ones
         #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
 
-        $my_command =
-            "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
+        
+        $train_contigs_transcr_2cols = "./precomputed/train_cont_transc.2col"; #@@@
+        
+        #~ $train_contigs_transcr_2cols =
+            #~ $work_dir . $species . "_train_setaside80.2cols";
+        #~ $my_command =
+            #~ "head --lines=$train_transcr_num $contigs_all_transcr_2cols > $train_contigs_transcr_2cols";
+        #~ run($my_command);
+        
+        ##$locus_id_new = capture($my_command);
 
-        $locus_id_new = capture($my_command);
+        
+        #~ open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
+            #~ or croak "Failed here";
+        #~ print {$FH_FOUT} "$locus_id_new";
+        #~ close $FH_FOUT;
 
-        $train_contigs_transcr_2cols =
-            $work_dir . $species . "_train_setaside80.2cols";
-        open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
-            or croak "Failed here";
-        print {$FH_FOUT} "$locus_id_new";
-        close $FH_FOUT;
-
-        $train_transcr_used_int = $train_transcr_num;
+        ##$train_transcr_used_int = $train_transcr_num;
 
         ## gff for training subset
         ##
         my $gff_4_training = "";
-
+        $train_set_gff = "precomputed/train.gff"; #@@@
+        
         print {*STDERR}
             "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
         ## ??? BUG ???
-        $my_command =
-            "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
-        $gff_4_training = capture($my_command);
+        #~ $my_command =
+            #~ "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
+        #~ $gff_4_training = capture($my_command);
 
-        $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
-        open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
-        print {$FH_FOUT} "$gff_4_training";
-        close $FH_FOUT;
+        
+        #~ open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
+        #~ print {$FH_FOUT} "$gff_4_training";
+        #~ close $FH_FOUT;
 
         print {*STDERR} "\nObtain list of training genes\n\n";
 
         #my $train_transcr_list_tmp = "";
 
-        $my_command = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
-        my $train_transcr_list_tmp = capture($my_command);
+        #~ $my_command = "gawk '{print \$9}' $train_set_gff | sort | uniq ";
+        #~ my $train_transcr_list_tmp = capture($my_command);
 
-        $train_transcr_lst_fn = $work_dir . $species . "train_setaside80.lst";
-        open($FH_FOUT, ">", "$train_transcr_lst_fn") or croak "Failed here";
-        print {$FH_FOUT} "$train_transcr_list_tmp";
-        close $FH_FOUT;
+        #~ $train_transcr_lst_fn = $work_dir . $species . "train_setaside80.lst";
+        
+        $train_transcr_lst_fn = "./precomputed/pmar_train_transcr.ids"; # @@@
+        #~ open($FH_FOUT, ">", "$train_transcr_lst_fn") or croak "Failed here";
+        #~ print {$FH_FOUT} "$train_transcr_list_tmp";
+        #~ close $FH_FOUT;
 
         #
         ## new locus_id for evaluation test set
         #
-        my $locus_id_eval = "";
+        #~ my $locus_id_eval = "";
 
-        $my_command =
+        #~ $my_command =
 
-            #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
-            "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
+            #~ #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
+            #~ "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
 
-        $locus_id_eval = capture($my_command);
-        chomp $locus_id_eval;
+        #~ $locus_id_eval = capture($my_command);
+        #~ chomp $locus_id_eval;
 
-        $eval_contigs_transcr_2cols =
-            $work_dir . $species . "_evaluation_setaside20.2cols";
-        open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
-            or croak "Failed here";
-        print {$FH_FOUT} "$locus_id_eval";
-        close $FH_FOUT;
+        #~ $eval_contigs_transcr_2cols =
+            #~ $work_dir . $species . "_evaluation_setaside20.2cols";
+        $eval_contigs_transcr_2cols =   "./precomputed/eval_cont_transc.2col"; # @@@
+        #~ open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
+            #~ or croak "Failed here";
+        #~ print {$FH_FOUT} "$locus_id_eval";
+        #~ close $FH_FOUT;
 
         ##
         ## gff for evaluation test set
         #
 
-        $my_command =
-            "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff | gawk '{ print \$9}' | sort | uniq | wc -l";
+        #~ $my_command =
+            #~ "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff | gawk '{ print \$9}' | sort | uniq | wc -l";
         ## ??? BUG this is a number...
-        $seqs_eval_gff = capture($my_command);
-
+        ## $seqs_eval_gff = capture($my_command);
+        $seqs_eval_gff = 153;
         #chomp $input_gff_fnseqseval;
 
         print {*STDERR}
             "The evaluation gff file includes $seqs_eval_gff gene models (20% of total seqs)\n\n";
 
-        $my_command =
-            "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff ";
-        my $gff_4_evaluation = capture($my_command);
+        #~ $my_command =
+            #~ "gawk '{print \$2\"\$\"}' $eval_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff ";
+        #~ my $gff_4_evaluation = capture($my_command);
 
-        $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
-        open($FH_FOUT, ">", "$eval_set_gff") or croak "Failed here";
-        print {$FH_FOUT} "$gff_4_evaluation";
-        close $FH_FOUT;
+        #~ $eval_set_gff = $work_dir . $species . "_evaluation_setaside20.gff";
+        
+        $eval_set_gff = "./precomputed/eval.gff";
+        
+        #~ open($FH_FOUT, ">", "$eval_set_gff") or croak "Failed here";
+        #~ print {$FH_FOUT} "$gff_4_evaluation";
+        #~ close $FH_FOUT;
 
     }    # seqs > 500
     ##LOOP IF WE HAVE FEWER THAN 500 SEQUENCES
 
-    else
-    {    # seqs < $train_loci_cutoff
-        ## BUG we do not do jacknife anyway here
-        croak "we do not have >= $train_loci_cutoff sequences, quitting now";
-    }    # seqs < 500
+
+    ## UNUSED now
+    #~ else
+    #~ {    # seqs < $train_loci_cutoff
+        #~ ## BUG we do not do jacknife anyway here
+        #~ croak "we do not have >= $train_loci_cutoff sequences, quitting now";
+    #~ }    # seqs < 500
 
     #~ if (!$use_allseqs_flag)
     #~ {    ##SET SEQS FOR EVAL AND TRAINING (SUBSETS)
-    print {*STDERR} "NOT_USE_ALL_SEQS \n\n";
-
-    {
+    ## print {*STDERR} "NOT_USE_ALL_SEQS \n\n";
+    
+    
+    ## remove extra \{ 
+    ##{
         ## BUG => there is no need to convert gff to geneid format each time we run
 
         $train_2cols_seq_locusid_fn =
@@ -537,8 +553,8 @@ sub normal_run
 	## FIXME 20200311: get the relevant files from the upstream python script
 	## in reality these are not needed
 
-            $eval_filtered_gff = "./precomputed/eval.gff";
-            $eval_inframestop_int = 0;
+            $eval_filtered_gff = "./precomputed/eval.gff"; #@@@
+            $eval_inframestop_int = 0; # @@@
         
         
 	
@@ -557,8 +573,8 @@ sub normal_run
 
         #EVAL
 
-    }
-
+    ##}
+    ## end remove extra {
     #
 
     ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
