@@ -167,7 +167,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = "/tmp/workdir_0001_dev_py3/";
+my $work_dir = "./workdir_gt_pre_20200316_01/";
 my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
@@ -347,37 +347,38 @@ sub normal_run
 
     my $FH_FOUT;
     #say "\n TTT got here TTT\n";
-    #$contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
-    #open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
-    #print {$FH_FOUT} "$locus_id";
-    #close $FH_FOUT;
+    
+    $contigs_all_transcr_2cols = $work_dir . $species . "_locus_id";
+    open(my $FH_FOUT, ">", "$contigs_all_transcr_2cols") or croak "Failed here";
+    print {$FH_FOUT} "$locus_id";
+    close $FH_FOUT;
 
-    #~ ## number of gene models TOTAL
-    #~ $my_command =
-        #~ " gawk '{print \$2}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    #~ $transcr_all_number = capture($my_command);
+    ## number of gene models TOTAL
+    $my_command =
+        " gawk '{print \$2}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
+    $transcr_all_number = capture($my_command);
 
-    #~ chomp $transcr_all_number;
-    #~ ## number of genomic sequences TOTAL
-    #~ $my_command =
-        #~ "gawk '{print \$1}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
-    #~ my $total_genomic = capture($my_command);
+    chomp $transcr_all_number;
+    ## number of genomic sequences TOTAL
+    $my_command =
+        "gawk '{print \$1}' $contigs_all_transcr_2cols | sort | uniq | wc -l";
+    my $total_genomic = capture($my_command);
 
-    #~ chomp $total_genomic;
+    chomp $total_genomic;
 
-    #~ print {*STDERR}
-        #~ "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
+    print {*STDERR}
+        "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
 
-    #~ ### get a list of genes TOTAL
-    #~ print {*STDERR} "\nObtain list of all transcripts\n\n";
+    ### get a list of genes TOTAL
+    print {*STDERR} "\nObtain list of all transcripts\n\n";
 
-    #~ $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
-    #~ my $transcr_list_tmp = capture($my_command);
+    $my_command = "gawk '{print \$9}' $input_nodots_gff | sort | uniq ";
+    my $transcr_list_tmp = capture($my_command);
 
-    #~ my $transcr_all_list_fn = $work_dir . $species . "_all_seqs.lst";
-    #~ open($FH_FOUT, ">", "$transcr_all_list_fn") or croak "Failed here";
-    #~ print {$FH_FOUT} "$transcr_list_tmp";
-    #~ close $FH_FOUT;
+    my $transcr_all_list_fn = $work_dir . $species . "_all_seqs.lst";
+    open($FH_FOUT, ">", "$transcr_all_list_fn") or croak "Failed here";
+    print {$FH_FOUT} "$transcr_list_tmp";
+    close $FH_FOUT;
 
     #if ($transcr_all_number >= $train_loci_cutoff)
     
@@ -395,17 +396,17 @@ sub normal_run
         ## head -$train_transcr_num just the first ones
         #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
 
-        #~ $my_command =
-            #~ "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
+        $my_command =
+            "head --lines=$train_transcr_num $contigs_all_transcr_2cols ";
 
-        #~ $locus_id_new = capture($my_command);
+        $locus_id_new = capture($my_command);
 
-        #~ $train_contigs_transcr_2cols =
-            #~ $work_dir . $species . "_train_setaside80.2cols";
-        #~ open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
-            #~ or croak "Failed here";
-        #~ print {$FH_FOUT} "$locus_id_new";
-        #~ close $FH_FOUT;
+        $train_contigs_transcr_2cols =
+            $work_dir . $species . "_train_setaside80.2cols";
+        open($FH_FOUT, ">", "$train_contigs_transcr_2cols")
+            or croak "Failed here";
+        print {$FH_FOUT} "$locus_id_new";
+        close $FH_FOUT;
 
         $train_transcr_used_int = $train_transcr_num;
 
@@ -416,14 +417,14 @@ sub normal_run
         print {*STDERR}
             "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
         ## ??? BUG ???
-        #~ $my_command =
-            #~ "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
-        #~ $gff_4_training = capture($my_command);
+        $my_command =
+            "gawk '{print \$2\"\$\"}' $train_contigs_transcr_2cols | sort | uniq | egrep -wf - $input_nodots_gff";
+        $gff_4_training = capture($my_command);
 
-        #~ $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
-        #~ open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
-        #~ print {$FH_FOUT} "$gff_4_training";
-        #~ close $FH_FOUT;
+        $train_set_gff = $work_dir . $species . "_train_setaside80.gff";
+        open($FH_FOUT, ">", "$train_set_gff") or croak "Failed here";
+        print {$FH_FOUT} "$gff_4_training";
+        close $FH_FOUT;
 
         print {*STDERR} "\nObtain list of training genes\n\n";
 
@@ -440,22 +441,22 @@ sub normal_run
         #
         ## new locus_id for evaluation test set
         #
-        #~ my $locus_id_eval = "";
+        my $locus_id_eval = "";
 
-        #~ $my_command =
+        $my_command =
 
-            #~ #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
-            #~ "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
+            #"gawk '{print \$0\"\$\"}' $train_transcr_lst_fn | egrep -vwf - $contigs_all_transcr_2cols";
+            "grep -vwf $train_transcr_lst_fn $contigs_all_transcr_2cols";
 
-        #~ $locus_id_eval = capture($my_command);
-        #~ chomp $locus_id_eval;
+        $locus_id_eval = capture($my_command);
+        chomp $locus_id_eval;
 
-        #~ $eval_contigs_transcr_2cols =
-            #~ $work_dir . $species . "_evaluation_setaside20.2cols";
-        #~ open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
-            #~ or croak "Failed here";
-        #~ print {$FH_FOUT} "$locus_id_eval";
-        #~ close $FH_FOUT;
+        $eval_contigs_transcr_2cols =
+            $work_dir . $species . "_evaluation_setaside20.2cols";
+        open($FH_FOUT, ">", "$eval_contigs_transcr_2cols")
+            or croak "Failed here";
+        print {$FH_FOUT} "$locus_id_eval";
+        close $FH_FOUT;
 
         ##
         ## gff for evaluation test set
@@ -501,18 +502,27 @@ sub normal_run
         print {*STDERR}
             "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
         ## FIXME 20200311: get the relevant files from the upstream python script
-        (
-            $train_cds_filtered_tbl,       $train_introns_filtered_tbl,
-            $train_locusid_filtered_2cols, $train_filtered_gff,
-            $train_inframestop_int
-        )
-            = @{
-            extract_cds_introns(
-                $train_2cols_seq_locusid_fn,
-                $train_contigs_transcr_2cols,
-                ".train"
-            )
-            };
+        ## FIXME 20200316: encode these in the yaml
+        
+            $train_cds_filtered_tbl        =  "./precomputed/pmar01.train.cds.tbl";
+            $train_introns_filtered_tbl    =  "./precomputed/pmar01.train.introns.tbl";
+            $train_locusid_filtered_2cols  =  "./precomputed/train_locusid_filtered.tbl";
+            $train_filtered_gff             =  "./precomputed/train.gff";
+            $train_inframestop_int        = 0; 
+        
+        
+        #~ (
+            #~ $train_cds_filtered_tbl,       $train_introns_filtered_tbl,
+            #~ $train_locusid_filtered_2cols, $train_filtered_gff,
+            #~ $train_inframestop_int
+        #~ )
+            #~ = @{
+            #~ extract_cds_introns(
+                #~ $train_2cols_seq_locusid_fn,
+                #~ $train_contigs_transcr_2cols,
+                #~ ".train"
+            #~ )
+            #~ };
 
         #  print {*STDERR} " OUTSIDE EXTRACTCDSINTRON outgff: $train_filtered_gff\noutlocus_id: $out_locus_id_X\n";
         ## TRAIN
@@ -521,23 +531,29 @@ sub normal_run
             gff_2_geneidgff_mock($eval_set_gff, $species, ".eval");
 
         print {*STDERR}
-            "L588 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
+            "L533 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
         ## 2016.12.10 not used??
 	
 	## FIXME 20200311: get the relevant files from the upstream python script
 	## in reality these are not needed
-        (
-            $eval_cds_filtered_tbl, $eval_introns_filtered_tbl,    #-- not used
-            $eval_locusid_filtered_2cols,                          #-- not used
-            $eval_filtered_gff, $eval_inframestop_int
-        )
-            = @{
-            extract_cds_introns(
-                $eval_2cols_seq_locusid_fn,
-                $eval_contigs_transcr_2cols,
-                ".eval"
-            )
-            };
+
+            $eval_filtered_gff = "./precomputed/eval.gff";
+            $eval_inframestop_int = 0;
+        
+        
+	
+        #~ (
+            #~ $eval_cds_filtered_tbl, $eval_introns_filtered_tbl,    #-- not used
+            #~ $eval_locusid_filtered_2cols,                          #-- not used
+            #~ $eval_filtered_gff, $eval_inframestop_int
+        #~ )
+            #~ = @{
+            #~ extract_cds_introns(
+                #~ $eval_2cols_seq_locusid_fn,
+                #~ $eval_contigs_transcr_2cols,
+                #~ ".eval"
+            #~ )
+            #~ };
 
         #EVAL
 
@@ -548,13 +564,23 @@ sub normal_run
     ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
     print {*STDERR}
         "L653 :  $train_filtered_gff \t $train_locusid_filtered_2cols  \n";
-    (
-        $train_donor_tbl,    $train_noncanon_donors_int,
-        $train_acceptor_tbl, $train_noncanon_accept_int,
-        $train_ATGx_tbl,     $train_noncanon_ATGx_int
-    )
-        = @{extractprocessSITES($train_filtered_gff,
-        $train_locusid_filtered_2cols)};
+    
+        $train_donor_tbl             = "./precomputed/pmar01.train.don_sites.tbl";  #@@@
+        $train_noncanon_donors_int   = 0; #@@@
+        $train_acceptor_tbl          = "./precomputed/pmar01.train.acc_sites.tbl";  #@@@
+        $train_noncanon_accept_int   = 0; #@@@ 
+        $train_ATGx_tbl              = "./precomputed/pmar01.train.start_sites.tbl";  #@@@ 
+        $train_noncanon_ATGx_int     = 0; #@@@
+     
+        
+        
+    #(
+        #$train_donor_tbl,    $train_noncanon_donors_int,
+        #$train_acceptor_tbl, $train_noncanon_accept_int,
+        #$train_ATGx_tbl,     $train_noncanon_ATGx_int
+    #)
+        #= @{extractprocessSITES($train_filtered_gff,
+        #$train_locusid_filtered_2cols)};
 
     ## prepare sequences for optimization of newly developed parameter file (TRAIN)
 
@@ -680,7 +706,7 @@ sub normal_run
     ## => getting worse parameter
     ### [<now>] Write preliminary non-optimized parameter file at <file>[<line>]...
 
-    $new_param_fn = "$work_dir/$species.geneid.param";
+    $new_param_fn = "$work_dir/$species.geneid.RAW.param";
     $param->writeParam($new_param_fn);
 
     ### [<now>] Optimizing new parameter file at <file>[<line>]...
@@ -774,226 +800,7 @@ $param->isocores([Geneid::Isocore->new()]);
     return $param;
 }
 
-sub extract_cds_introns ($my_nodots_gff, $my_contig_transcr_2cols, $type)
-{
 
-    #my ( $my_nodots_gff, $my_contig_transcr_2cols, $type ) = @_;
-
-    ### [<now>] running extract_cds_introns at <file>[<line>]... 
-    ###  $my_nodots_gff my_contig_transcr_2cols, $type
-   
-    
-    ## CODE SIMPLE
-    
-    my $out_cds_intron_gff =
-        $work_dir . $species . "_" . $type . ".cds_intron_gff";
-    open(my $FH_LOCUS, "<", "$my_contig_transcr_2cols")
-        or croak "Failed here";
-    print {*STDERR} "$my_contig_transcr_2cols and $my_nodots_gff\n";
-    my $count = 0;
-    while (<$FH_LOCUS>)
-    {
-        my ($id_genomic, $id_gene) = split;
-        my $tmp_single_gene_gff = "$tmp_dir/$id_gene.gff";
-        run(" egrep -w '$id_gene\$' $my_nodots_gff | sort -k4,5n > $tmp_single_gene_gff"
-        );
-        ## NEW code simplify
-        run(" egrep -w '$id_gene\$' $my_nodots_gff | sort -k4,5n >> $out_cds_intron_gff"
-        );
-        ## POTENTIAL BUG, split commands below
-
-        #~ my $FH_ssgff_A    = File::Temp->new();
-        #~ my $fname_ssgff_A = $FH_ssgff_A->filename;
-        ## CDS
-        my $fname_ssgff_A = "$cds_dir/${species}_ssgff_A.tmp.fa";
-        
-        ### CDS extraction "-cE"
-        my $my_command =
-            "./bin/ssgff -cE $fastas_dir/$id_genomic $tmp_single_gene_gff >  $fname_ssgff_A";
-        run($my_command);
-        $my_command =
-            "cat $fname_ssgff_A | sed -e 's/:/_/' -e 's/ CDS//' >> $cds_dir/${species}${type}.cds.fa ";
-        run($my_command);
-
-        #` ./bin/ssgff -cE $work_dir/fastas_$species/$id_genomic $tmp_dir/$id_gene.gff | sed -e 's/:/_/' -e 's/ CDS//' >> $work_dir/cds/${species}${type}.cds.fa `;
-
-        ## INTRONS extraction
-        #~ my $FH_ssgff_B    = File::Temp->new();
-        #~ my $fname_ssgff_B = $FH_ssgff_B->filename;
-        my $fname_ssgff_B = "$introns_dir/${species}_ssgff_B.tmp.fa";
-        $my_command =
-            "./bin/ssgff -iE $fastas_dir/$id_genomic $tmp_single_gene_gff > $fname_ssgff_B";
-
-        #say "\n$my_command\n";
-        run($my_command);
-        $my_command =
-            "cat $fname_ssgff_B | sed -e 's/:/_/' -e 's/ Intron.*//' >> $introns_dir/${species}${type}.intron.fa";
-
-        #say "\n$my_command\n";
-        run($my_command);
-
-        #` ./bin/ssgff -iE $work_dir/fastas_$species/$id_genomic $tmp_dir/$id_gene.gff | sed -e 's/:/_/' -e 's/ Intron.*//' >> $work_dir/intron/${species}${type}.intron.fa `;
-        $count++;
-        print {*STDERR} "$count ..";
-    }
-    close $FH_LOCUS;
-
-    print {*STDERR} "DONE\n";
-
-    # #tabulate CDS and INTRON SEQUENCES
-
-    print {*STDERR}
-        "\nCreate tabular format of CDS and INTRON sequences for $type sequences\n";
-
-    ## CDS
-    my $cds_tmp_fa = $cds_dir . ${species} . "$type" . ".cds.fa";
-    print {*STDERR} "$cds_tmp_fa\n\n";
-    my $cds_tmp_tbl = $cds_dir . ${species} . "$type" . ".cds.tbl";
-    fasta_2_tbl($cds_tmp_fa, $cds_tmp_tbl);
-    print {*STDERR} "cds tabular file created for $type sequences \n";
-
-    # ##INTRON
-    my $intron_tmp_fa  = $introns_dir . ${species} . "$type" . ".intron.fa";
-    my $intron_tmp_tbl = $introns_dir . ${species} . "$type" . ".intron.tbl";
-    fasta_2_tbl($intron_tmp_fa, $intron_tmp_tbl);
-
-
-    ##    }
-    #    else {    ## ??? END IF THERE ARE INFRAME STOPS
-    my $my_cds_filtered_tbl     = $cds_tmp_tbl;
-    my $my_intron_filtered_tbl  = $intron_tmp_tbl;
-    my $my_locusid_filtered_tbl = $my_contig_transcr_2cols;
-    my $my_filtered_gff         = $out_cds_intron_gff;
-    return [
-        $my_cds_filtered_tbl,     $my_intron_filtered_tbl,
-        $my_locusid_filtered_tbl, $my_filtered_gff,
-        0
-    ];
-
-    #    }    #END ELSE IF NO SEQS  ARE INFRAME
-
-}    #sub extract_cds_introns
-
-## FUNCTION TO EXTRACT AND PROCESS SPLICE SITES AND START CODON
-sub extractprocessSITES ($my_input_nodots_gff, $locusid_2cols)
-{
-    my $my_command = "";
-    ## SPLICE SITES
-    print {*STDERR} "\nEXTRACT START AND SPLICE SITES from transcripts\n\n";
-
-    #print {*STDERR} "$locus_id and $input_gff_fn\n";
-    my @newsites = ();
-    my $count    = 0;
-
-    open(my $FH_LOC_sites, "<", "$locusid_2cols") or croak "Failed here";
-    while (<$FH_LOC_sites>)
-    {
-        my ($id_genomic, $id_gene) = split;
-
-        #  print {*STDERR} "$id_genomic,$id_gene\n";
-        run("egrep -w '$id_gene\$' $my_input_nodots_gff > $tmp_dir/$id_gene.gff"
-        );
-
-        #  print {*STDERR} "$id_gene $input_gff_fn $tmp_dir/$id_gene.gff \n\n";
-        ## POTENTIAL BUG SPLIT
-        $my_command =
-            "./bin/ssgff -dabeE $fastas_dir/$id_genomic $tmp_dir/$id_gene.gff > $tmp_dir/${id_gene}.all_sites";
-        run($my_command);
-
-
-        $count++;
-        print {*STDERR} "$count..";
-    }    #while $FH_LOC_sites
-    close $FH_LOC_sites;
-
-    #    my $acceptors_fa  = "$sites_dir/Acceptor_sites.fa";
-    #    my $acceptors_tbl = "$work_dir/Acceptor_sites.tbl";
-    #
-    #    my $donors_fa  = "$sites_dir/Donor_sites.fa";
-    #    my $donors_tbl = "$work_dir/Donor_sites.tbl";
-    #
-    #    my $preATGx_fa  = "$sites_dir/Start_sites.fa";
-    #    my $preATGx_tbl = "$work_dir/Start_sites.tbl";
-
-    ## 2016.12.14a
-    ## foreach my $site (qw(Acceptor Donor Start Stop ))
-    foreach my $site (qw(Donor Acceptor  Start  ))
-    {
-        my $output_sites_fas = "$sites_dir/${site}_sites.fa";
-        my $output_sites_tbl = "$work_dir/${site}_sites.tbl";
-        $my_command =
-            "grep -h -A 1 $site $tmp_dir/*.all_sites | grep -v '\-' > $output_sites_fas";
-        run($my_command);
-        fasta_2_tbl($output_sites_fas, $output_sites_tbl);
-        if ($site eq 'Start')
-        {
-            my $ATGx_tbl = "$sites_dir" . "Start_sites_complete.tbl";
-            $my_command =
-                ##  "gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $output_sites_tbl  > $ATGx_tbl";
-                "gawk '{printf \$1\" \";for (i=1;i<=60-length(\$2);i++) printf \"n\"; print \$2}' $output_sites_tbl  > $ATGx_tbl";
-            run($my_command);
-            $my_command =
-                "cp $output_sites_tbl ATG_safe.tbl; mv $ATGx_tbl $output_sites_tbl ";
-            run($my_command);
-        }
-
-        my ($canonical_tbl_fn, $noncanonical_num) =
-            noncanonical($site, %canonical_const);
-
-        #~ say "BAD GUYS";
-        #~ print Dump @bad_guys;
-        push @newsites, $canonical_tbl_fn;
-        push @newsites, $noncanonical_num;
-
-    }
-
-    return \@newsites;
-
-}    #sub ectractprocesssites end
-
-sub noncanonical ($site_type, %canonical_const)
-{
-    my $input_site_tbl   = "$work_dir/${site_type}_sites.tbl";
-    my $out_site_tbl     = "$work_dir/${site_type}_canonical.DK.tbl";
-    my $pre_bases_number = $canonical_const{$site_type}[0];
-    my $pattern          = $canonical_const{$site_type}[1];
-    my $pattern_len      = length($pattern);
-    ## DEBUG
-    #~ print Dump $pre_bases_number;
-    #~ print Dump $pattern;
-    #~ print Dump $pattern_len;
-    my $canonical_counter     = 0;
-    my $non_canonical_counter = 0;
-    my @non_canonical_list    = ();
-
-    open(my $FH_TBL_IN,  "<", "$input_site_tbl") or croak "Failed here";
-    open(my $FH_TBL_OUT, ">", "$out_site_tbl")   or croak "Failed here";
-    while (<$FH_TBL_IN>)
-    {
-        my ($site_id, $site_whole_seq) = split;
-        my $test_seq = substr($site_whole_seq, $pre_bases_number, $pattern_len);
-        ## DEBUG
-        ## say $site_whole_seq;
-        ## say $test_seq;
-        if ($test_seq eq $pattern)
-        {
-            print {$FH_TBL_OUT} "$site_id\t$site_whole_seq\n";
-            $canonical_counter += 1;
-        }
-        else
-        {
-            ## model10054m000225.10:10054.m000225
-            push @non_canonical_list, $site_id;
-            $non_canonical_counter += 1;
-        }
-    }
-
-    close $FH_TBL_IN;
-    close $FH_TBL_OUT;
-
-    #return $canonical_counter, $non_canonical_counter; #, \@non_canonical_list;
-    return $out_site_tbl, $non_canonical_counter;
-}
 
 ### FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
 sub derive_coding_potential ($train_cds_filtered_tbl, $train_introns_filtered_tbl)
