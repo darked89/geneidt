@@ -3,10 +3,10 @@
 #inputs to modify for each project
 input:
     species: pmar01
-    genome_fasta: ./inputs/pmar4_nodots.fa
-    input_gff:     ./inputs/pmar4_nodots.gff
+    genome_fasta: ./test_data/pmar4_nodots.fa
+    input_gff:     ./test_data/pmar4_nodots.gff
     genetic_code: etc/genetic.code
-    work_dir: ./workdir_00_gtrain/
+    work_dir: ./workdir_dev_canon_donor_20200318a/
 
 dirs:
     tmp_dir:   temp_00
@@ -123,10 +123,10 @@ all_gff_contigs :   ./precomputed/pmar_all_gff_contigs.ids
 eval_gff_contigs :  ./precomputed/pmar_eval_contig.ids
 train_gff_contigs : ./precomputed/pmar_train_contig.ids
 
-train_acc_tbl :   ./precomputed/acc_sites.tab
-train_donor_tbl : ./precomputed/don_sites.tab
-train_ATG_tbl   : ./precomputed/start_sites.tab
-train_stop_tbl  : ./precomputed/stop_sites.tab
+train_acc_tbl :   ./precomputed/pmar01.train.acc_sites.tbl
+train_donor_tbl : ./precomputed/pmar01.train.don_sites.tbl
+train_ATG_tbl   : ./precomputed/pmar01.train.start_sites.tbl
+train_stop_tbl  : ./precomputed/pmar01.train.stop_sites.tbl
 
 #depths/num of lines of training matrices
 train_acc_num   : 3479
@@ -134,9 +134,9 @@ train_donor_num : 3479
 train_ATG_num   : 612
 train_stop_num  : 612
 
-train_cds_fas   :  ./precomputed/cds_seqs.fa
-train_cds_tbl   :  ./precomputed/cds_seqs.tab
-train_intron_tbl : ./precomputed/train_introns.tab
+train_cds_fas   :  ./precomputed/pmar01.train.cds.fa
+train_cds_tbl   :  ./precomputed/pmar01.train.cds.tbl
+train_intron_tbl : ./precomputed/pmar01.train.introns.tbl
 
 train_cds_len : 635946
 train_introns_len : 304368
