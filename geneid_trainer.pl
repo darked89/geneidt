@@ -115,11 +115,11 @@ Readonly::Scalar my $bases_offset   => 30;    #bases in front/after? a feature
 ## UNUSED HERE
 ## Readonly::Scalar my $train_fraction => 0.8;   #fraction of seq used for training
 ## Readonly::Scalar my $train_loci_cutoff         => 500;
-Readonly::Scalar my $train_sites_cutoff        => 1_400;
-## Readonly::Scalar my $train_sites_cutoff_alt    => 1_200; # changed in some part?
-Readonly::Scalar my $train_sites_markov_cutoff => 5_500;
+Readonly::Scalar my $train_sites_cutoff         => 1_400;
+## Readonly::Scalar my $train_sites_cutoff_alt  => 1_200; # changed in some part?
+Readonly::Scalar my $train_sites_markov_cutoff  => 5_500;
 Readonly::Scalar my $backgrnd_kmer_size        => 60;
-Readonly::Scalar my $backgrnd_kmer_num => 100_000;
+Readonly::Scalar my $backgrnd_kmer_num         => 100_000;
 
 #~ ( $totalcodingbases > 400000 && $totalnoncodingbases > 100000 )
 Readonly::Scalar my $coding_bp_limit_A => 400_000;
@@ -173,7 +173,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir = "./workdir_gt_pre_20200318_08nogeneidgff_input/";
+my $work_dir     = "./workdir_gt_pre_20200319_001/";
 my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
@@ -190,7 +190,7 @@ my $results_dir  = "$work_dir/results/";
 my @data_dirs = (
     $work_dir,  $tmp_dir,    $fastas_dir,  $stats_dir,
     $sites_dir, $plots_dir,  $introns_dir, $backgrnd_dir,
-    $cds_dir,   $geneid_dir, $results_dir,
+    $cds_dir,   $geneid_dir, $results_dir
 );
 
 create_data_dirs(@data_dirs);
@@ -308,8 +308,8 @@ my $train_transcr_num  = 0;
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
 
-#~ ### CREATE BLANK PARAMETER FILE...
-#~ ### [<now>] template parameter file
+#~ #-#  CREATE BLANK PARAMETER FILE...
+#~ #-#  [<now>] template parameter file
 #~ my $param        = Geneid::Param->new($species);
 #~ my $new_param_fn = "$work_dir/$species.geneid.param";
 
@@ -317,8 +317,8 @@ my $train_transcr_num  = 0;
 #~ $param->numIsocores(1);
 #~ $param->isocores([Geneid::Isocore->new()]);
 
-#~ ### END CREATING A PARAMETER FILE
-#~ ### [<now>] template parameter file at <file>[<line>]
+#~ #-#  END CREATING A PARAMETER FILE
+#~ #-#  [<now>] template parameter file at <file>[<line>]
 
 my $param = init_param_file($species);
 
@@ -362,7 +362,7 @@ sub normal_run
     print {*STDERR}
         "\nThe gff file ($input_nodots_gff) contains a total of $total_genomic genomic sequences and $transcr_all_number gene models\n";
 
-    ### get a list of transcripts TOTAL
+    #-#  get a list of transcripts TOTAL
     print {*STDERR} "\nObtain list of all transcripts\n\n";
 
     
@@ -454,7 +454,7 @@ sub normal_run
     
 
  
-    ### GET BACKGROUND SEQUENCES
+    #-#  GET BACKGROUND SEQUENCES
 
     print
         "Obtaining $backgrnd_kmer_num background sequences of $backgrnd_kmer_size nucleotides each for estimating background frequencies of nucleotides\n";
@@ -528,8 +528,8 @@ sub normal_run
         "\nshortest intron: $intron_short_int\nlongest intron: $intron_long_int\nminimum intergenic: $intergenic_min\nmaximum intergenic: $intergenic_max\n";
 
     ##
-    ### WRITE PRELIMINARY NON-OPTIMIZED PARAMETER FILE
-    ### "INTRONS mean, ST
+    #-#  WRITE PRELIMINARY NON-OPTIMIZED PARAMETER FILE
+    #-#  "INTRONS mean, ST
 
     ## $intron_short_int = 21;
     ## $intron_long_int  = 6384;
@@ -594,7 +594,7 @@ sub normal_run
     my @evaluation_test = ();
 
     ##
-    ### EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
+    #-#  EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
     ##
 
     my $param_opt_fn = "$species.geneid.optimized.param";
@@ -643,7 +643,7 @@ $param->isocores([Geneid::Isocore->new()]);
 ### [<now>] template parameter file at <file>[<line>]
 
     ### [<now>] running init_param_file at <file>[<line>]...
-    ###########################################
+
     ### PARAM INIT
     #set isochores to 1
     $param->numIsocores(1);
@@ -652,16 +652,15 @@ $param->isocores([Geneid::Isocore->new()]);
     $param->geneModel(Geneid::GeneModel->new());
     $param->geneModel->useDefault;
     
-
-    ###########################################
     return $param;
 }
 
 
 
-### FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
-sub derive_coding_potential ($train_cds_filtered_tbl, $train_introns_filtered_tbl)
-{
+
+sub derive_coding_potential ($train_cds_filtered_tbl, 
+                             $train_introns_filtered_tbl)
+{   #-#  FUNCTION TO OBTAIN MARKOV MODELS CORRESPONDING TO THE CODING POTENTIAL
     ### [<now>] Running derive_coding_potential at <file>[<line>]...
     ## my ($train_cds_filtered_tbl, $train_introns_filtered_tbl) = @_;
 
@@ -787,13 +786,13 @@ sub derive_coding_potential ($train_cds_filtered_tbl, $train_introns_filtered_tb
         push @profile_trans, \@columns_profile;
     }
     close $FH_PROFILE_2;
-
+    ### [<now>] Finished derive_coding_potential at <file>[<line>]...
     return [
         \@profile_init,        \@profile_trans, $total_codingbases,
         $total_noncodingbases, $markov_mod_A
     ];
 
-}    #derive coding potential
+}    #derive coding potential END
 
 ## PROCESS SEQUENCES FUNCTION ( FLANKED GENE MODELS OBTAINED FOR OPTIMIZATION)
 sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
@@ -864,16 +863,9 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$pso_gp_tbl";
     close $FH_FOUT;
 
-    open(
-        $FH_LOCID,
-        "-|",
-        "gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $gp_Xgetgenes_tmp_pre_tbl | egrep -v '(Intron|Utr)' - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $pso_gp_gff .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "gawk 'BEGIN{OFS=\"\\t\";pos=1;b=\"x\"}{if (\$1!=b){pos=1}; print \$1,\"annotations\",\$3,pos,pos+\$5-1,\"\.\",\"+\",\"\.\",\$1\$2; pos+=\$5;b=\$1 }' $gp_Xgetgenes_tmp_pre_tbl | egrep -v '(Intron|Utr)' - ";
+    $pso_gp_gff = capture($my_command);
 
     my $temp_gp_gff =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".gp.gff";
@@ -901,23 +893,19 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     #  ` gawk '{print \$1,length(\$2)}' $temp_gp_tbl | sort -k1,1 `;    ##XX
 
     my $opt_type_cds_contigs_total_bp =
-        $work_dir . $species . $opt_type . $contig_opt_flag . ".gp_cds_length";
+        $work_dir 
+    . $species 
+    . $opt_type 
+    . $contig_opt_flag 
+    . ".gp_cds_length";
     open($FH_FOUT, ">", "$opt_type_cds_contigs_total_bp")
         or croak "Failed here";
     print {$FH_FOUT} "$gp_seqs_lengths";
     close $FH_FOUT;
 
-    my $cds_gp = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/gff2cds.awk source=\"annotations\" $temp_gp_gff | sort -k1,1 | join $opt_type_cds_contigs_total_bp - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $cds_gp .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "./bin/gff2cds.awk source=\"annotations\" $temp_gp_gff | sort -k1,1 | join $opt_type_cds_contigs_total_bp - ";
+    my $cds_gp = capture($my_command);
 
     my $temp_gp_cds_fn =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".cds_gp";
@@ -970,18 +958,10 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$gp_contigs_seqs_lengths";
     close $FH_FOUT;
 
-    my $gp_contig_tmp = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/multiple_annot2one.awk species=$species leng=$my_seq_len $temp_gp_cds_fn "
-    );
-    while (<$FH_LOCID>)
-    {
+    $my_command =
+      "./bin/multiple_annot2one.awk species=$species leng=$my_seq_len $temp_gp_cds_fn ";
+    my $gp_contig_tmp = capture($my_command);
 
-        $gp_contig_tmp .= $_;
-    }
-    close $FH_LOCID;
 
     my $temp_gff2gpcontig =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".contig.gp.cds";
@@ -990,33 +970,27 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     print {$FH_FOUT} "$gp_contig_tmp";
     close $FH_FOUT;
 
-    my $cds2gffcontig = "";
-    open(
-        $FH_LOCID,
-        "-|",
-        "./bin/cds2gff.awk $temp_gff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$my_seq_len,\".\",\".\",\".\",\".\";print}else {print}}' - "
-    );
-    while (<$FH_LOCID>)
-    {
-        $cds2gffcontig .= $_;
-    }
-    close $FH_LOCID;
+    $my_command =
+      "./bin/cds2gff.awk $temp_gff2gpcontig | gawk 'BEGIN{OFS=\"\\t\";}{if (NR==1){print \"$species\",\"annotations\",\"Sequence\",\"1\",$my_seq_len,\".\",\".\",\".\",\".\";print}else {print}}' - ";
+    my $cds2gffcontig = capture($my_command);
 
     my $temp_gp_cdsgff_contig_eval =
         $work_dir
-            . $species
-            . $opt_type
-            . $contig_opt_flag
-            . ".cds_gp_contig.eval.gff";
+      . $species
+      . $opt_type
+      . $contig_opt_flag
+      . ".cds_gp_contig.eval.gff";
     open($FH_FOUT, ">", "$temp_gp_cdsgff_contig_eval")
-        or croak "Failed here";
+      or croak "Failed here";
     print {$FH_FOUT} "$cds2gffcontig";
     close $FH_FOUT;
     ## TODO Inspect files / values returned. 2016.12.15
     ### Finished process_seqs_4opty at <file>[<line>]...
     return [
-        $temp_gp_cdsgff_contig_eval, $temp_fastagpcontig,
-        $temp_tabulargpcontig,       $temp_seqlencontig
+        $temp_gp_cdsgff_contig_eval, 
+    $temp_fastagpcontig,
+        $temp_tabulargpcontig,       
+    $temp_seqlencontig
     ];
 
 
@@ -1038,19 +1012,26 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
         or croak "Failed here";
     ### [<now>] Reading at <file>[<line>]...
     ###  $my_pso_tmp_gp_from_gff
+    ## FIXME: $FH_OUT_tblgb to $FH_OUT_tbl_gp
     open(my $FH_OUT_tblgb, ">", "$gp_out_tbl") or croak "Failed here";
     while (<$FH_REFGENE>)
     {
 
         #my $line = <$FH_REFGENE>;
         #chomp $line;
-        my @tmp_cols = split " ";    #, $_;
+        my @tmp_cols = split; ## " ";    #, $_;
         ## DEBUG
         #~ print Dump @tmp_cols;
         my (
-            $name,     $chrom,          $strand,
-            $tx_start, $tx_end,         $cds_start,
-            $cds_end,  $exon_count_int, $tmp_exons_starts,
+            $name,     
+        $chrom,          
+        $strand,
+            $tx_start, 
+        $tx_end,         
+        $cds_start,
+            $cds_end,  
+        $exon_count_int, 
+        $tmp_exons_starts,
             $tmp_exons_ends
         )
             = @tmp_cols;
@@ -1079,9 +1060,9 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
         #~ my $exon_count_int = $8;
         #~ my @exon          = ( $9 =~ m/(\d+)/g );
 
-        my $cds_len    = $cds_end - $cds_start;
-        my $tx_len     = $tx_end - $tx_start;
-        my $cds_offset = $cds_start - $tx_start;
+        my $cds_len    = $cds_end   - $cds_start;
+        my $tx_len     = $tx_end    - $tx_start;
+        my $cds_offset  = $cds_start - $tx_start;
 
         my $redundant = 0;
         ## 2016.12.13c unused???
@@ -1107,6 +1088,7 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
 
             #added code
             my $chrom_tmp_tbl = "$tmp_dir/chrom_tmp.tbl";
+            ### [<now>] chrom fasta_2_tbl at <file>[<line>]...
             $chrom_tmp_tbl =
                 fasta_2_tbl($my_fastas_dir . $chrom, $chrom_tmp_tbl);
 
@@ -1432,28 +1414,60 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
     #$gp_out_tbl = $gp_out_tbl;
     return $gp_out_tbl;
 
-}    #getgenes
+}    #get_genes END
 
-## GET BACKGROUND SEQUENCES (ex. 62 Kmer) used to compute log likelihoods
+#FIXME: not used. 
+#ERROR: Subroutine main::bit_score_graph redefined at (eval 75) line 1 
+
+#use Inline Python => <<'END_OF_PYTHON_CODE3';
+
+#def bit_score_graph(info_fn, info_thresh, offset):
+    #line_counter = 0
+    #accepted_positions = []
+    #if info_thresh  in [ 0.15, 0.04, 0.15]:
+        ##all ok
+        #for line in open(info_fn).readlines():
+            #line_counter += 1
+            #sl = line.split()
+            #matrix_position = int(sl[0])
+            #info_score      = float(sl[1]) 
+            #if info_score > info_thresh:
+                #accepted_positions.append(matrix_position)
+        #accepted_positions.sort()    
+        #start = accepted_positions[0]
+        #end   = accepted_positions[-1]
+        #if (start > offset - 1):
+            #start = offset - 1
+        
+        ### BUG??
+        ### it should be one base after the GT/AG/ATG etc 2fix???
+        #if (end < offset + 1):
+            #end = offset + 1
+        
+    #return start, end
+
+#END_OF_PYTHON_CODE3
+
 
 sub BitScoreGraph ($info_output, $info_thresh, $offset)
 {
-    ## 2016.12.13a {
+    # 2016.12.13a 
+    # {
 
-    ## my ($info_output, $info_thresh, $offset) = @_;
+    # my ($info_output, $info_thresh, $offset) = @_;
     print {*STDERR}
         "bitscoregraph input:  $info_output, $info_thresh, $offset\n";
     my @info = ();    ##($offset - 1, $offset + 1);
 
-    ## 2016.12.14a
-    ## my @fields;
+    # 2016.12.14a
+    # my @fields;
 
     open(my $FH_INFO, "<", "$info_output") or croak "Failed here";
     while (<$FH_INFO>)
     {    ## 2016.12.14a: these information files do not have anythyng but numbers
 
         my ($matrix_position, $info_score) = split;
-        ## @fields = split;
+        # @fields = split;
         #~ printf {*STDERR} "%2s %2.2f %s",
         #~ ($fields[0], $fields[1], "=" x int($fields[1] * 30));
         printf {*STDERR} "%2s %2.2f %s",
@@ -1467,7 +1481,7 @@ sub BitScoreGraph ($info_output, $info_thresh, $offset)
     }
     close $FH_INFO;
 
-    ## DEBUG
+    # DEBUG
     #~ say "INFO SORTING PRE";
     #~ print Dump @info;
     #my @sorted_info = sort { $a <=> $b } @info;
@@ -1476,16 +1490,16 @@ sub BitScoreGraph ($info_output, $info_thresh, $offset)
 
     my $start = (shift @info);
     my $end   = pop @info;
-    ## 2016.12.15a
-    ## hack: thresholds may be too strict in some cases???
-    ## make sure that at least one position bordering the site is included
+    # 2016.12.15a
+    # hack: thresholds may be too strict in some cases???
+    # make sure that at least one position bordering the site is included
     if ($start > $offset - 1)
     {
         $start = $offset - 1;
     }
-    ## 2016.12.15a
-    ## BUG??
-    ## it should be one base after the GT/AG/ATG etc 2fix???
+    # 2016.12.15a
+    # BUG??
+    # it should be one base after the GT/AG/ATG etc 2fix???
     if ($end < $offset + 1)
     {
         $end = $offset + 1;
@@ -1503,7 +1517,7 @@ sub BitScoreGraph ($info_output, $info_thresh, $offset)
 }    #end BitScoreGraph
 
 sub get_pre_matrix ($kmers_tbl, $order)
-{    ### TMP HACK 2016.12.16
+{    #-#  TMP HACK 2016.12.16
     my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
     
     ## UNUSED
@@ -1524,20 +1538,41 @@ sub get_pre_matrix ($kmers_tbl, $order)
 }
 
 ## GETKMATRIX FUNCTION (Splice sites and Start ATG codon PWMs)
-sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
-    $matrix_type)
+sub get_K_matrix ($true_kmers_tbl, 
+          $backgrnd_kmers_tbl, 
+          $order, 
+          $offset,
+          $matrix_type)
 {
+    ### [<now>] Running get_K_matrix at <file>[<line>]...
+    ### [<now>] gKm1 $true_kmers_tbl, $backgrnd_freq_fn
+    ### [<now>] gKm2  $order, $offset, $matrix_type
     ## my $original_offset = $offset;
     my @profile_array = ();
     ## $temp_infolog;
     my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
     my $ordname = $orders[$order];
     my $sort    = "sort -n";
-    ## 2016.12.13a {
-    ## BUG do not relay on  jacknife/branch etc. use some: type ??
-    #was my our?
-    ## my ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset, $matrix_type) =
-    ##  @_;
+    
+    ## FIXME: not used yet 20200319
+use Inline Python => <<'END_OF_BACKGR_MATRICES_CALC';
+def background_calc(backgound_tab_fn):
+    import os
+    ## assumption/temp hack
+    matrix_len = 60 
+    hmm_order = 1
+    backgrnd_freq_matrix_fn = 'foobar' #FIXME
+    
+    exe = './bin/get_k_matrix.pypy'
+    command_A  = '%s %s %s %s' % (exe, hmm_order, matrix_len, backgrnd_kmers_tbl)  
+    command_B  = '| sort > ' 
+    command_C  = '%s' % (backgrnd_freq_matrix_fn)
+    #os.system(command)
+    command = ""
+    #os.system(command)
+    command = ""
+    #os.system(command)
+END_OF_BACKGR_MATRICES_CALC
 
     my ($donor, $acceptor_mtype, $ATGx) = (0, 0, 0);
     ## BUG temp fix
@@ -1571,7 +1606,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     $true_seq_name =~ s/\.tbl$//;
     my $backgrnd_seq_name = $backgrnd_kmers_tbl;
     $backgrnd_seq_name =~ s/\.tbl$//;
-    print "\n XXX L2136: $true_seq_name $backgrnd_seq_name \n";
+    ###  $true_seq_name $backgrnd_seq_name;
 
     ## Open true sequences
     #    print {*STDERR} "$true_kmers_tbl (true)\n";
@@ -1676,7 +1711,8 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     #say "\n matrix sub: $matrix_type, $my_info_thresh \n";
     my ($start, $end) =
         BitScoreGraph($my_freq_subtract_fn, $my_info_thresh, $offset);
-    print {*STDERR} "\n L2921 got: $start, $end using $my_freq_subtract_fn \n";
+    
+    ### $start, $end using $my_freq_subtract_fn \n";
 
     $offset = $offset - $order;
     $end    = $end - $order;
@@ -1698,7 +1734,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
 
 
     ## DONOR DIMATRIX START
-    my $exec_A1 = "./bin/submatrix.py   ";
+    my $exec_A1 = "./bin/submatrix.py ";
     my $exec_B1 = "./bin/prepare_dimatrix_donor_4parameter.awk ";
     ## my $exec_B1 = "./bin/matrix_4_parameter.py ";
 
@@ -1735,7 +1771,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
     ## ACCEPTOR DIMATRIX START
     elsif ($order >= 1 && $acceptor_mtype)
     {
-        ### [<now>] Running acceptor order_one_plus...
+        ### [<now>] Running acceptor order_one_plus at <file>[<line>]...
         my $pre_offset  = $offset - 1;
         my $new_offset  = $offset;
         my $post_offset = $offset + 1;
@@ -1774,9 +1810,14 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
         ##);
         say $my_command;
         run($my_command);
-
-        run(" ./bin/prepare_trimatrix_start_4parameter.awk $pre_offset $new_offset $post_offset $my_T_generic_lograt_summatrix_fn > $my_T_generic_matrix_4param_fn"
-        );
+        $my_command =
+    " ./bin/prepare_trimatrix_start_4parameter.awk $pre_offset $new_offset $post_offset $my_T_generic_lograt_summatrix_fn > $my_T_generic_matrix_4param_fn";
+        say $my_command;
+        run($my_command);
+    
+    
+        #run(" ./bin/prepare_trimatrix_start_4parameter.awk $pre_offset $new_offset $post_offset $my_T_generic_lograt_summatrix_fn > $my_T_generic_matrix_4param_fn"
+        #);
     }
 
     ## ATG DIMATRIX END
@@ -1787,7 +1828,7 @@ sub get_K_matrix ($true_kmers_tbl, $backgrnd_kmers_tbl, $order, $offset,
 
         # print {*STDERR} "$path/submatrix_order0.awk $start $end $true_seq_name-log.$ordname-matrix\n";
         $my_command =
-            "./bin/submatrix_order0.py   $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_matrix_4param_fn";
+            "./bin/submatrix_order0.py  $start $end $my_T_generic_logratio_freq_matrix_fn  > $my_T_generic_matrix_4param_fn";
         say $my_command;
         run($my_command);
 
@@ -1890,7 +1931,7 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
                         )
                 )
                 {
-                    croak "error in setting exon weights L3163\n";
+                    croak "error in setting exon weights L1915\n";
                 }
 
                 if (
@@ -2071,7 +2112,7 @@ sub BuildOptimizedParameterFile ( $eval_array )
 
     }
 
-    ### FIVE BEST PERFORMANCE RESULTS AFTER OPTIMIZATION
+    ## FIVE BEST PERFORMANCE RESULTS AFTER OPTIMIZATION
     for (my $i = 0 ; $i < 5 ; $i++)
     {
         print {*STDERR} join("\t", @{$sorted_eval[$i]}), "\n";
@@ -2142,13 +2183,13 @@ sub BuildOptimizedParameterFile ( $eval_array )
     ##return 1;
 }
 
-sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
-    $ExWeightParam_ini)
+sub parameter_evaluate ($gp_fasta, 
+                        $gp_gff_fn, 
+            $new_param_fn, 
+            $OligoWeight_ini,
+                        $ExWeightParam_ini)
 {
-    ## 2016.12.13a
-    #~ my ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
-    #~ $ExWeightParam_ini)
-    #~ = @_;
+    ### [<now>] Running  parameter_evaluate at <file>[<line>]...
     my $my_command;
 
     my $geneid_test_predict_gff_fn =
@@ -2156,15 +2197,12 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
     print {*STDERR}
         "\ngeneid_test_predict_gff_fn: $geneid_test_predict_gff_fn\n";
 
-    #~ my $FH_GENEID;
-    #~ my $fname_geneid;
-    ##my ($fname_geneid) =
     my ($FH_GENEID, $fname_geneid) =
         tempfile(DIR => $geneid_dir, SUFFIX => '.eval_par.geneid');
     print "\ntemp geneid file: $fname_geneid \n";
     $my_command = "./bin/geneid -GP $new_param_fn $gp_fasta > $fname_geneid";
 
-    #print {*STDERR} "\n$my_command, not running\n";
+    say($my_command);
     run($my_command);
 
     #` ./bin/geneid -GP $new_param_fn $gp_fasta
@@ -2200,10 +2238,8 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
     }
     close $FH_IN;
 
-    #dk
+    ### [<now>] Finished sub  parameter_evaluate at <file>[<line>]...
 
-    #~ my @evaluation_test = split " ",
-    #~ ` ./bin/evaluation -sta $geneid_test_predict_gff_fn $gp_gff_fn | tail -2 | head -1 |  gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' `;
 
     return \@evaluation_test;
 
@@ -2480,18 +2516,21 @@ sub tbl_2_fasta ($in_tbl_fn, $fa_out_fn)
     {
         chomp;
 
-        #~ my ( $n, $s ) = split( /\s+/, $_ );
+        #my ( $n, $s ) = split( /\s+/, $_ );
         my ($seq_name, $seq) = split(/\s+/);
         my ($seq_position, $seq_len) = (1, length($seq));
         print {$FH_FOUT} ">$seq_name\n";
+
         while ($seq_position <= $seq_len)
         {
             print {$FH_FOUT} substr($seq, $seq_position - 1, 60) . "\n";
             $seq_position += 60;
+
         }
     }
     close $FH_IN;
     close $FH_FOUT;
+    ### [<now>] Finished tbl_2_fasta at <file>[<line>]...
     return $fa_out_fn;
 }
 
@@ -2510,11 +2549,8 @@ sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
         #my ( $seq_name, $seq ) = split( /\s+/o, $_ );
         my ($seq_name, $seq) = split(/\s+/o, $input_line);
 
-        #print {*STDERR} "YYY $seq_name \t";
-        ##open( FOUT, ">${dir}" . "$n" );
         open(my $FH_FOUT_FASTA, ">", "${out_fas_dir}" . "$seq_name");
 
-        #print {*STDERR} "XXX ${dir}" . "$seq_name \n";
         my ($base_number, $seq_len) = (1, length($seq));
         print {$FH_FOUT_FASTA} ">$seq_name\n";
         print {*STDERR} "#";
@@ -2527,20 +2563,19 @@ sub tbl_2_single_fastas ($in_tbl_fn, $out_fas_dir)
     }
 
     close $FH_IN_TBL;
-
+    ### [<now>] Finished tbl_2_single_fastas at <file>[<line>]...
     #close $FH_FOUT_FASTA;
     return 1;
 }
 
 sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 {
-    ## 2016.12.13a {
-    ##    my ($in_fa, $out_tbl_fn) = @_;
+### [<now>] Running fasta_2_tbl at <file>[<line>]...
+### $in_fa, $out_tbl_fn
 
     open(my $FH_IN,   "<", "$in_fa");
     open(my $FH_TOUT, ">", "$out_tbl_fn");
 
-    #print {*STDERR} "$in_fa INSIDE LOOP\n\n";
     my $count = 0;
     while (<$FH_IN>)
     {
@@ -2564,7 +2599,7 @@ sub fasta_2_tbl ($in_fa, $out_tbl_fn)
 
     close $FH_IN;
     close $FH_TOUT;
-
+### [<now>] Finished fasta_2_tbl at <file>[<line>]...
     return $out_tbl_fn;
 }
 
