@@ -45,7 +45,6 @@ use YAML::XS qw(LoadFile); #from dev_unstable
 use IPC::System::Simple qw(run system capture EXIT_ANY);
 use Readonly;
 
-## 2016.12.11 use Benchmark qw(:all);
 use YAML qw(Dump Bless);
 
 
@@ -236,7 +235,8 @@ my $best_Min           = 0;
 my $seqs_eval_gff         = "";
 my $train_inframestop_int = 0;
 my $eval_inframestop_int  = 0;
-my $locus_id              = "";
+## UNUSED 
+## my $locus_id              = "";
 ##my $locus_id_new          = "";
 my $intron_long_int       = 0;
 my $intron_short_int      = 0;
@@ -246,8 +246,9 @@ my $intergenic_min        = 0;
 ## UNUSED now
 ## my $eval_cds_filtered_tbl       = "";
 my $eval_filtered_gff           = "";
-my $eval_introns_filtered_tbl   = "";
-my $eval_locusid_filtered_2cols = "";
+## UNUSED
+##my $eval_introns_filtered_tbl   = "";
+##my $eval_locusid_filtered_2cols = "";
 
 my $train_acceptor_tbl           = "";
 my $train_ATGx_tbl               = "";
@@ -365,8 +366,8 @@ sub normal_run
     #-#  get a list of transcripts TOTAL
     print {*STDERR} "\nObtain list of all transcripts\n\n";
 
-    
-    my $transcr_all_list_fn = "./precomputed/pmar_all_transcr.ids";
+    ## UNUSED
+    ## my $transcr_all_list_fn = "./precomputed/pmar_all_transcr.ids";
     
 
 
@@ -1419,34 +1420,34 @@ sub get_genes ($my_fastas_dir, $my_pso_tmp_gp_from_gff, $work_dir)
 #FIXME: not used. 
 #ERROR: Subroutine main::bit_score_graph redefined at (eval 75) line 1 
 
-#use Inline Python => <<'END_OF_PYTHON_CODE3';
+use Inline Python => <<'END_OF_PYTHON_CODE3';
 
-#def bit_score_graph(info_fn, info_thresh, offset):
-    #line_counter = 0
-    #accepted_positions = []
-    #if info_thresh  in [ 0.15, 0.04, 0.15]:
-        ##all ok
-        #for line in open(info_fn).readlines():
-            #line_counter += 1
-            #sl = line.split()
-            #matrix_position = int(sl[0])
-            #info_score      = float(sl[1]) 
-            #if info_score > info_thresh:
-                #accepted_positions.append(matrix_position)
-        #accepted_positions.sort()    
-        #start = accepted_positions[0]
-        #end   = accepted_positions[-1]
-        #if (start > offset - 1):
-            #start = offset - 1
+def bit_score_graph(info_fn, info_thresh, offset):
+    line_counter = 0
+    accepted_positions = []
+    if info_thresh  in [ 0.15, 0.04, 0.15]:
+        #all ok
+        for line in open(info_fn).readlines():
+            line_counter += 1
+            sl = line.split()
+            matrix_position = int(sl[0])
+            info_score      = float(sl[1]) 
+            if info_score > info_thresh:
+                accepted_positions.append(matrix_position)
+        accepted_positions.sort()    
+        start = accepted_positions[0]
+        end   = accepted_positions[-1]
+        if (start > offset - 1):
+            start = offset - 1
         
-        ### BUG??
-        ### it should be one base after the GT/AG/ATG etc 2fix???
-        #if (end < offset + 1):
-            #end = offset + 1
+        ## BUG??
+        ## it should be one base after the GT/AG/ATG etc 2fix???
+        if (end < offset + 1):
+            end = offset + 1
         
-    #return start, end
+    return start, end
 
-#END_OF_PYTHON_CODE3
+END_OF_PYTHON_CODE3
 
 
 sub BitScoreGraph ($info_output, $info_thresh, $offset)
@@ -1517,10 +1518,10 @@ sub BitScoreGraph ($info_output, $info_thresh, $offset)
 }    #end BitScoreGraph
 
 sub get_pre_matrix ($kmers_tbl, $order)
-{    #-#  TMP HACK 2016.12.16
-    my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
-    
+{  
+     
     ## UNUSED
+    ## my @orders  = (qw(hmm_0 hmm_2 hmm_3 hmm_4 hmm_5 hmm_6 hmm_7 hmm_8));
     ## my $ordname = $orders[$order];
     my $FH_KMERS;
     open($FH_KMERS, "<", "$kmers_tbl") or croak "Failed here";
@@ -2166,8 +2167,8 @@ sub BuildOptimizedParameterFile ( $eval_array )
     }
 
     #write new parameter file (optimized)
-    my $optimized_geneid_param_fn =
-        "$results_dir/$species.geneid.optimized.param";
+    ## UNUSED
+    ## my $optimized_geneid_param_fn = "$results_dir/$species.geneid.optimized.param";
     $param->writeParam("$species.geneid.optimized.param");
 
     print {*STDERR}
