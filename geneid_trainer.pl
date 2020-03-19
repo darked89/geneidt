@@ -513,8 +513,8 @@ sub normal_run
         calc_stats(
             ## $species,                   $sout,
 
-            $train_introns_filtered_tbl, $train_cds_filtered_tbl,
-            $train_filtered_gff,         $train_inframestop_int,
+            $train_introns_filtered_tbl,  $train_cds_filtered_tbl,
+            $train_filtered_gff,           $train_inframestop_int,
             $eval_inframestop_int,       $train_transcr_used_int,
             $train_noncanon_donors_int,  $train_noncanon_accept_int,
             $train_noncanon_ATGx_int,    $markov_model,
@@ -2211,13 +2211,18 @@ sub parameter_evaluate ($gp_fasta, $gp_gff_fn, $new_param_fn, $OligoWeight_ini,
 
 sub calc_stats
 {
+    ## FIX_ME: 
+    ## 20200318
+    ## rewrite in the upstream python
+    ## output as YAML if needed
+    
     ## BUG variable names hard to guess
     my (
         ## 2016.12.15 unused
         ## $species,
         ## $sout,
-        $train_introns_filtered_tbl, $train_cds_filtered_tbl,
-        $train_filtered_gff,         $train_inframestop_int,
+        $train_introns_filtered_tbl,  $train_cds_filtered_tbl,
+        $train_filtered_gff  ,         $train_inframestop_int,
         $eval_inframestop_int,       $train_transcr_used_int,
         $train_noncanon_donors_int,  $train_noncanon_accept_int,
         $train_noncanon_ATGx_int,    $markov_model,
@@ -2285,7 +2290,9 @@ sub calc_stats
 
     my $intergenic_min = 200;
     my $intergenic_max = 'Infinity';
-
+    
+    
+    ## FIX_ME: move outside 
     ## use shortest and longest intron lengths in gene model of parameter file
     $param->geneModel->intronRange($intron_short_int, $intron_long_int);
     $param->geneModel->intergenicRange($intergenic_min, $intergenic_max);
@@ -2960,14 +2967,16 @@ sub compute_matrices_4sites ($my_input_table, $my_site_type)
     {
         if ($sites_number > $train_sites_cutoff)
         {
-            $my_order = "1";    ### [<now>] $my_order Acc/Don site...
+            $my_order = "1";    
+            ### [<now>] $my_order Acc/Don site...
         }
     }
     elsif ($my_site_type eq 'ATGx')
     {
         if ($sites_number > $train_sites_markov_cutoff)
         {
-            $my_order = "2";    ### [<now>] $my_order ATGx site...
+            $my_order = "2";    
+            ### [<now>] $my_order ATGx site...
         }
     }
     else
