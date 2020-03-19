@@ -9,24 +9,24 @@ input:
     work_dir: ./workdir_dev_canon_donor_20200318a/
 
 dirs:
-    tmp_dir:   temp_00
-    stats_dir:   stats
-    sites_dir:   sites
-    plots_dir:   plots
-    introns_dir:   introns
-    fastas_dir:   fastas
-    backgrnd_dir:   backgrnd
-    cds_dir:   cds
-    geneid_dir   :   geneid
-    results_dir  :   results
+    tmp_dir:           temp_00
+    stats_dir:         stats
+    sites_dir:         sites
+    plots_dir:         plots
+    introns_dir:       introns
+    fastas_dir:        fastas
+    backgrnd_dir:      backgrnd
+    cds_dir:           cds
+    geneid_dir   :     geneid
+    results_dir  :     results
 
 ## Constant values. modify if needed
 bases_offset: 30 
 #bases in front/after? a feature (buggy...)
 
-train_fraction:     0.8   #fraction of seq used for training
-backgrnd_kmer_size: 60
-backgrnd_kmer_num:  100000
+train_fraction:        0.8   #fraction of seq used for training
+backgrnd_kmer_size:    60
+backgrnd_kmer_num:     100000
 
 sites:
     acceptor:
@@ -109,10 +109,10 @@ eval_cont_transc :  ./precomputed/eval_cont_transc.2col
 train_gff : ./precomputed/train.gff
 eval_gff  : ./precomputed/eval.gff
 
-all_transc_int  : 765
-all_contigs_int : 765
-eval_transc_int : 153
-train_transc_int : 612
+all_transc_int  :      765
+all_contigs_int :      765
+eval_transc_int :      153
+train_transc_int :     612
 
 #training eval sets
 all_transc   : ./precomputed/pmar_all_transcr.ids  
@@ -138,8 +138,8 @@ train_cds_fas   :  ./precomputed/pmar01.train.cds.fa
 train_cds_tbl   :  ./precomputed/pmar01.train.cds.tbl
 train_intron_tbl : ./precomputed/pmar01.train.introns.tbl
 
-train_cds_len : 635946
-train_introns_len : 304368
+train_cds_len :        635946
+train_introns_len :    304368
 
 
 
