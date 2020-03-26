@@ -70,6 +70,10 @@ $ENV{'PATH'} = $exec_path . ":" . $ENV{'PATH'};
 ## no need to run anything if this fails
 check_external_progs();
 
+
+## FIXME: modify the code/Remove GetOptions
+our $conf = LoadFile('gtrain_perl_conf.yaml');
+
 ## Move parts necessary for getting comand line args here
 my $species      = "";
 my $input_gff_fn = "";
@@ -135,7 +139,7 @@ Readonly::Scalar my $intron_param_X => 10;
 
 Readonly::Hash my %profile_params => (
         ## EXON WEIGHT PARAMETER
-        ExWeightParam_ini   => -4.5,
+        ExonWeight_ini   => -4.5,
         ExWeightParam_step  => 0.5,
         ExWeightParam_limit => -2.5,
         ## EXON/OLIGO FACTOR PARAMETER
@@ -172,7 +176,7 @@ Readonly::Hash my %my_info_thresholds => (
 
 ## changing to /tmp for faster exec on clusters
 ## TODO: random string in dir name to avoid conflicts with other ppl runnig the script
-my $work_dir     = "./workdir_gt_pre_20200319_001/";
+my $work_dir     = "./workdir_gt_pre_20200325_001/";
 my $new_param_fn = "$work_dir/$species.geneid.param";
 
 my $tmp_dir      = "$work_dir/temp_00/";
@@ -225,7 +229,7 @@ my $gp_traincontig_tbl     = "";
 
 
 ## Weights for profiles??
-my $best_ExWeightParam = 0;
+my $best_ExonWeight = 0;
 my $best_OlWeight      = 0;
 my $best_Acc           = 0;
 my $best_Min           = 0;
@@ -260,7 +264,7 @@ my $train_locusid_filtered_2cols = "";
 
 my $train_2cols_seq_locusid_fn = "";
 my $eval_2cols_seq_locusid_fn  = "";
-my $train_transcr_lst_fn       = "";
+my $train_transcr_ids_fn       = "";
 
 my $train_noncanon_accept_int  = 0;
 my $train_noncanon_donors_int  = 0;
@@ -382,8 +386,6 @@ sub normal_run
 
         ## $train_transcr_num = int($train_fraction * $transcr_all_number);
         $train_transcr_num = 612;
-        print {*STDERR}
-            "\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n";
         ## DEBUG KEEP !!! shuf => random select
         ## head -$train_transcr_num just the first ones
         #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
@@ -393,18 +395,13 @@ sub normal_run
         
         $train_set_gff = "precomputed/train.gff"; #@@@
         
-        print {*STDERR}
-            "\nThe new training gff file includes $train_transcr_used_int gene models (80% of total seqs)\n";
 
-        print {*STDERR} "\nObtain list of training genes\n\n";
         
-        $train_transcr_lst_fn = "./precomputed/pmar_train_transcr.ids"; # @@@
+        $train_transcr_ids_fn = "./precomputed/pmar_train_transcr.ids"; # @@@
         
         $eval_contigs_transcr_2cols =   "./precomputed/eval_cont_transc.2col"; # @@@
         $seqs_eval_gff = 153; # @@@
         
-        print {*STDERR}
-            "The evaluation gff file includes $seqs_eval_gff gene models (20% of total seqs)\n\n";
         
         $eval_set_gff = "./precomputed/eval.gff"; # @@@
         
@@ -418,8 +415,6 @@ sub normal_run
 
         $train_2cols_seq_locusid_fn =
             gff_2_geneidgff_mock($train_set_gff, $species, ".train");
-        print {*STDERR}
-            "L575 : $train_2cols_seq_locusid_fn \t $train_contigs_transcr_2cols \n";
 
         ## FIXME 20200316: encode these in the yaml
         
@@ -433,17 +428,12 @@ sub normal_run
         $eval_2cols_seq_locusid_fn =
             gff_2_geneidgff_mock($eval_set_gff, $species, ".eval");
 
-        print {*STDERR}
-            "L533 tmp_locus_id_X_new:  $eval_2cols_seq_locusid_fn \t $eval_contigs_transcr_2cols\n";
 
 
             $eval_filtered_gff = "./precomputed/eval.gff"; #@@@
             $eval_inframestop_int = 0; # @@@
         
 
-    ## extract and check splice sites and start codon. Use only canonical info #IN SEQUENCES USED IN TRAINING
-    print {*STDERR}
-        "L653 :  $train_filtered_gff \t $train_locusid_filtered_2cols  \n";
     
         $train_donor_tbl             = "./precomputed/pmar01.train.don_sites.tbl";  #@@@
         $train_noncanon_donors_int   = 0; #@@@
@@ -562,21 +552,15 @@ sub normal_run
         $gp_evalcontig_tbl, $gp_evalcontig_len_int
     )
         = @{process_seqs_4opty($eval_filtered_gff, ".eval", 1)};
-    print {*STDERR} "DONE\n";
-    
-    ## # END prepare sequences for optimization BLOCK
-
 
     ### [<now>] Optimizing new parameter file at <file>[<line>]...
 
     ## OPTIMIZATION FUNCTION NO BRANCH
-    my $array_ref         = "";
-    my $OligoWeight_ini   = $profile_params{'OligoWeight_ini'};
-    my $ExWeightParam_ini = $profile_params{'ExWeightParam_ini'};
+    my $array_ref       = "";
+    my $OligoWeight_ini = $conf->{profile_params}->{OligoWeight}->{init};
+    my $ExonWeight_ini  = $conf->{profile_params}->{ExonWeight}->{init};
 
     ### [<now>] contig optimization at <file>[<line>]...
-
-    print {*STDERR} "\n DEBUG: CONTIG OPTIMISATION\n";
 
     @evaluation = @{
         parameter_optimize(
@@ -587,16 +571,14 @@ sub normal_run
         )
         };
 
-    ($best_ExWeightParam, $best_OlWeight, $best_Acc, $best_Min, $array_ref) = @{
-        BuildOptimizedParameterFile(\@evaluation)
+    ($best_ExonWeight, $best_OlWeight, $best_Acc, $best_Min, $array_ref) = 
+    @{BuildOptimizedParameterFile(\@evaluation)
         };
 
     my @evaluation_init = @{$array_ref};
     my @evaluation_test = ();
 
-    ##
-    #-#  EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
-    ##
+    ## EVALUATE PERFORMANCE OF NEW PARAMETER FILE ON TEST SET (IF PRESENT)
 
     my $param_opt_fn = "$species.geneid.optimized.param";
 
@@ -606,7 +588,7 @@ sub normal_run
     @evaluation_test = @{
         parameter_evaluate(
             $gp_evalcontig_fa, $gp_evalcontig_gff, $param_opt_fn,
-            $OligoWeight_ini,  $ExWeightParam_ini
+            $OligoWeight_ini,  $ExonWeight_ini
         )
         };
 
@@ -667,35 +649,26 @@ sub derive_coding_potential ($train_cds_filtered_tbl,
 
     my $markov_mod_A = "";
     my $markov_mod_B = "";
-
-    my $my_command =
-        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $train_cds_filtered_tbl";
-    my $total_codingbases = capture($my_command);
-    chomp $total_codingbases;
-
-    $my_command =
-        "gawk '{ l=length(\$2); L+=l;} END{ print L;}' $train_introns_filtered_tbl ";
-    my $total_noncodingbases = capture($my_command);
-    chomp $total_noncodingbases;
-
+    my $total_coding_bp  = $conf->{train_cds_len};
+    my $total_introns_bp = $conf->{train_introns_len};
     print {*STDERR}
-        "There are $total_codingbases coding bases and $total_noncodingbases non-coding bases on this training set:\n";
+        "There are $total_coding_bp coding bases and $total_introns_bp non-coding bases on this training set:\n";
 
     if (
         (
-            $total_codingbases > $coding_bp_limit_A
-                && $total_noncodingbases > $non_coding_bp_limit_A
+            $total_coding_bp > $coding_bp_limit_A
+                && $total_introns_bp > $non_coding_bp_limit_A
         )
-            || (   $total_codingbases > $coding_bp_limit_B
-            && $total_noncodingbases > $non_coding_bp_limit_B)
-            || (   $total_noncodingbases > $non_coding_bp_limit_C
-            && $total_codingbases > (25 * $total_noncodingbases))
+            || (   $total_coding_bp > $coding_bp_limit_B
+            && $total_introns_bp > $non_coding_bp_limit_B)
+            || (   $total_introns_bp > $non_coding_bp_limit_C
+            && $total_coding_bp > (25 * $total_introns_bp))
     )
     {
         $markov_mod_A = 5;
         $markov_mod_B = 4;
         print {*STDERR}
-            "Deriving a markov model of order $markov_mod_A OPTION_1\n";
+            "Deriving a Markov model of order $markov_mod_A OPTION_1\n";
 
     }
     else
@@ -704,7 +677,7 @@ sub derive_coding_potential ($train_cds_filtered_tbl,
         $markov_mod_A = 5;
         $markov_mod_B = 4;
         print {*STDERR}
-            "Deriving a markov model of order $markov_mod_A  OPTION_2\n";
+            "Deriving a Markov model of order $markov_mod_A  OPTION_2\n";
     }
 
     open(my $FH_INTRONS_tbl, "<", "$train_introns_filtered_tbl") or croak "Failed here";
@@ -789,8 +762,8 @@ sub derive_coding_potential ($train_cds_filtered_tbl,
     close $FH_PROFILE_2;
     ### [<now>] Finished derive_coding_potential at <file>[<line>]...
     return [
-        \@profile_init,        \@profile_trans, $total_codingbases,
-        $total_noncodingbases, $markov_mod_A
+        \@profile_init,        \@profile_trans, $total_coding_bp,
+        $total_introns_bp, $markov_mod_A
     ];
 
 }    #derive coding potential END
@@ -803,43 +776,25 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     #my $pso_out_tbl = "";
     my $pso_gp_tbl  = "";
-    my $gp_from_gff = "";
+    my $gp_from_gff  = "";
 
-    #~ my $gp_fasta    = ""; #unused
     my $pso_gp_gff = "";
-    my $my_command = "";
-
-    #my $work_dir;
-
-    open(
-        my $FH_LOCID, "-|",
-        ##"./bin/gff2gp.py $my_input_nodots_gff | sort -k 1 " );
-        "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 "
-    );
-
-    while (<$FH_LOCID>)
-    {
-
-        $gp_from_gff .= $_;
-    }
-    close $FH_LOCID;
-
-    my $pso_tmp_gp_from_gff =
-        $work_dir . $species . $opt_type . $contig_opt_flag . ".gp";
-
-    open(my $FH_FOUT, ">", "$pso_tmp_gp_from_gff");
-    print {$FH_FOUT} "$gp_from_gff";
-    close $FH_FOUT;
+    
+    my $pso_tmp_gp_from_gff = $work_dir . $species . $opt_type . $contig_opt_flag . ".gp";
+    my $my_command = "./bin/gff2gp.awk $my_input_nodots_gff | sort -k 1 > $pso_tmp_gp_from_gff";
+    say "$my_command";
+    run($my_command);
+    
 
     ### [<now>] Before get_genes at <file>[<line>]...
     ### $fastas_dir, $pso_tmp_gp_from_gff, $work_dir , $contig_opt_flag \n";
 
     my $gp_Xgetgenes_tmp_pre_tbl =
         get_genes($fastas_dir, $pso_tmp_gp_from_gff, $work_dir);
-    print {*STDERR} "PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl \n";
 
-    print {*STDERR}
-        "\nGet sequences of 400-nt flanked sequences in tabular and gff formats\n";
+    ### [<now>] After get_genes at <file>[<line>]...
+    ### PRETBL AFTER GETGENES: $gp_Xgetgenes_tmp_pre_tbl
+    ### Get sequences of 400-nt flanked sequences in tabular and gff formats\n";
 
     #~ my $seq4Optimization_temp_1_fn =  "$work_dir/processSequences4Optimization_temp1.txt";
     #~ $my_command =  "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $gp_Xgetgenes_tmp_pre_tbl > $seq4Optimization_temp_1_fn";
@@ -847,7 +802,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     #~ $my_command =  "sort seq4Optimization_temp_1_fn | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - |";
     #open( $FH_LOCID, $my_command );
     open(
-        $FH_LOCID,
+        my $FH_LOCID,
         "-|",
         "gawk 'BEGIN{b=\"x\"}{if (\$1!=b){printf \"\\n\%s \",\$1}printf \"\%s\",\$6;b=\$1}END{printf \"\\n\"}' $gp_Xgetgenes_tmp_pre_tbl | sort | sed '/^\$/d' - | gawk '{print \$1, toupper(\$2)}' - "
     );
@@ -860,7 +815,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     my $temp_gp_tbl =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".gp.tbl";
-    open($FH_FOUT, ">", "$temp_gp_tbl") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_gp_tbl") or croak "Failed here";
     print {$FH_FOUT} "$pso_gp_tbl";
     close $FH_FOUT;
 
@@ -870,7 +825,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     my $temp_gp_gff =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".gp.gff";
-    open($FH_FOUT, ">", "$temp_gp_gff") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_gp_gff") or croak "Failed here";
     print {$FH_FOUT} "$pso_gp_gff";
     close $FH_FOUT;
 
@@ -899,7 +854,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     . $opt_type 
     . $contig_opt_flag 
     . ".gp_cds_length";
-    open($FH_FOUT, ">", "$opt_type_cds_contigs_total_bp")
+    open(my $FH_FOUT, ">", "$opt_type_cds_contigs_total_bp")
         or croak "Failed here";
     print {$FH_FOUT} "$gp_seqs_lengths";
     close $FH_FOUT;
@@ -910,7 +865,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
 
     my $temp_gp_cds_fn =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".cds_gp";
-    open($FH_FOUT, ">", "$temp_gp_cds_fn") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_gp_cds_fn") or croak "Failed here";
     print {$FH_FOUT} "$cds_gp";
     close $FH_FOUT;
 
@@ -935,13 +890,13 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     my $folded_seq_gp = fold4fasta($seq);
     my $temp_fastagpcontig =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".combined.gp.fa";
-    open($FH_FOUT, ">", "$temp_fastagpcontig") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_fastagpcontig") or croak "Failed here";
     print {$FH_FOUT} ">$species\n$folded_seq_gp\n";
     close $FH_FOUT;
 
     my $temp_tabulargpcontig =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".combined.gp.tbl";
-    open($FH_FOUT, ">", "$temp_tabulargpcontig") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_tabulargpcontig") or croak "Failed here";
     print {$FH_FOUT} "$species\t$seq\n";
     close $FH_FOUT;
     $my_command = "gawk '{print \$1,length(\$2)}' $temp_tabulargpcontig";
@@ -955,7 +910,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
             . $opt_type
             . $contig_opt_flag
             . ".gp_cds_contig_length";
-    open($FH_FOUT, ">", "$temp_seqlencontig") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_seqlencontig") or croak "Failed here";
     print {$FH_FOUT} "$gp_contigs_seqs_lengths";
     close $FH_FOUT;
 
@@ -967,7 +922,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
     my $temp_gff2gpcontig =
         $work_dir . $species . $opt_type . $contig_opt_flag . ".contig.gp.cds";
 
-    open($FH_FOUT, ">", "$temp_gff2gpcontig") or croak "Failed here";
+    open(my $FH_FOUT, ">", "$temp_gff2gpcontig") or croak "Failed here";
     print {$FH_FOUT} "$gp_contig_tmp";
     close $FH_FOUT;
 
@@ -981,7 +936,7 @@ sub process_seqs_4opty ($my_input_nodots_gff, $opt_type, $contig_opt_flag)
       . $opt_type
       . $contig_opt_flag
       . ".cds_gp_contig.eval.gff";
-    open($FH_FOUT, ">", "$temp_gp_cdsgff_contig_eval")
+    open(my $FH_FOUT, ">", "$temp_gp_cdsgff_contig_eval")
       or croak "Failed here";
     print {$FH_FOUT} "$cds2gffcontig";
     close $FH_FOUT;
@@ -1886,7 +1841,7 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
 {
 
 
-    my $ExWeightParam_ini   = $profile_params{'ExWeightParam_ini'};
+    my $ExonWeight_ini   = $profile_params{'ExonWeight_ini'};
     my $ExWeightParam_step  = $profile_params{'ExWeightParam_step'};
     my $ExWeightParam_limit = $profile_params{'ExWeightParam_limit'};
     ## EXON/OLIGO FACTOR PARAMETER
@@ -1895,19 +1850,19 @@ sub parameter_optimize ($gp_fasta, $gp_gff_fn, $new_param_fn, %profile_params)
     my $OligoWeight_limit = $profile_params{'OligoWeight_limit'};
 
     my @evaluation_total    = ();
-    my $myExWeightParam_tmp = $ExWeightParam_ini;
+    my $myExWeightParam_tmp = $ExonWeight_ini;
     my $myOlWeight_tmp      = $OligoWeight_ini;
 
     open(my $FH_SOUT, ">", "$work_dir/$species##.OptimizeParameter.log")
         or croak "Failed here";
 
     print {*STDERR}
-        "\neWF range : $ExWeightParam_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
+        "\neWF range : $ExonWeight_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
     print {$FH_SOUT}
-        "\neWF range : $ExWeightParam_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
+        "\neWF range : $ExonWeight_ini to $ExWeightParam_limit\noWF range : $OligoWeight_ini to $OligoWeight_limit\n\n";
     close $FH_SOUT;
 
-    for ($myExWeightParam_tmp = $ExWeightParam_ini ;
+    for ($myExWeightParam_tmp = $ExonWeight_ini ;
         $myExWeightParam_tmp <= $ExWeightParam_limit ;
         $myExWeightParam_tmp += $ExWeightParam_step)
     {    #for_#1
@@ -2052,7 +2007,7 @@ sub BuildOptimizedParameterFile ( $eval_array )
     my @sorted_eval        = ();
     my @evaluation_init    = ();
     my $best_OlWeight      = 0;
-    my $best_ExWeightParam = 0;
+    my $best_ExonWeight = 0;
     ## 2016.12.15 unused
     ## my $best_Min           = 0;
     ## my $best_Acc           = 0;
@@ -2084,7 +2039,7 @@ sub BuildOptimizedParameterFile ( $eval_array )
     #~ print Dump @sorted_eval;
 
     $best_OlWeight      = $sorted_eval[0][0];    #0.2
-    $best_ExWeightParam = $sorted_eval[0][1];    #-3.5
+    $best_ExonWeight = $sorted_eval[0][1];    #-3.5
 
     print {*STDERR} "\nBest performance obtained using I_OlWeight_F: "
         . $sorted_eval[0][0]
@@ -2130,8 +2085,8 @@ sub BuildOptimizedParameterFile ( $eval_array )
         if (
             !defined @{$param->isocores}[$i]->Exon_weights(
                     [
-                        $best_ExWeightParam, $best_ExWeightParam,
-                        $best_ExWeightParam, $best_ExWeightParam
+                        $best_ExonWeight, $best_ExonWeight,
+                        $best_ExonWeight, $best_ExonWeight
                     ]
                 )
         )
@@ -2177,7 +2132,7 @@ sub BuildOptimizedParameterFile ( $eval_array )
         "\n\nNew optimized parameter file named: $species.geneid.optimized.param \n";
 
     close $FH_SOUT;
-    return [$best_ExWeightParam, $best_OlWeight, 0, 0, \@evaluation_init];
+    return [$best_ExonWeight, $best_OlWeight, 0, 0, \@evaluation_init];
 
     ## 2016.12.13c }
     ##close $FH_SOUT;
@@ -2186,9 +2141,9 @@ sub BuildOptimizedParameterFile ( $eval_array )
 
 sub parameter_evaluate ($gp_fasta, 
                         $gp_gff_fn, 
-            $new_param_fn, 
-            $OligoWeight_ini,
-                        $ExWeightParam_ini)
+                        $new_param_fn, 
+                        $OligoWeight_ini,
+                        $ExonWeight_ini)
 {
     ### [<now>] Running  parameter_evaluate at <file>[<line>]...
     my $my_command;
@@ -2225,7 +2180,7 @@ sub parameter_evaluate ($gp_fasta,
     my $temp_evalout_B_fn =
         "$geneid_dir/Predictions." . basename($new_param_fn) . ".temp_evalout_B";
     $my_command = "tail -2 $temp_evalout_A_fn | head -1 |
-            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $OligoWeight_ini, $ExWeightParam_ini, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
+            gawk '{printf \"\%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f \%6.2f\\n\", $OligoWeight_ini, $ExonWeight_ini, \$1, \$2, \$3, \$4, \$5, \$6, \$9, \$10, \$11, \$7, \$8}' > $temp_evalout_B_fn ";
     print "\n$my_command\n";
     run($my_command);
 
@@ -2385,36 +2340,17 @@ sub calc_stats
     #my $single_exon_genes = `egrep -c '(Single)' $train_filtered_gff `;
     chomp $single_exon_genes;
 
-    #print {$FH_SOUT} "GENE MODEL STATISTICS FOR $species\n\n";
 
     print {$FH_SOUT}
         "\nA subset of $train_transcr_num sequences (randomly chosen from the $transcr_all_number gene models) was used for training\n\n";
-    ## my $transcr_all_number;
 
-    #~ if (!$use_allseqs_flag)
-    #~ {
     print {$FH_SOUT}
         "The user has selected to use $train_transcr_used_int gene models (80 % of total) for training and to set aside BUG  was xxgffseqseval annotations (20 % of total) for evaluation\n\n";
 
-    #~ }
-    #~ else
-    #~ {
-    #~ print {$FH_SOUT}
-    #~ "$transcr_all_number gene models were used for both training and evaluation\n\n";
-    #~ }
-
-    #~ if (!$use_allseqs_flag)
-    #~ {
     print {$FH_SOUT}
         "$train_inframestop_int of the gene models translate into proteins with in-frame stops within the training set and $eval_inframestop_int in the evaluation set (seqs removed).\n\n";
 
-    #~ }
 
-    #~ else
-    #~ {
-    #~ print {$FH_SOUT}
-    #~ "$inframe_X of the gene models translate into proteins with in-frame stops within the training set.\n\n";
-    #~ }
     print {$FH_SOUT}
         "There are $train_noncanon_donors_int non-canonical donors as part of the training set\n\n";
     print {$FH_SOUT}
@@ -2424,7 +2360,7 @@ sub calc_stats
     print {$FH_SOUT}
         "These gene models correspond to $total_coding coding bases and $total_noncoding non-coding bases\n\n";
     print {$FH_SOUT}
-        "Deriving a markov model for the coding potential of order $markov_model\n\n";
+        "Deriving a Markov model for the coding potential of order $markov_model\n\n";
     print {$FH_SOUT}
         "The intronic sequences extracted from the gene models have an average length of $mean, with $st of SD\n";
     print {$FH_SOUT}
@@ -2445,12 +2381,6 @@ sub calc_stats
     print {$FH_SOUT}
         "The training set includes $single_exon_genes single-exon genes (out of $train_transcr_used_int ) gene models\n\n";
 
-    #~ }
-    #~ else
-    #~ {
-    #~ print {$FH_SOUT}
-    #~ "The training set includes $single_exon_genes single-exon genes (out of $transcr_all_number) gene models\n\n";
-    #~ }
     print {$FH_SOUT} "The donor site profile chosen by the user spans "
         . ($en_donor - $st_donor + 1)
         . " nucleotides: position $st_donor to $en_donor\n";
