@@ -61,7 +61,7 @@ while kmer_num_counter < 500000:
                 kmer_seq = genome_fas[contig_name][start_in_contig:end_in_contig]
                 tmp_out_str = "kmer%s\t%s\t%s" %(kmer_num_counter, kmer_seq, len(kmer_seq))
                 tmp_out_str = "km%s\t%s" %(kmer_num_counter, kmer_seq)
-                print tmp_out_str
+                print (tmp_out_str)
                 #print kmer_seq
             except:
                 kmer_num_counter -= 1
