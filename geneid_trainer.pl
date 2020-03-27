@@ -192,12 +192,12 @@ my $train_transcr_used_int      = 0;
 
 ## Golden Path stuff
 my $gp_evalcontig_fa      = "";
-my $gp_evalcontig_gff     = "";
+my $gp_evalcontig_gff      = "";
 my $gp_evalcontig_len_int = 0;
 my $gp_evalcontig_tbl     = "";
 
 my $gp_traincontig_fa      = "";
-my $gp_traincontig_gff     = "";
+my $gp_traincontig_gff      = "";
 my $gp_traincontig_len_int = 0;
 my $gp_traincontig_tbl     = "";
 
@@ -211,9 +211,6 @@ my $best_Min        = 0;
 my $seqs_eval_gff         = "";
 my $train_inframestop_int = 0;
 my $eval_inframestop_int  = 0;
-## UNUSED
-## my $locus_id              = "";
-##my $locus_id_new          = "";
 my $intron_long_int  = 0;
 my $intron_short_int = 0;
 my $intergenic_max   = 0;
@@ -228,11 +225,11 @@ my $eval_filtered_gff = "";
 
 my $train_acceptor_tbl           = "";
 my $train_ATGx_tbl               = "";
-my $train_cds_filtered_tbl       = "";
+my $train_cds_filtered_tbl        = "";
 my $train_donor_tbl              = "";
-my $train_filtered_gff           = "";
-my $train_introns_filtered_tbl   = "";
-my $train_locusid_filtered_2cols = "";
+my $train_filtered_gff             = "";
+my $train_introns_filtered_tbl    = "";
+my $train_locusid_filtered_2cols  = "";
 
 my $train_2cols_seq_locusid_fn = "";
 my $eval_2cols_seq_locusid_fn  = "";
@@ -285,22 +282,16 @@ my $train_transcr_num  = 0;
 ## TODO 2. limits:
 ## 2a. >= 500 genes in gff
 
-#~ #-#  CREATE BLANK PARAMETER FILE...
-#~ #-#  [<now>] template parameter file
-#~ my $param        = Geneid::Param->new($species);
-#~ my $new_param_fn = "$work_dir/$species.geneid.param";
+##  CREATE BLANK PARAMETER FILE...
 
-#~ #set isochores to 1
-#~ $param->numIsocores(1);
-#~ $param->isocores([Geneid::Isocore->new()]);
-
-#~ #-#  END CREATING A PARAMETER FILE
-#~ #-#  [<now>] template parameter file at <file>[<line>]
 
 my $param = init_param_file($species);
+### [<now>] template parameter file at <file>[<line>]
+
+
+## END CREATING A PARAMETER FILE
 
 normal_run();
-
 sub normal_run
 {
     our $conf;
@@ -347,29 +338,28 @@ sub normal_run
     # FIXME 20200313 temp solution
     ## $transcr_all_number = 765;
     ## hack for if
-    if ($transcr_all_number > 1)
-    {
 
-        ## $train_transcr_num = int($train_fraction * $transcr_all_number);
-        $train_transcr_num = 612;
-        ## DEBUG KEEP !!! shuf => random select
-        ## head -$train_transcr_num just the first ones
-        #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
 
-        $train_contigs_transcr_2cols =
-          "./precomputed/train_cont_transc.2col";    #@@@
+    ## $train_transcr_num = int($train_fraction * $transcr_all_number);
+    $train_transcr_num = 612;
+    ## DEBUG KEEP !!! shuf => random select
+    ## head -$train_transcr_num just the first ones
+    #my $my_command =           "shuf --head-count=$train_transcr_num $contigs_all_transcr_2cols | sort ";
 
-        $train_set_gff = "precomputed/train.gff";    #@@@
+    $train_contigs_transcr_2cols =
+      "./precomputed/train_cont_transc.2col";    #@@@
 
-        $train_transcr_ids_fn = "./precomputed/pmar_train_transcr.ids";    # @@@
+    $train_set_gff = "precomputed/train.gff";    #@@@
 
-        $eval_contigs_transcr_2cols =
-          "./precomputed/eval_cont_transc.2col";                           # @@@
-        $seqs_eval_gff = 153;                                              # @@@
+    $train_transcr_ids_fn = "./precomputed/pmar_train_transcr.ids";    # @@@
 
-        $eval_set_gff = "./precomputed/eval.gff";                          # @@@
+    $eval_contigs_transcr_2cols =
+      "./precomputed/eval_cont_transc.2col";                           # @@@
+    $seqs_eval_gff = 153;                                              # @@@
 
-    }    # seqs > 500
+    $eval_set_gff = "./precomputed/eval.gff";                          # @@@
+
+
 
     ## BUG => there is no need to convert gff to geneid format each time we run
 
@@ -2775,13 +2765,13 @@ sub create_data_dirs (@data_dirs)
 #    return 1;
 #}    #end write_sizes_from_tbl_fn
 
-sub get_background_kmers ($kmer_len, $input_fas_fn, $contigs_all_tbl,
-                          $num_seqs, $backgrnd_tbl)
+sub get_background_kmers ($kmer_len, 
+                          $input_fas_fn, 
+                          $contigs_all_tbl,
+                          $num_seqs, 
+                          $backgrnd_tbl)
 {
-    ## 206.12.13a {
 
-    #~ my ($kmer_len, $input_fas_fn, $contigs_all_tbl, $num_seqs, $backgrnd_tbl) =
-    #~ @_;
 
     my $backgrnd_debug_flag = 1;
     if ($backgrnd_debug_flag)
